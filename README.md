@@ -23,22 +23,61 @@ The implementation plan lives in `IMPLEMENTATION_PLAN.md`.
 
 ## Source Layout
 
-Target layout once the app is bootstrapped:
+Current layout:
 
 - `src/app` - Next.js routes and route handlers.
 - `src/domain` - pure product rules, deterministic and DB-free.
-- `src/server` - server-only services, validation, persistence, realtime, and side effects.
-- `src/features` - reusable UI and workflow modules.
-- `src/components/ui` - shared UI primitives.
-- `src/i18n` - dictionaries and translation helpers when localization is enabled.
+- `src/server` - server-only services, validation, and persistence.
+- `src/client` - browser-only service clients.
+- `supabase/migrations` - database schema migrations.
+- `tests/e2e` - Playwright happy-path coverage.
+
+## Environment
+
+Local development and Vercel need these variables:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SECRET_KEY=
+```
+
+`SUPABASE_SECRET_KEY` is server-only. Do not expose it to browser code.
+
+Optional local mode flag:
+
+```bash
+APP_ACCESS_MODE=public
+```
+
+## Supabase
+
+Apply the migrations in `supabase/migrations` to the target Supabase project before deploying the app.
+
+The MVP keeps direct anonymous table access closed with RLS. Public reads go through the `get_event_snapshot` RPC, and server writes use `SUPABASE_SECRET_KEY`.
+
+Realtime uses Supabase Broadcast topics named `event:{eventId}`. No Postgres table publication is required for the current realtime refresh behavior.
+
+## Deploy Checklist
+
+- Supabase project created.
+- Migration `202605310001_initial_mvp.sql` applied.
+- `NEXT_PUBLIC_SUPABASE_URL` configured in Vercel.
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` configured in Vercel.
+- `SUPABASE_SECRET_KEY` configured in Vercel as a server-only secret.
+- `pnpm build` passes locally.
+- `pnpm e2e` passes locally against the target environment variables.
+- Vercel preview opens `/new`.
+- Preview happy path works: create poll, join, save availability, view results.
 
 ## Quality Checks
 
-Expected commands once the stack is installed:
+Expected commands:
 
 ```bash
 pnpm lint
 pnpm typecheck
 pnpm test
+pnpm e2e
 pnpm build
 ```

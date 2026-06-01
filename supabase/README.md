@@ -25,6 +25,13 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SECRET_KEY=
 ```
 
+Use Supabase's current API key names:
+
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` maps to the browser-safe publishable key.
+- `SUPABASE_SECRET_KEY` maps to the server-only secret key.
+
+Do not use legacy `anon` / `service_role` naming in app env vars.
+
 ## Apply
 
 Use the Supabase CLI or paste the SQL into the SQL editor for the target project:
@@ -32,3 +39,24 @@ Use the Supabase CLI or paste the SQL into the SQL editor for the target project
 ```bash
 supabase db push
 ```
+
+## Realtime
+
+Slotly currently uses Supabase Realtime Broadcast, not Postgres changes:
+
+- clients subscribe to topic `event:{eventId}`;
+- successful join and availability saves broadcast `event_changed`;
+- open event/results pages call `router.refresh()`;
+- table RLS can stay closed to anonymous direct reads.
+
+No `alter publication supabase_realtime add table ...` step is required for this implementation.
+
+## Production Checklist
+
+- Confirm the initial migration is applied once to the production Supabase project.
+- Confirm RLS is enabled on `events`, `participants`, and `availability_windows`.
+- Confirm anonymous direct table reads remain closed.
+- Confirm `get_event_snapshot(uuid)` is executable by `anon`.
+- Confirm Vercel has all three Supabase env vars.
+- Run `pnpm build` before deploy.
+- Run `pnpm e2e` against a local server connected to the target Supabase project before the first public test.

@@ -43,7 +43,7 @@ export default async function EventPage({ params }: EventPageProps) {
           </div>
           <div className="grid gap-2 sm:min-w-40">
             <Link
-              className="rounded-full border border-[var(--line)] px-4 py-2 text-center text-sm font-medium"
+              className="sl-button sl-button-secondary"
               href={`/e/${eventId}/results`}
             >
               View results
@@ -52,7 +52,7 @@ export default async function EventPage({ params }: EventPageProps) {
           </div>
         </div>
 
-        <div className="mt-8 rounded-[8px] border border-[var(--line)] bg-[var(--surface)] p-5">
+        <div className="sl-panel mt-8 p-5">
           <JoinEventForm
             endDate={event.endDate}
             eventId={event.id}

@@ -9,6 +9,15 @@
   --primary: #146c5c;
   --primary-foreground: #ffffff;
   --accent: #f1c84b;
+  --danger-line: #e6b8a8;
+  --danger-surface: #fff5ef;
+  --danger-text: #8a351e;
+  --success-line: #a8d8cc;
+  --success-surface: #effaf6;
+  --success-text: #146c5c;
+  --radius-control: 999px;
+  --radius-panel: 8px;
+  --transition-fast: 150ms ease;
 }
 
 * {
@@ -38,4 +47,113 @@ button,
 input,
 select {
   font: inherit;
+}
+
+a[href],
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+button,
+a[href],
+input,
+select {
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    color var(--transition-fast),
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+button:not(:disabled):active,
+a[href]:active {
+  transform: translateY(1px);
+}
+
+@layer components {
+  .sl-button {
+    display: inline-flex;
+    min-height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-control);
+    padding: 0.5rem 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .sl-button-primary {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-weight: 600;
+  }
+
+  .sl-button-primary:hover {
+    background: #0f5d50;
+  }
+
+  .sl-button-secondary {
+    border: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  .sl-button-secondary:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  .sl-button:disabled {
+    opacity: 0.65;
+  }
+
+  .sl-panel {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-panel);
+    background: var(--surface);
+  }
+
+  .sl-field {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-panel);
+    background: var(--surface);
+    padding: 0.75rem;
+    outline: none;
+  }
+
+  .sl-field:hover {
+    border-color: #bfc3bb;
+  }
+
+  .sl-field:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgb(20 108 92 / 12%);
+  }
+
+  .sl-alert {
+    border-radius: var(--radius-panel);
+    border: 1px solid;
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .sl-alert-error {
+    border-color: var(--danger-line);
+    background: var(--danger-surface);
+    color: var(--danger-text);
+  }
+
+  .sl-alert-success {
+    border-color: var(--success-line);
+    background: var(--success-surface);
+    color: var(--success-text);
+  }
 }

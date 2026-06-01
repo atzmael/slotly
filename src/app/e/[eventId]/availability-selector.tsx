@@ -96,10 +96,7 @@ export function AvailabilitySelector({
       </div>
 
       {state.status === "error" ? (
-        <div
-          className="rounded-[8px] border border-[#e6b8a8] bg-[#fff5ef] px-3 py-3 text-sm text-[#8a351e]"
-          role="alert"
-        >
+        <div className="sl-alert sl-alert-error" role="alert">
           <ul className="space-y-1">
             {state.errors.map((error) => (
               <li key={error}>{errorCopy[error] ?? "Something went wrong."}</li>
@@ -109,10 +106,7 @@ export function AvailabilitySelector({
       ) : null}
 
       {state.status === "success" ? (
-        <div
-          className="rounded-[8px] border border-[#a8d8cc] bg-[#effaf6] px-3 py-3 text-sm text-[#146c5c]"
-          role="status"
-        >
+        <div className="sl-alert sl-alert-success" role="status">
           Availability saved.
         </div>
       ) : null}
@@ -124,7 +118,7 @@ export function AvailabilitySelector({
           return (
             <button
               aria-pressed={selected}
-              className={`min-h-20 rounded-[6px] border px-2 py-2 text-left text-xs transition ${
+              className={`min-h-20 rounded-[6px] border px-2 py-2 text-left text-xs hover:border-[var(--primary)] active:scale-[0.99] ${
                 selected
                   ? "border-[var(--primary)] bg-[#dff4ed] text-[var(--foreground)]"
                   : "border-[var(--line)] bg-[#f2f2ec] text-[var(--muted)]"
@@ -141,7 +135,7 @@ export function AvailabilitySelector({
       </div>
 
       <button
-        className="w-full rounded-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-[var(--primary-foreground)] disabled:cursor-not-allowed disabled:opacity-65"
+        className="sl-button sl-button-primary w-full px-5 py-3"
         disabled={isPending}
         type="submit"
       >

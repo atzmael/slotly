@@ -41,13 +41,10 @@ export function NewPollForm() {
   return (
     <form
       action={formAction}
-      className="mt-8 space-y-5 rounded-[8px] border border-[var(--line)] bg-[var(--surface)] p-5"
+      className="sl-panel mt-8 space-y-5 p-5"
     >
       {state.status === "error" ? (
-        <div
-          className="rounded-[8px] border border-[#e6b8a8] bg-[#fff5ef] px-3 py-3 text-sm text-[#8a351e]"
-          role="alert"
-        >
+        <div className="sl-alert sl-alert-error" role="alert">
           <ul className="space-y-1">
             {state.errors.map((error) => (
               <li key={error}>{errorCopy[error] ?? "Something went wrong."}</li>
@@ -59,7 +56,7 @@ export function NewPollForm() {
       <label className="block">
         <span className="text-sm font-medium">Event name</span>
         <input
-          className="mt-2 w-full rounded-[8px] border border-[var(--line)] px-3 py-3 outline-none focus:border-[var(--primary)]"
+          className="sl-field mt-2"
           maxLength={80}
           name="title"
           placeholder="Board Game Night"
@@ -72,7 +69,7 @@ export function NewPollForm() {
         <label className="block">
           <span className="text-sm font-medium">Start date</span>
           <input
-            className="mt-2 w-full rounded-[8px] border border-[var(--line)] px-3 py-3 outline-none focus:border-[var(--primary)]"
+            className="sl-field mt-2"
             name="startDate"
             required
             type="date"
@@ -81,7 +78,7 @@ export function NewPollForm() {
         <label className="block">
           <span className="text-sm font-medium">End date</span>
           <input
-            className="mt-2 w-full rounded-[8px] border border-[var(--line)] px-3 py-3 outline-none focus:border-[var(--primary)]"
+            className="sl-field mt-2"
             name="endDate"
             required
             type="date"
@@ -93,7 +90,7 @@ export function NewPollForm() {
         <label className="block">
           <span className="text-sm font-medium">Event duration</span>
           <select
-            className="mt-2 w-full rounded-[8px] border border-[var(--line)] bg-white px-3 py-3 outline-none focus:border-[var(--primary)]"
+            className="sl-field mt-2"
             defaultValue={60}
             name="durationMinutes"
           >
@@ -107,7 +104,7 @@ export function NewPollForm() {
         <label className="block">
           <span className="text-sm font-medium">Grid resolution</span>
           <select
-            className="mt-2 w-full rounded-[8px] border border-[var(--line)] bg-white px-3 py-3 outline-none focus:border-[var(--primary)]"
+            className="sl-field mt-2"
             defaultValue={30}
             name="slotSizeMinutes"
           >
@@ -121,7 +118,7 @@ export function NewPollForm() {
       </div>
 
       <button
-        className="w-full rounded-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-[var(--primary-foreground)] disabled:cursor-not-allowed disabled:opacity-65"
+        className="sl-button sl-button-primary w-full px-5 py-3"
         disabled={isPending}
         type="submit"
       >

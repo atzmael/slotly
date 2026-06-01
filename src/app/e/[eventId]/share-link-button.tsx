@@ -32,7 +32,7 @@ export function ShareLinkButton({ path }: ShareLinkButtonProps) {
   return (
     <div className="flex flex-col items-stretch gap-2 sm:items-end">
       <button
-        className="rounded-full border border-[var(--line)] bg-[var(--surface)] px-4 py-2 text-center text-sm font-medium transition hover:border-[var(--primary)]"
+        className="sl-button sl-button-secondary"
         onClick={copyLink}
         type="button"
       >

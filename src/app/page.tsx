@@ -13,7 +13,7 @@ export default function HomePage() {
         <header className="flex items-center justify-between">
           <span className="text-lg font-semibold tracking-normal">Slotly</span>
           <Link
-            className="rounded-full border border-[var(--line)] px-4 py-2 text-sm font-medium"
+            className="sl-button sl-button-secondary"
             href="/new"
           >
             Create Poll
@@ -34,7 +34,7 @@ export default function HomePage() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                className="rounded-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-[var(--primary-foreground)]"
+                className="sl-button sl-button-primary px-5 py-3"
                 href="/new"
               >
                 Create Poll
@@ -42,7 +42,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="rounded-[8px] border border-[var(--line)] bg-[var(--surface)] p-4 shadow-sm">
+          <div className="sl-panel p-4 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <span className="text-sm font-semibold">Best slots</span>
               <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold">
@@ -55,7 +55,7 @@ export default function HomePage() {
                 ["Wed 20:00", "11 available", "w-11/12"],
                 ["Thu 21:00", "10 available", "w-10/12"],
               ].map(([time, count, width]) => (
-                <div key={time} className="rounded-[8px] border border-[var(--line)] p-3">
+                <div key={time} className="sl-panel p-3">
                   <div className="mb-2 flex items-center justify-between gap-3">
                     <span className="font-medium">{time}</span>
                     <span className="text-sm text-[var(--muted)]">{count}</span>

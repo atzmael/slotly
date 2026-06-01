@@ -33,7 +33,7 @@ export function ResultsContent({
               : "No availability yet"
           }
         />
-        <section className="rounded-[8px] border border-[var(--line)] bg-[var(--surface)] p-5">
+        <section className="sl-panel p-5">
           <EmptyState
             description="Results are calculated as soon as at least one participant saves availability."
             title="Nothing to rank yet"
@@ -52,7 +52,7 @@ export function ResultsContent({
           return (
             <button
               aria-pressed={selected}
-              className="w-full rounded-[8px] border border-[var(--line)] bg-[var(--surface)] p-4 text-left transition hover:border-[var(--primary)] data-[selected=true]:border-[var(--primary)] data-[selected=true]:shadow-sm"
+              className="sl-panel w-full p-4 text-left hover:border-[var(--primary)] active:scale-[0.99] data-[selected=true]:border-[var(--primary)] data-[selected=true]:shadow-sm"
               data-selected={selected}
               key={`${slot.start}-${slot.end}`}
               onClick={() => setSelectedIndex(index)}
@@ -84,7 +84,7 @@ export function ResultsContent({
         })}
       </section>
 
-      <section className="rounded-[8px] border border-[var(--line)] bg-[var(--surface)] p-5">
+      <section className="sl-panel p-5">
         {selectedSlot ? (
           <>
             <p className="text-sm font-semibold text-[var(--primary)]">
@@ -157,7 +157,7 @@ function EmptyState({
   readonly title: string;
 }) {
   return (
-    <div className="rounded-[8px] border border-dashed border-[var(--line)] bg-[var(--surface)] p-5">
+    <div className="sl-panel border-dashed p-5">
       <h2 className="font-semibold">{title}</h2>
       <p className="mt-2 text-sm text-[var(--muted)]">{description}</p>
     </div>

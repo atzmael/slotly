@@ -52,10 +52,7 @@ export function JoinEventForm({
   return (
     <div className="space-y-4">
       {state.status === "error" ? (
-        <div
-          className="rounded-[8px] border border-[#e6b8a8] bg-[#fff5ef] px-3 py-3 text-sm text-[#8a351e]"
-          role="alert"
-        >
+        <div className="sl-alert sl-alert-error" role="alert">
           <ul className="space-y-1">
             {state.errors.map((error) => (
               <li key={error}>{errorCopy[error] ?? "Something went wrong."}</li>
@@ -65,10 +62,7 @@ export function JoinEventForm({
       ) : null}
 
       {state.status === "success" ? (
-        <div
-          className="rounded-[8px] border border-[#a8d8cc] bg-[#effaf6] px-3 py-3 text-sm text-[#146c5c]"
-          role="status"
-        >
+        <div className="sl-alert sl-alert-success" role="status">
           You joined this poll. Pick your availability next.
         </div>
       ) : null}
@@ -90,7 +84,7 @@ export function JoinEventForm({
           <label className="block">
             <span className="text-sm font-medium">Your name</span>
             <input
-              className="mt-2 w-full rounded-[8px] border border-[var(--line)] px-3 py-3 outline-none focus:border-[var(--primary)]"
+              className="sl-field mt-2"
               maxLength={60}
               name="name"
               placeholder="Mael"
@@ -104,7 +98,7 @@ export function JoinEventForm({
           </p>
 
           <button
-            className="w-full rounded-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-[var(--primary-foreground)] disabled:cursor-not-allowed disabled:opacity-65"
+            className="sl-button sl-button-primary w-full px-5 py-3"
             disabled={isPending}
             type="submit"
           >

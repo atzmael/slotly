@@ -58,7 +58,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
           </div>
           <div className="grid gap-2 sm:min-w-40">
             <Link
-              className="rounded-full border border-[var(--line)] px-4 py-2 text-center text-sm font-medium"
+              className="sl-button sl-button-secondary"
               href={`/e/${event.id}`}
             >
               Add availability

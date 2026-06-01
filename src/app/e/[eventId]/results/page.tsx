@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { rankAvailabilitySlots } from "@/domain/availability";
 import { getEventSnapshot } from "@/server/events";
+import { EventRealtimeRefresh } from "../event-realtime";
 import { ShareLinkButton } from "../share-link-button";
 import { ResultsContent } from "./results-content";
 
@@ -37,6 +38,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
 
   return (
     <main className="min-h-screen px-5 py-6 sm:px-8">
+      <EventRealtimeRefresh eventId={event.id} />
       <section className="mx-auto w-full max-w-5xl">
         <Link className="text-sm font-semibold text-[var(--primary)]" href="/">
           Slotly

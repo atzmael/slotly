@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getEventSnapshot } from "@/server/events";
+import { EventRealtimeRefresh } from "./event-realtime";
 import { JoinEventForm } from "./join-event-form";
 import { ShareLinkButton } from "./share-link-button";
 
@@ -22,6 +23,7 @@ export default async function EventPage({ params }: EventPageProps) {
 
   return (
     <main className="min-h-screen px-5 py-6 sm:px-8">
+      <EventRealtimeRefresh eventId={event.id} />
       <section className="mx-auto w-full max-w-4xl">
         <Link className="text-sm font-semibold text-[var(--primary)]" href="/">
           Slotly

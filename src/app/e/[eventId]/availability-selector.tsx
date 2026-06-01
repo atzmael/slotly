@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { saveAvailabilityAction } from "./actions";
+import { broadcastEventChange } from "./event-realtime";
 
 interface AvailabilitySelectorProps {
   readonly eventId: string;
@@ -53,6 +54,14 @@ export function AvailabilitySelector({
   const selectedWindows = cells
     .filter((cell) => selectedIds.has(cell.id))
     .map((cell) => ({ start: cell.start, end: cell.end }));
+
+  useEffect(() => {
+    if (state.status !== "success") {
+      return;
+    }
+
+    void broadcastEventChange(eventId, "availability_saved");
+  }, [eventId, state]);
 
   function toggleCell(id: string) {
     setSelectedIds((current) => {

@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { joinEventAction } from "./actions";
 import { AvailabilitySelector } from "./availability-selector";
+import { broadcastEventChange } from "./event-realtime";
 
 const errorCopy: Record<string, string> = {
   event_id_invalid: "This event link is invalid.",
@@ -33,6 +34,20 @@ export function JoinEventForm({
     joinEventAction,
     initialJoinEventState,
   );
+  const lastBroadcastParticipantId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (
+      state.status !== "success" ||
+      !state.participantId ||
+      lastBroadcastParticipantId.current === state.participantId
+    ) {
+      return;
+    }
+
+    lastBroadcastParticipantId.current = state.participantId;
+    void broadcastEventChange(eventId, "participant_joined");
+  }, [eventId, state]);
 
   return (
     <div className="space-y-4">

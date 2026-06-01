@@ -46,24 +46,12 @@ export default async function EventPage({ params }: EventPageProps) {
           </Link>
         </div>
 
-        <div className="mt-8 grid gap-5 lg:grid-cols-[18rem_1fr]">
-          <aside className="rounded-[8px] border border-[var(--line)] bg-[var(--surface)] p-5">
-            <JoinEventForm eventId={event.id} />
-          </aside>
-
-          <div className="rounded-[8px] border border-[var(--line)] bg-[var(--surface)] p-4">
-            <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
-              {Array.from({ length: 28 }).map((_, index) => (
-                <button
-                  className="aspect-square rounded-[6px] border border-[var(--line)] bg-[#f2f2ec] text-xs text-[var(--muted)]"
-                  key={index}
-                  type="button"
-                >
-                  {index + 1}
-                </button>
-              ))}
-            </div>
-          </div>
+        <div className="mt-8 rounded-[8px] border border-[var(--line)] bg-[var(--surface)] p-5">
+          <JoinEventForm
+            endDate={event.endDate}
+            eventId={event.id}
+            startDate={event.startDate}
+          />
         </div>
       </section>
     </main>

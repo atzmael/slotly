@@ -3,6 +3,9 @@ import {
   createEvent,
   getEventSnapshot,
   joinEvent,
+  saveAvailability,
+  type AvailabilityInsert,
+  type AvailabilityRepository,
   type CreateEventRepository,
   type EventInsert,
   type ParticipantInsert,
@@ -14,6 +17,17 @@ function createFakeRepository(
 ): CreateEventRepository {
   return {
     insertEvent: onInsert,
+  };
+}
+
+function createFakeAvailabilityRepository(
+  onReplace: (
+    participantId: string,
+    windows: readonly AvailabilityInsert[],
+  ) => Promise<void>,
+): AvailabilityRepository {
+  return {
+    replaceAvailability: onReplace,
   };
 }
 
@@ -228,5 +242,97 @@ describe("joinEvent", () => {
       errors: ["event_id_invalid", "name_required", "timezone_invalid"],
     });
     expect(didInsert).toBe(false);
+  });
+});
+
+describe("saveAvailability", () => {
+  it("replaces a participant availability windows", async () => {
+    const replacements: Array<{
+      readonly participantId: string;
+      readonly windows: readonly AvailabilityInsert[];
+    }> = [];
+    const result = await saveAvailability(
+      {
+        participantId: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
+        windows: [
+          {
+            start: "2026-06-15T16:00:00.000Z",
+            end: "2026-06-15T17:00:00.000Z",
+          },
+          {
+            start: "2026-06-15T17:00:00.000Z",
+            end: "2026-06-15T18:00:00.000Z",
+          },
+        ],
+      },
+      createFakeAvailabilityRepository(async (participantId, windows) => {
+        replacements.push({ participantId, windows });
+      }),
+    );
+
+    expect(result).toEqual({ ok: true });
+    expect(replacements).toEqual([
+      {
+        participantId: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
+        windows: [
+          {
+            participant_id: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
+            start_at: "2026-06-15T16:00:00.000Z",
+            end_at: "2026-06-15T17:00:00.000Z",
+          },
+          {
+            participant_id: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
+            start_at: "2026-06-15T17:00:00.000Z",
+            end_at: "2026-06-15T18:00:00.000Z",
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("rejects invalid participant ids and windows before writing", async () => {
+    let didReplace = false;
+    const result = await saveAvailability(
+      {
+        participantId: "not-a-uuid",
+        windows: [
+          {
+            start: "2026-06-15T18:00:00.000Z",
+            end: "2026-06-15T17:00:00.000Z",
+          },
+        ],
+      },
+      createFakeAvailabilityRepository(async () => {
+        didReplace = true;
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      errors: ["participant_id_invalid", "availability_window_invalid"],
+    });
+    expect(didReplace).toBe(false);
+  });
+
+  it("maps persistence failures to a safe error", async () => {
+    const result = await saveAvailability(
+      {
+        participantId: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
+        windows: [
+          {
+            start: "2026-06-15T16:00:00.000Z",
+            end: "2026-06-15T17:00:00.000Z",
+          },
+        ],
+      },
+      createFakeAvailabilityRepository(async () => {
+        throw new Error("database unavailable");
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      errors: ["save_availability_failed"],
+    });
   });
 });

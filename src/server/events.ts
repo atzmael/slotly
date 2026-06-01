@@ -28,10 +28,23 @@ export interface ParticipantRepository {
   ) => Promise<{ readonly id: string }>;
 }
 
+export interface AvailabilityRepository {
+  readonly replaceAvailability: (
+    participantId: string,
+    windows: readonly AvailabilityInsert[],
+  ) => Promise<void>;
+}
+
 export interface ParticipantInsert {
   readonly event_id: string;
   readonly name: string;
   readonly timezone: string;
+}
+
+export interface AvailabilityInsert {
+  readonly participant_id: string;
+  readonly start_at: string;
+  readonly end_at: string;
 }
 
 export interface SlotlyEvent {
@@ -92,6 +105,15 @@ export type JoinEventResult =
   | {
       readonly ok: true;
       readonly participantId: string;
+    }
+  | {
+      readonly ok: false;
+      readonly errors: readonly string[];
+    };
+
+export type SaveAvailabilityResult =
+  | {
+      readonly ok: true;
     }
   | {
       readonly ok: false;
@@ -209,6 +231,63 @@ export async function joinEvent(
   }
 }
 
+export async function saveAvailability(
+  input: {
+    readonly participantId: string;
+    readonly windows: readonly {
+      readonly start: string;
+      readonly end: string;
+    }[];
+  },
+  repository: AvailabilityRepository = createSupabaseAvailabilityRepository(),
+): Promise<SaveAvailabilityResult> {
+  const errors: string[] = [];
+
+  if (!isUuid(input.participantId)) {
+    errors.push("participant_id_invalid");
+  }
+
+  if (input.windows.length === 0) {
+    errors.push("availability_required");
+  }
+
+  if (input.windows.length > 400) {
+    errors.push("availability_too_large");
+  }
+
+  const windows = input.windows.map((window) => {
+    const startMs = Date.parse(window.start);
+    const endMs = Date.parse(window.end);
+
+    if (Number.isNaN(startMs) || Number.isNaN(endMs) || startMs >= endMs) {
+      errors.push("availability_window_invalid");
+    }
+
+    return {
+      participant_id: input.participantId,
+      start_at: window.start,
+      end_at: window.end,
+    };
+  });
+
+  if (errors.length > 0) {
+    return {
+      ok: false,
+      errors: Array.from(new Set(errors)),
+    };
+  }
+
+  try {
+    await repository.replaceAvailability(input.participantId, windows);
+    return { ok: true };
+  } catch {
+    return {
+      ok: false,
+      errors: ["save_availability_failed"],
+    };
+  }
+}
+
 function createSupabaseCreateEventRepository(): CreateEventRepository {
   return {
     async insertEvent(event) {
@@ -260,6 +339,34 @@ function createSupabaseParticipantRepository(): ParticipantRepository {
       }
 
       return data;
+    },
+  };
+}
+
+function createSupabaseAvailabilityRepository(): AvailabilityRepository {
+  return {
+    async replaceAvailability(participantId, windows) {
+      const supabase = createServiceSupabaseClient();
+      const deleteResult = await supabase
+        .from("availability_windows")
+        .delete()
+        .eq("participant_id", participantId);
+
+      if (deleteResult.error) {
+        throw deleteResult.error;
+      }
+
+      if (windows.length === 0) {
+        return;
+      }
+
+      const insertResult = await supabase
+        .from("availability_windows")
+        .insert([...windows]);
+
+      if (insertResult.error) {
+        throw insertResult.error;
+      }
     },
   };
 }

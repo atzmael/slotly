@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { joinEventAction } from "./actions";
+import { AvailabilitySelector } from "./availability-selector";
 
 const errorCopy: Record<string, string> = {
   event_id_invalid: "This event link is invalid.",
@@ -16,7 +17,15 @@ const initialJoinEventState = {
   errors: [] as readonly string[],
 };
 
-export function JoinEventForm({ eventId }: { readonly eventId: string }) {
+export function JoinEventForm({
+  eventId,
+  startDate,
+  endDate,
+}: {
+  readonly eventId: string;
+  readonly startDate: string;
+  readonly endDate: string;
+}) {
   const [timezone] = useState(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
   );
@@ -26,10 +35,7 @@ export function JoinEventForm({ eventId }: { readonly eventId: string }) {
   );
 
   return (
-    <form action={formAction} className="space-y-4">
-      <input name="eventId" type="hidden" value={eventId} />
-      <input name="timezone" type="hidden" value={timezone} />
-
+    <div className="space-y-4">
       {state.status === "error" ? (
         <div
           className="rounded-[8px] border border-[#e6b8a8] bg-[#fff5ef] px-3 py-3 text-sm text-[#8a351e]"
@@ -52,29 +58,45 @@ export function JoinEventForm({ eventId }: { readonly eventId: string }) {
         </div>
       ) : null}
 
-      <label className="block">
-        <span className="text-sm font-medium">Your name</span>
-        <input
-          className="mt-2 w-full rounded-[8px] border border-[var(--line)] px-3 py-3 outline-none focus:border-[var(--primary)]"
-          maxLength={60}
-          name="name"
-          placeholder="Mael"
-          required
-          type="text"
+      {state.status === "success" && state.participantId ? (
+        <AvailabilitySelector
+          endDate={endDate}
+          eventId={eventId}
+          participantId={state.participantId}
+          startDate={startDate}
         />
-      </label>
+      ) : null}
 
-      <p className="text-sm leading-6 text-[var(--muted)]">
-        Times are shown in {timezone}. Availability selection comes next.
-      </p>
+      {state.status !== "success" ? (
+        <form action={formAction} className="space-y-4">
+          <input name="eventId" type="hidden" value={eventId} />
+          <input name="timezone" type="hidden" value={timezone} />
 
-      <button
-        className="w-full rounded-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-[var(--primary-foreground)] disabled:cursor-not-allowed disabled:opacity-65"
-        disabled={isPending}
-        type="submit"
-      >
-        {isPending ? "Joining..." : "Join poll"}
-      </button>
-    </form>
+          <label className="block">
+            <span className="text-sm font-medium">Your name</span>
+            <input
+              className="mt-2 w-full rounded-[8px] border border-[var(--line)] px-3 py-3 outline-none focus:border-[var(--primary)]"
+              maxLength={60}
+              name="name"
+              placeholder="Mael"
+              required
+              type="text"
+            />
+          </label>
+
+          <p className="text-sm leading-6 text-[var(--muted)]">
+            Times are shown in {timezone}. Availability selection comes next.
+          </p>
+
+          <button
+            className="w-full rounded-full bg-[var(--primary)] px-5 py-3 text-sm font-semibold text-[var(--primary-foreground)] disabled:cursor-not-allowed disabled:opacity-65"
+            disabled={isPending}
+            type="submit"
+          >
+            {isPending ? "Joining..." : "Join poll"}
+          </button>
+        </form>
+      ) : null}
+    </div>
   );
 }

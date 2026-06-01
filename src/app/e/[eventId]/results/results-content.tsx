@@ -58,7 +58,7 @@ export function ResultsContent({
               onClick={() => setSelectedIndex(index)}
               type="button"
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                 <div>
                   <span className="text-sm font-semibold text-[var(--primary)]">
                     #{index + 1}
@@ -67,7 +67,7 @@ export function ResultsContent({
                     {formatSlot(slot, timezone)}
                   </p>
                 </div>
-                <span className="text-sm text-[var(--muted)]">
+                <span className="shrink-0 text-sm text-[var(--muted)]">
                   {slot.availableCount} available
                 </span>
               </div>

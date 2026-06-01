@@ -1,11 +1,13 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useState } from "react";
+import type { EventAvailabilityWindow } from "@/server/events";
 import { saveAvailabilityAction } from "./actions";
 import { broadcastEventChange } from "./event-realtime";
 
 interface AvailabilitySelectorProps {
   readonly eventId: string;
+  readonly initialWindows?: readonly EventAvailabilityWindow[];
   readonly participantId: string;
   readonly startDate: string;
   readonly endDate: string;
@@ -36,6 +38,7 @@ const errorCopy: Record<string, string> = {
 
 export function AvailabilitySelector({
   eventId,
+  initialWindows = [],
   participantId,
   startDate,
   endDate,
@@ -45,7 +48,7 @@ export function AvailabilitySelector({
     [startDate, endDate],
   );
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(
-    () => new Set(),
+    () => buildSelectedIds(cells, initialWindows),
   );
   const [state, formAction, isPending] = useActionState(
     saveAvailabilityAction,
@@ -201,4 +204,23 @@ function formatHour(value: Date): string {
     hour: "2-digit",
     minute: "2-digit",
   }).format(value);
+}
+
+function buildSelectedIds(
+  cells: readonly AvailabilityCell[],
+  windows: readonly EventAvailabilityWindow[],
+): ReadonlySet<string> {
+  const windowKeys = new Set(
+    windows.map((window) => getWindowKey(window.start, window.end)),
+  );
+
+  return new Set(
+    cells
+      .filter((cell) => windowKeys.has(getWindowKey(cell.start, cell.end)))
+      .map((cell) => cell.id),
+  );
+}
+
+function getWindowKey(start: string, end: string): string {
+  return `${Date.parse(start)}:${Date.parse(end)}`;
 }

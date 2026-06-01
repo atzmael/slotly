@@ -11,7 +11,7 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   await page.getByLabel("Start date").fill("2026-06-15");
   await page.getByLabel("End date").fill("2026-06-15");
   await page.getByLabel("Event duration").selectOption("60");
-  await page.getByLabel("Grid resolution").selectOption("30");
+  await page.getByLabel("Slot size").selectOption("30");
   await page.getByRole("button", { name: "Create Event" }).click();
 
   await expect(page).toHaveURL(/\/e\/[0-9a-f-]+$/i);
@@ -28,6 +28,13 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   await page.getByRole("button", { name: "Save availability" }).click();
 
   await expect(page.getByText("Availability saved.")).toBeVisible();
+  await page.reload();
+  await expect(page.getByText(`Welcome back, ${participantName}.`)).toBeVisible();
+  await expect(page.getByLabel("Your name")).toBeHidden();
+  await expect(
+    page.getByRole("button", { name: /Mon, Jun 15.*06:00 PM -> 07:00 PM/ }),
+  ).toHaveAttribute("aria-pressed", "true");
+
   await page.getByRole("link", { name: "View results" }).click();
 
   await expect(page).toHaveURL(/\/results$/);

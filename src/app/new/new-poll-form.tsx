@@ -10,7 +10,7 @@ const durationOptions = [
   { label: "3 hours", value: 180 },
   { label: "4 hours", value: 240 },
 ];
-const resolutionOptions = [
+const slotSizeOptions = [
   { label: "30 min", value: 30 },
   { label: "1 hour", value: 60 },
 ];
@@ -23,7 +23,7 @@ const errorCopy: Record<string, string> = {
   date_range_invalid: "End date must be after the start date.",
   date_range_too_long: "Keep the date range to 31 days or less.",
   duration_invalid: "Choose a supported event duration.",
-  slot_size_invalid: "Choose a supported grid resolution.",
+  slot_size_invalid: "Choose a supported slot size.",
   create_event_failed: "The poll could not be created. Try again.",
 };
 
@@ -102,13 +102,13 @@ export function NewPollForm() {
           </select>
         </label>
         <label className="block">
-          <span className="text-sm font-medium">Grid resolution</span>
+          <span className="text-sm font-medium">Slot size</span>
           <select
             className="sl-field mt-2"
             defaultValue={30}
             name="slotSizeMinutes"
           >
-            {resolutionOptions.map((option) => (
+            {slotSizeOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>

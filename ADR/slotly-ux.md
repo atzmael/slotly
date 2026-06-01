@@ -45,7 +45,7 @@ Champs :
 - Event name.
 - Date range.
 - Event duration : 30 min, 1 hour, 2 hours, 3 hours, 4 hours.
-- Grid resolution : 30 min ou 1 hour.
+- Slot size : 30 min ou 1 hour.
 
 Action :
 

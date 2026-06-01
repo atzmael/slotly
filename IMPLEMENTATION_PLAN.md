@@ -83,7 +83,7 @@ Tickets:
 
 - Define core entities and vocabulary in ADR.
 - Model events, participants, availability windows, and candidate slots.
-- Generate valid meeting windows from availability, duration, and grid resolution.
+- Generate valid meeting windows from availability, duration, and slot size.
 - Calculate `availableCount`, `availableParticipants`, and `missingParticipants`.
 - Sort best slots by highest attendance.
 - Normalize timezone-aware inputs into stable instants.
@@ -103,7 +103,7 @@ Objective: create an availability poll in under 15 seconds.
 Tickets:
 
 - Landing CTA to create poll.
-- `/new` form with event name, date range, duration, and grid resolution.
+- `/new` form with event name, date range, duration, and slot size.
 - Supabase persistence for event.
 - Redirect to `/e/{eventId}` after creation.
 - Mobile-first validation and error states.

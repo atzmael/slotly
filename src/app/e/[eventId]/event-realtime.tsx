@@ -58,7 +58,13 @@ export async function broadcastEventChange(
   const channel = supabase.channel(getEventTopic(eventId));
 
   await new Promise<void>((resolve) => {
+    let finished = false;
     const finish = async () => {
+      if (finished) {
+        return;
+      }
+
+      finished = true;
       clearTimeout(timeout);
       await supabase.removeChannel(channel);
       resolve();

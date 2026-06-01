@@ -19,7 +19,7 @@ export default async function EventPage({ params }: EventPageProps) {
     notFound();
   }
 
-  const { event, participants } = result.snapshot;
+  const { event, participants, availabilityWindows } = result.snapshot;
 
   return (
     <main className="min-h-screen px-5 py-6 sm:px-8">
@@ -54,8 +54,10 @@ export default async function EventPage({ params }: EventPageProps) {
 
         <div className="sl-panel mt-8 p-5">
           <JoinEventForm
+            availabilityWindows={availabilityWindows}
             endDate={event.endDate}
             eventId={event.id}
+            participants={participants}
             startDate={event.startDate}
           />
         </div>

@@ -32,6 +32,19 @@ Current layout:
 - `supabase/migrations` - database schema migrations.
 - `tests/e2e` - Playwright happy-path coverage.
 
+## Minimal UI System
+
+Shared UI primitives live in `src/app/globals.css` and use the `sl-*` prefix:
+
+- `sl-button`, `sl-button-primary`, `sl-button-secondary`
+- `sl-field`
+- `sl-panel`
+- `sl-alert`, `sl-alert-error`, `sl-alert-success`
+
+Keep new route UI on these primitives before adding new styling patterns.
+Interactive elements should preserve hover, focus, active, disabled, and cursor
+states.
+
 ## Environment
 
 Local development and Vercel need these variables:

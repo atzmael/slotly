@@ -55,5 +55,34 @@ begin
 end;
 $$;
 
+with ranked_participants as (
+  select
+    id,
+    first_value(id) over (
+      partition by event_id, normalized_name
+      order by created_at, id
+    ) as kept_id,
+    row_number() over (
+      partition by event_id, normalized_name
+      order by created_at, id
+    ) as duplicate_rank
+  from public.participants
+),
+duplicate_participants as (
+  select id, kept_id
+  from ranked_participants
+  where duplicate_rank > 1
+),
+moved_availability as (
+  update public.availability_windows aw
+  set participant_id = dp.kept_id
+  from duplicate_participants dp
+  where aw.participant_id = dp.id
+  returning aw.id
+)
+delete from public.participants p
+using duplicate_participants dp
+where p.id = dp.id;
+
 create unique index if not exists participants_event_id_normalized_name_key
   on public.participants(event_id, normalized_name);

@@ -28,12 +28,23 @@ const errorCopy: Record<string, string> = {
   duration_exceeds_time_range: "Event duration must fit inside the time range.",
   duration_invalid: "Choose a supported event duration.",
   slot_size_invalid: "Choose a supported slot size.",
+  database_migration_required:
+    "The database is not up to date. Apply the latest Supabase migration, then try again.",
   create_event_failed: "The poll could not be created. Try again.",
 };
 
 const initialCreateEventActionState = {
   status: "idle" as const,
   errors: [] as readonly string[],
+  values: {
+    title: "",
+    startDate: "",
+    endDate: "",
+    startTime: "18:00",
+    endTime: "22:00",
+    durationMinutes: 60,
+    slotSizeMinutes: 30,
+  },
 };
 
 export function NewPollForm() {
@@ -58,6 +69,7 @@ export function NewPollForm() {
         <span className="text-sm font-medium">Event name</span>
         <input
           className="sl-field mt-2"
+          defaultValue={state.values.title}
           maxLength={80}
           name="title"
           placeholder="Board Game Night"
@@ -71,6 +83,7 @@ export function NewPollForm() {
           <span className="text-sm font-medium">Start date</span>
           <input
             className="sl-field mt-2"
+            defaultValue={state.values.startDate}
             name="startDate"
             required
             type="date"
@@ -80,6 +93,7 @@ export function NewPollForm() {
           <span className="text-sm font-medium">End date</span>
           <input
             className="sl-field mt-2"
+            defaultValue={state.values.endDate}
             name="endDate"
             required
             type="date"
@@ -92,7 +106,7 @@ export function NewPollForm() {
           <span className="text-sm font-medium">Start time</span>
           <input
             className="sl-field mt-2"
-            defaultValue="18:00"
+            defaultValue={state.values.startTime}
             name="startTime"
             required
             type="time"
@@ -102,7 +116,7 @@ export function NewPollForm() {
           <span className="text-sm font-medium">End time</span>
           <input
             className="sl-field mt-2"
-            defaultValue="22:00"
+            defaultValue={state.values.endTime}
             name="endTime"
             required
             type="time"
@@ -115,7 +129,7 @@ export function NewPollForm() {
           <span className="text-sm font-medium">Event duration</span>
           <select
             className="sl-field mt-2"
-            defaultValue={60}
+            defaultValue={state.values.durationMinutes}
             name="durationMinutes"
           >
             {durationOptions.map((option) => (
@@ -129,7 +143,7 @@ export function NewPollForm() {
           <span className="text-sm font-medium">Slot size</span>
           <select
             className="sl-field mt-2"
-            defaultValue={30}
+            defaultValue={state.values.slotSizeMinutes}
             name="slotSizeMinutes"
           >
             {slotSizeOptions.map((option) => (

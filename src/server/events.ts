@@ -160,7 +160,14 @@ export async function createEvent(
       ok: true,
       eventId: event.id,
     };
-  } catch {
+  } catch (error) {
+    if (isEventSchemaMigrationError(error)) {
+      return {
+        ok: false,
+        errors: ["database_migration_required"],
+      };
+    }
+
     return {
       ok: false,
       errors: ["create_event_failed"],
@@ -480,6 +487,21 @@ function parseEventSnapshot(payload: Json): EventSnapshot {
 function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     value,
+  );
+}
+
+function isEventSchemaMigrationError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) {
+    return false;
+  }
+
+  const code = "code" in error ? error.code : undefined;
+  const message = "message" in error ? error.message : undefined;
+
+  return (
+    (code === "PGRST204" || code === "42703") &&
+    typeof message === "string" &&
+    (message.includes("start_time") || message.includes("end_time"))
   );
 }
 

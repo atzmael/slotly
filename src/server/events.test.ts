@@ -136,6 +136,32 @@ describe("createEvent", () => {
       errors: ["create_event_failed"],
     });
   });
+
+  it("maps missing event time columns to a migration error", async () => {
+    const result = await createEvent(
+      {
+        title: "Board Game Night",
+        startDate: "2026-06-15",
+        endDate: "2026-06-21",
+        startTime: "18:00",
+        endTime: "22:00",
+        durationMinutes: 120,
+        slotSizeMinutes: 60,
+      },
+      createFakeRepository(async () => {
+        throw {
+          code: "PGRST204",
+          message:
+            "Could not find the 'start_time' column of 'events' in the schema cache",
+        };
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      errors: ["database_migration_required"],
+    });
+  });
 });
 
 describe("getEventSnapshot", () => {

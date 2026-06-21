@@ -9,7 +9,7 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   await page.goto("/new");
   await page.getByLabel("Event name").fill(title);
   await page.getByLabel("Start date").fill("2026-06-15");
-  await page.getByLabel("End date").fill("2026-06-15");
+  await page.getByLabel("End date").fill("2026-06-21");
   await page.getByLabel("Start time").fill("19:00");
   await page.getByLabel("End time").fill("22:00");
   await page.getByLabel("Event duration").selectOption("60");
@@ -30,6 +30,9 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   const secondSlot = page.getByRole("button", {
     name: /Mon, Jun 15.*07:30 PM -> 08:00 PM/,
   });
+  const saturdaySlot = page.getByRole("button", {
+    name: /Sat, Jun 20.*07:00 PM -> 07:30 PM/,
+  });
 
   await expect(
     page.getByRole("button", { name: "Save availability" }),
@@ -42,9 +45,17 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   await page.getByRole("button", { name: "Apply to all days" }).click();
   await expect(firstSlot).toHaveAttribute("aria-pressed", "true");
   await expect(secondSlot).toHaveAttribute("aria-pressed", "true");
+  await expect(saturdaySlot).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Clear all" }).click();
   await expect(firstSlot).toHaveAttribute("aria-pressed", "false");
   await expect(secondSlot).toHaveAttribute("aria-pressed", "false");
+  await expect(saturdaySlot).toHaveAttribute("aria-pressed", "false");
+
+  await page.getByRole("button", { name: "Apply to weekdays" }).click();
+  await expect(firstSlot).toHaveAttribute("aria-pressed", "true");
+  await expect(saturdaySlot).toHaveAttribute("aria-pressed", "false");
+  await page.getByRole("button", { name: "Clear all" }).click();
+  await expect(firstSlot).toHaveAttribute("aria-pressed", "false");
 
   await firstSlot.click();
   await expect(firstSlot).toHaveAttribute("aria-pressed", "true");

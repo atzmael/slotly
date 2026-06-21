@@ -38,6 +38,7 @@ interface AvailabilityCell {
 interface AvailabilityDay {
   readonly id: string;
   readonly label: string;
+  readonly isWeekday: boolean;
   readonly cells: readonly AvailabilityCell[];
 }
 
@@ -180,7 +181,7 @@ export function AvailabilitySelector({
     applyCell(id, action);
   }
 
-  function applyBulkRange() {
+  function applyBulkRange(scope: "all" | "weekdays") {
     if (!canApplyBulkRange) {
       return;
     }
@@ -188,12 +189,18 @@ export function AvailabilitySelector({
     setSelectedIds((current) => {
       const next = new Set(current);
 
-      for (const cell of cells) {
-        if (
-          cell.startMinutes >= bulkStartMinutes &&
-          cell.endMinutes <= bulkEndMinutes
-        ) {
-          next.add(cell.id);
+      for (const day of days) {
+        if (scope === "weekdays" && !day.isWeekday) {
+          continue;
+        }
+
+        for (const cell of day.cells) {
+          if (
+            cell.startMinutes >= bulkStartMinutes &&
+            cell.endMinutes <= bulkEndMinutes
+          ) {
+            next.add(cell.id);
+          }
         }
       }
 
@@ -260,63 +267,6 @@ export function AvailabilitySelector({
         </div>
       ) : null}
 
-      <div className="sl-panel space-y-3 p-3">
-        <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
-          <label className="block">
-            <span className="text-xs font-medium text-[var(--muted)]">
-              From
-            </span>
-            <input
-              className="sl-field mt-1"
-              max={endTime}
-              min={startTime}
-              onChange={(event) => setBulkStartTime(event.target.value)}
-              step={slotSizeMinutes * 60}
-              type="time"
-              value={bulkStartTime}
-            />
-          </label>
-          <label className="block">
-            <span className="text-xs font-medium text-[var(--muted)]">To</span>
-            <input
-              className="sl-field mt-1"
-              max={endTime}
-              min={startTime}
-              onChange={(event) => setBulkEndTime(event.target.value)}
-              step={slotSizeMinutes * 60}
-              type="time"
-              value={bulkEndTime}
-            />
-          </label>
-          <button
-            className="sl-button sl-button-secondary"
-            disabled={!canApplyBulkRange}
-            onClick={applyBulkRange}
-            type="button"
-          >
-            Apply to all days
-          </button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            className="sl-button sl-button-secondary"
-            disabled={selectedIds.size === 0}
-            onClick={clearAll}
-            type="button"
-          >
-            Clear all
-          </button>
-          <button
-            className="sl-button sl-button-secondary"
-            disabled={!isDirty}
-            onClick={cancelChanges}
-            type="button"
-          >
-            Cancel changes
-          </button>
-        </div>
-      </div>
-
       <div className="overflow-x-auto rounded-[8px] border border-[var(--line)] bg-[var(--surface)]">
         <div
           className="grid min-w-max select-none"
@@ -374,6 +324,71 @@ export function AvailabilitySelector({
         </div>
       </div>
 
+      <div className="sl-panel space-y-3 p-3">
+        <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end">
+          <label className="block">
+            <span className="text-xs font-medium text-[var(--muted)]">
+              From
+            </span>
+            <input
+              className="sl-field mt-1"
+              max={endTime}
+              min={startTime}
+              onChange={(event) => setBulkStartTime(event.target.value)}
+              step={slotSizeMinutes * 60}
+              type="time"
+              value={bulkStartTime}
+            />
+          </label>
+          <label className="block">
+            <span className="text-xs font-medium text-[var(--muted)]">To</span>
+            <input
+              className="sl-field mt-1"
+              max={endTime}
+              min={startTime}
+              onChange={(event) => setBulkEndTime(event.target.value)}
+              step={slotSizeMinutes * 60}
+              type="time"
+              value={bulkEndTime}
+            />
+          </label>
+          <button
+            className="sl-button sl-button-secondary"
+            disabled={!canApplyBulkRange}
+            onClick={() => applyBulkRange("all")}
+            type="button"
+          >
+            Apply to all days
+          </button>
+          <button
+            className="sl-button sl-button-secondary"
+            disabled={!canApplyBulkRange}
+            onClick={() => applyBulkRange("weekdays")}
+            type="button"
+          >
+            Apply to weekdays
+          </button>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            className="sl-button sl-button-secondary"
+            disabled={selectedIds.size === 0}
+            onClick={clearAll}
+            type="button"
+          >
+            Clear all
+          </button>
+          <button
+            className="sl-button sl-button-secondary"
+            disabled={!isDirty}
+            onClick={cancelChanges}
+            type="button"
+          >
+            Cancel changes
+          </button>
+        </div>
+      </div>
+
       <button
         className="sl-button sl-button-primary w-full px-5 py-3"
         disabled={isPending || !isDirty}
@@ -413,6 +428,7 @@ function buildAvailabilityDays(
     days.push({
       id: dayId,
       label: dayLabel,
+      isWeekday: isWeekday(day),
       cells: range(startMinutes, endMinutes, slotSizeMinutes).map((minutes) => {
         const startAt = new Date(
           day.getFullYear(),
@@ -449,6 +465,11 @@ function toDateInputValue(value: Date): string {
   const month = String(value.getMonth() + 1).padStart(2, "0");
   const day = String(value.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+function isWeekday(value: Date): boolean {
+  const day = value.getDay();
+  return day >= 1 && day <= 5;
 }
 
 function formatHour(value: Date): string {

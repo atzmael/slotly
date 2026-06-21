@@ -1,5 +1,6 @@
 import {
   isValidTimeZone,
+  normalizeParticipantName,
   validateEventDraft,
   type EventDraft,
 } from "../domain/availability";
@@ -10,12 +11,16 @@ export interface EventInsert {
   readonly title: string;
   readonly start_date: string;
   readonly end_date: string;
+  readonly start_time: string;
+  readonly end_time: string;
   readonly duration_minutes: number;
   readonly slot_size_minutes: number;
 }
 
 export interface CreateEventRepository {
-  readonly insertEvent: (event: EventInsert) => Promise<{ readonly id: string }>;
+  readonly insertEvent: (
+    event: EventInsert,
+  ) => Promise<{ readonly id: string }>;
 }
 
 export interface EventSnapshotRepository {
@@ -23,6 +28,10 @@ export interface EventSnapshotRepository {
 }
 
 export interface ParticipantRepository {
+  readonly findParticipantByNormalizedName: (
+    eventId: string,
+    normalizedName: string,
+  ) => Promise<{ readonly id: string; readonly name: string } | null>;
   readonly insertParticipant: (
     participant: ParticipantInsert,
   ) => Promise<{ readonly id: string }>;
@@ -38,6 +47,7 @@ export interface AvailabilityRepository {
 export interface ParticipantInsert {
   readonly event_id: string;
   readonly name: string;
+  readonly normalized_name: string;
   readonly timezone: string;
 }
 
@@ -52,6 +62,8 @@ export interface SlotlyEvent {
   readonly title: string;
   readonly startDate: string;
   readonly endDate: string;
+  readonly startTime: string;
+  readonly endTime: string;
   readonly durationMinutes: number;
   readonly slotSizeMinutes: number;
   readonly createdAt: string;
@@ -138,6 +150,8 @@ export async function createEvent(
       title: validation.value.title,
       start_date: validation.value.startDate,
       end_date: validation.value.endDate,
+      start_time: validation.value.startTime,
+      end_time: validation.value.endTime,
       duration_minutes: validation.value.durationMinutes,
       slot_size_minutes: validation.value.slotSizeMinutes,
     });
@@ -188,6 +202,7 @@ export async function joinEvent(
 ): Promise<JoinEventResult> {
   const errors: string[] = [];
   const name = input.name.trim();
+  const normalizedName = normalizeParticipantName(name);
 
   if (!isUuid(input.eventId)) {
     errors.push("event_id_invalid");
@@ -213,9 +228,30 @@ export async function joinEvent(
   }
 
   try {
+    const existingParticipant =
+      await repository.findParticipantByNormalizedName(
+        input.eventId,
+        normalizedName,
+      );
+
+    if (existingParticipant) {
+      if (existingParticipant.name === name) {
+        return {
+          ok: true,
+          participantId: existingParticipant.id,
+        };
+      }
+
+      return {
+        ok: false,
+        errors: ["participant_name_taken"],
+      };
+    }
+
     const participant = await repository.insertParticipant({
       event_id: input.eventId,
       name,
+      normalized_name: normalizedName,
       timezone: input.timezone,
     });
 
@@ -223,7 +259,14 @@ export async function joinEvent(
       ok: true,
       participantId: participant.id,
     };
-  } catch {
+  } catch (error) {
+    if (isParticipantNameUniqueViolation(error)) {
+      return {
+        ok: false,
+        errors: ["participant_name_taken"],
+      };
+    }
+
     return {
       ok: false,
       errors: ["join_event_failed"],
@@ -326,6 +369,21 @@ function createSupabaseEventSnapshotRepository(): EventSnapshotRepository {
 
 function createSupabaseParticipantRepository(): ParticipantRepository {
   return {
+    async findParticipantByNormalizedName(eventId, normalizedName) {
+      const supabase = createServiceSupabaseClient();
+      const { data, error } = await supabase
+        .from("participants")
+        .select("id, name")
+        .eq("event_id", eventId)
+        .eq("normalized_name", normalizedName)
+        .maybeSingle();
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
     async insertParticipant(participant) {
       const supabase = createServiceSupabaseClient();
       const { data, error } = await supabase
@@ -386,6 +444,8 @@ function parseEventSnapshot(payload: Json): EventSnapshot {
       title: asString(event.title),
       startDate: asString(event.start_date),
       endDate: asString(event.end_date),
+      startTime: asTimeString(event.start_time ?? "18:00"),
+      endTime: asTimeString(event.end_time ?? "22:00"),
       durationMinutes: asNumber(event.duration_minutes),
       slotSizeMinutes: asNumber(event.slot_size_minutes),
       createdAt: asString(event.created_at),
@@ -423,6 +483,18 @@ function isUuid(value: string): boolean {
   );
 }
 
+function isParticipantNameUniqueViolation(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "23505" &&
+    "message" in error &&
+    typeof error.message === "string" &&
+    error.message.includes("participants_event_id_normalized_name_key")
+  );
+}
+
 function isRecord(value: Json | undefined): value is { [key: string]: Json } {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -449,6 +521,16 @@ function asString(value: Json | undefined): string {
   }
 
   return value;
+}
+
+function asTimeString(value: Json | undefined): string {
+  const time = asString(value);
+
+  if (!/^\d{2}:\d{2}(:\d{2})?$/.test(time)) {
+    throw new Error("Expected time string");
+  }
+
+  return time.slice(0, 5);
 }
 
 function asNumber(value: Json | undefined): number {

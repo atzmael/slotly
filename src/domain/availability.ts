@@ -11,6 +11,8 @@ export interface EventDraft {
   readonly title: string;
   readonly startDate: string;
   readonly endDate: string;
+  readonly startTime: string;
+  readonly endTime: string;
   readonly durationMinutes: number;
   readonly slotSizeMinutes: number;
 }
@@ -19,6 +21,8 @@ export interface ValidEventDraft {
   readonly title: string;
   readonly startDate: string;
   readonly endDate: string;
+  readonly startTime: string;
+  readonly endTime: string;
   readonly durationMinutes: DurationMinutes;
   readonly slotSizeMinutes: SlotSizeMinutes;
 }
@@ -56,7 +60,9 @@ type MillisecondWindow = {
   readonly endMs: number;
 };
 
-export function validateEventDraft(draft: EventDraft):
+export function validateEventDraft(
+  draft: EventDraft,
+):
   | { readonly valid: true; readonly value: ValidEventDraft }
   | { readonly valid: false; readonly errors: readonly string[] } {
   const errors: string[] = [];
@@ -76,6 +82,14 @@ export function validateEventDraft(draft: EventDraft):
 
   if (!isDateOnly(draft.endDate)) {
     errors.push("end_date_invalid");
+  }
+
+  if (!isTimeOnly(draft.startTime)) {
+    errors.push("start_time_invalid");
+  }
+
+  if (!isTimeOnly(draft.endTime)) {
+    errors.push("end_time_invalid");
   }
 
   if (
@@ -102,6 +116,24 @@ export function validateEventDraft(draft: EventDraft):
     errors.push("slot_size_invalid");
   }
 
+  if (
+    isTimeOnly(draft.startTime) &&
+    isTimeOnly(draft.endTime) &&
+    timeToMinutes(draft.startTime) >= timeToMinutes(draft.endTime)
+  ) {
+    errors.push("time_range_invalid");
+  }
+
+  if (
+    isTimeOnly(draft.startTime) &&
+    isTimeOnly(draft.endTime) &&
+    isAllowedDuration(draft.durationMinutes) &&
+    timeToMinutes(draft.endTime) - timeToMinutes(draft.startTime) <
+      draft.durationMinutes
+  ) {
+    errors.push("duration_exceeds_time_range");
+  }
+
   if (errors.length > 0) {
     return { valid: false, errors };
   }
@@ -112,10 +144,21 @@ export function validateEventDraft(draft: EventDraft):
       title,
       startDate: draft.startDate,
       endDate: draft.endDate,
+      startTime: draft.startTime,
+      endTime: draft.endTime,
       durationMinutes: draft.durationMinutes as DurationMinutes,
       slotSizeMinutes: draft.slotSizeMinutes as SlotSizeMinutes,
     },
   };
+}
+
+export function normalizeParticipantName(name: string): string {
+  return name
+    .trim()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/\s+/g, " ")
+    .toLocaleLowerCase("en-US");
 }
 
 export function isValidTimeZone(timezone: string): boolean {
@@ -127,14 +170,18 @@ export function isValidTimeZone(timezone: string): boolean {
   }
 }
 
-export function rankAvailabilitySlots(input: RankAvailabilityInput): RankedSlot[] {
+export function rankAvailabilitySlots(
+  input: RankAvailabilityInput,
+): RankedSlot[] {
   assertAllowedDuration(input.durationMinutes);
   assertAllowedSlotSize(input.slotSizeMinutes);
 
   const participantById = new Map(
     input.participants.map((participant) => [participant.id, participant]),
   );
-  const windows = normalizeWindows(input.availability, participantById);
+  const windows = mergeWindows(
+    normalizeWindows(input.availability, participantById),
+  );
   const windowsByParticipant = groupWindowsByParticipant(windows);
   const candidateSlots = getCandidateSlots(
     windows,
@@ -173,6 +220,33 @@ export function rankAvailabilitySlots(input: RankAvailabilityInput): RankedSlot[
         Date.parse(left.start) - Date.parse(right.start) ||
         Date.parse(left.end) - Date.parse(right.end),
     );
+}
+
+function mergeWindows(
+  windows: readonly MillisecondWindow[],
+): MillisecondWindow[] {
+  const merged: MillisecondWindow[] = [];
+
+  for (const window of windows) {
+    const previous = merged.at(-1);
+
+    if (
+      previous &&
+      previous.participantId === window.participantId &&
+      previous.endMs >= window.startMs
+    ) {
+      merged[merged.length - 1] = {
+        participantId: previous.participantId,
+        startMs: previous.startMs,
+        endMs: Math.max(previous.endMs, window.endMs),
+      };
+      continue;
+    }
+
+    merged.push(window);
+  }
+
+  return merged;
 }
 
 function normalizeWindows(
@@ -266,24 +340,44 @@ function isAllowedSlotSize(value: number): value is SlotSizeMinutes {
   return allowedSlotSizeMinutes.includes(value as SlotSizeMinutes);
 }
 
-function assertAllowedDuration(value: number): asserts value is DurationMinutes {
+function assertAllowedDuration(
+  value: number,
+): asserts value is DurationMinutes {
   if (!isAllowedDuration(value)) {
     throw new Error(`Unsupported duration: ${value}`);
   }
 }
 
-function assertAllowedSlotSize(value: number): asserts value is SlotSizeMinutes {
+function assertAllowedSlotSize(
+  value: number,
+): asserts value is SlotSizeMinutes {
   if (!isAllowedSlotSize(value)) {
     throw new Error(`Unsupported slot size: ${value}`);
   }
 }
 
 function isDateOnly(value: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(toDateOnlyMs(value));
+  return (
+    /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(toDateOnlyMs(value))
+  );
+}
+
+function isTimeOnly(value: string): boolean {
+  if (!/^\d{2}:\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const [hours, minutes] = value.split(":").map(Number);
+  return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
 }
 
 function toDateOnlyMs(value: string): number {
   return Date.parse(`${value}T00:00:00.000Z`);
+}
+
+function timeToMinutes(value: string): number {
+  const [hours, minutes] = value.split(":").map(Number);
+  return hours * 60 + minutes;
 }
 
 function parseInstant(value: string): number {

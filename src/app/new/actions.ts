@@ -16,6 +16,8 @@ export async function createEventAction(
     title: getString(formData, "title"),
     startDate: getString(formData, "startDate"),
     endDate: getString(formData, "endDate"),
+    startTime: getString(formData, "startTime"),
+    endTime: getString(formData, "endTime"),
     durationMinutes: getNumber(formData, "durationMinutes"),
     slotSizeMinutes: getNumber(formData, "slotSizeMinutes"),
   });

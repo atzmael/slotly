@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   isValidTimeZone,
+  normalizeParticipantName,
   rankAvailabilitySlots,
   validateEventDraft,
   type Participant,
@@ -19,6 +20,8 @@ describe("validateEventDraft", () => {
         title: " Raid WoW ",
         startDate: "2026-06-15",
         endDate: "2026-06-21",
+        startTime: "18:00",
+        endTime: "22:00",
         durationMinutes: 120,
         slotSizeMinutes: 60,
       }),
@@ -28,6 +31,8 @@ describe("validateEventDraft", () => {
         title: "Raid WoW",
         startDate: "2026-06-15",
         endDate: "2026-06-21",
+        startTime: "18:00",
+        endTime: "22:00",
         durationMinutes: 120,
         slotSizeMinutes: 60,
       },
@@ -40,6 +45,8 @@ describe("validateEventDraft", () => {
         title: "",
         startDate: "2026-06-21",
         endDate: "2026-06-15",
+        startTime: "22:00",
+        endTime: "18:00",
         durationMinutes: 45,
         slotSizeMinutes: 15,
       }),
@@ -50,8 +57,32 @@ describe("validateEventDraft", () => {
         "date_range_invalid",
         "duration_invalid",
         "slot_size_invalid",
+        "time_range_invalid",
       ],
     });
+  });
+
+  it("rejects event durations that do not fit inside the time range", () => {
+    expect(
+      validateEventDraft({
+        title: "Raid WoW",
+        startDate: "2026-06-15",
+        endDate: "2026-06-15",
+        startTime: "18:00",
+        endTime: "19:00",
+        durationMinutes: 120,
+        slotSizeMinutes: 30,
+      }),
+    ).toEqual({
+      valid: false,
+      errors: ["duration_exceeds_time_range"],
+    });
+  });
+});
+
+describe("normalizeParticipantName", () => {
+  it("normalizes whitespace, case, and accents", () => {
+    expect(normalizeParticipantName("  Maël   A ")).toBe("mael a");
   });
 });
 
@@ -173,6 +204,33 @@ describe("rankAvailabilitySlots", () => {
 
     expect(ranked).toHaveLength(2);
     expect(ranked.map((slot) => slot.availableCount)).toEqual([2, 2]);
+  });
+
+  it("merges adjacent availability windows before ranking", () => {
+    const ranked = rankAvailabilitySlots({
+      participants: [participants[0]],
+      availability: [
+        {
+          participantId: "p1",
+          start: "2026-06-16T18:00:00.000Z",
+          end: "2026-06-16T18:30:00.000Z",
+        },
+        {
+          participantId: "p1",
+          start: "2026-06-16T18:30:00.000Z",
+          end: "2026-06-16T19:00:00.000Z",
+        },
+      ],
+      durationMinutes: 60,
+      slotSizeMinutes: 30,
+    });
+
+    expect(ranked).toHaveLength(1);
+    expect(ranked[0]).toMatchObject({
+      start: "2026-06-16T18:00:00.000Z",
+      end: "2026-06-16T19:00:00.000Z",
+      availableCount: 1,
+    });
   });
 
   it("throws on unknown participants and invalid windows", () => {

@@ -46,7 +46,12 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
         <div className="mt-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm text-[var(--muted)]">
-              {formatDate(event.startDate)} {"->"} {formatDate(event.endDate)}
+              {formatEventWindow(
+                event.startDate,
+                event.endDate,
+                event.startTime,
+                event.endTime,
+              )}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-normal sm:text-4xl">
               Best times for {event.title}
@@ -74,6 +79,15 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
       </section>
     </main>
   );
+}
+
+function formatEventWindow(
+  startDate: string,
+  endDate: string,
+  startTime: string,
+  endTime: string,
+): string {
+  return `${formatDate(startDate)} -> ${formatDate(endDate)}, ${startTime} -> ${endTime}`;
 }
 
 function formatDate(value: string): string {

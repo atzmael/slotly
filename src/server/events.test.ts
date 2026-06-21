@@ -35,8 +35,15 @@ function createFakeParticipantRepository(
   onInsert: (
     participant: ParticipantInsert,
   ) => Promise<{ readonly id: string }>,
+  existingParticipant: {
+    readonly id: string;
+    readonly name: string;
+  } | null = null,
 ): ParticipantRepository {
   return {
+    async findParticipantByNormalizedName() {
+      return existingParticipant;
+    },
     insertParticipant: onInsert,
   };
 }
@@ -49,6 +56,8 @@ describe("createEvent", () => {
         title: " Team Meeting ",
         startDate: "2026-06-15",
         endDate: "2026-06-21",
+        startTime: "18:00",
+        endTime: "22:00",
         durationMinutes: 60,
         slotSizeMinutes: 30,
       },
@@ -67,6 +76,8 @@ describe("createEvent", () => {
         title: "Team Meeting",
         start_date: "2026-06-15",
         end_date: "2026-06-21",
+        start_time: "18:00",
+        end_time: "22:00",
         duration_minutes: 60,
         slot_size_minutes: 30,
       },
@@ -80,6 +91,8 @@ describe("createEvent", () => {
         title: "",
         startDate: "2026-06-21",
         endDate: "2026-06-15",
+        startTime: "22:00",
+        endTime: "18:00",
         durationMinutes: 45,
         slotSizeMinutes: 15,
       },
@@ -96,6 +109,7 @@ describe("createEvent", () => {
         "date_range_invalid",
         "duration_invalid",
         "slot_size_invalid",
+        "time_range_invalid",
       ],
     });
     expect(didInsert).toBe(false);
@@ -107,6 +121,8 @@ describe("createEvent", () => {
         title: "Board Game Night",
         startDate: "2026-06-15",
         endDate: "2026-06-21",
+        startTime: "18:00",
+        endTime: "22:00",
         durationMinutes: 120,
         slotSizeMinutes: 60,
       },
@@ -134,6 +150,8 @@ describe("getEventSnapshot", () => {
               title: "Board Game Night",
               start_date: "2026-06-15",
               end_date: "2026-06-21",
+              start_time: "18:00",
+              end_time: "22:00",
               duration_minutes: 120,
               slot_size_minutes: 60,
               created_at: "2026-06-01T00:00:00.000Z",
@@ -162,6 +180,8 @@ describe("getEventSnapshot", () => {
           title: "Board Game Night",
           startDate: "2026-06-15",
           endDate: "2026-06-21",
+          startTime: "18:00",
+          endTime: "22:00",
           durationMinutes: 120,
           slotSizeMinutes: 60,
           createdAt: "2026-06-01T00:00:00.000Z",
@@ -218,9 +238,58 @@ describe("joinEvent", () => {
       {
         event_id: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
         name: "Mael",
+        normalized_name: "mael",
         timezone: "Europe/Paris",
       },
     ]);
+  });
+
+  it("reconnects an existing participant when the trimmed name matches exactly", async () => {
+    let didInsert = false;
+    const result = await joinEvent(
+      {
+        eventId: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
+        name: " Mael ",
+        timezone: "Europe/Paris",
+      },
+      createFakeParticipantRepository(
+        async () => {
+          didInsert = true;
+          return { id: "unused" };
+        },
+        { id: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3", name: "Mael" },
+      ),
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      participantId: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
+    });
+    expect(didInsert).toBe(false);
+  });
+
+  it("rejects a participant name already used with different casing or accents", async () => {
+    let didInsert = false;
+    const result = await joinEvent(
+      {
+        eventId: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
+        name: "maël",
+        timezone: "Europe/Paris",
+      },
+      createFakeParticipantRepository(
+        async () => {
+          didInsert = true;
+          return { id: "unused" };
+        },
+        { id: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3", name: "Mael" },
+      ),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      errors: ["participant_name_taken"],
+    });
+    expect(didInsert).toBe(false);
   });
 
   it("returns validation errors without writing", async () => {

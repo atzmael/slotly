@@ -9,6 +9,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import type { KeyboardEvent } from "react";
 import type { EventAvailabilityWindow } from "@/server/events";
 import { saveAvailabilityAction } from "./actions";
 import { broadcastEventChange } from "./event-realtime";
@@ -18,14 +19,16 @@ interface AvailabilitySelectorProps {
   readonly initialWindows?: readonly EventAvailabilityWindow[];
   readonly participantId: string;
   readonly startDate: string;
+  readonly startTime: string;
   readonly endDate: string;
+  readonly endTime: string;
+  readonly slotSizeMinutes: number;
 }
 
 interface AvailabilityCell {
   readonly id: string;
   readonly label: string;
   readonly dayLabel: string;
-  readonly timeLabel: string;
   readonly start: string;
   readonly end: string;
 }
@@ -35,8 +38,6 @@ interface AvailabilityDay {
   readonly label: string;
   readonly cells: readonly AvailabilityCell[];
 }
-
-const hours = [18, 19, 20, 21];
 
 const initialSaveAvailabilityState = {
   status: "idle" as const,
@@ -56,25 +57,39 @@ export function AvailabilitySelector({
   initialWindows = [],
   participantId,
   startDate,
+  startTime,
   endDate,
+  endTime,
+  slotSizeMinutes,
 }: AvailabilitySelectorProps) {
   const days = useMemo(
-    () => buildAvailabilityDays(startDate, endDate),
-    [startDate, endDate],
+    () =>
+      buildAvailabilityDays(
+        startDate,
+        endDate,
+        startTime,
+        endTime,
+        slotSizeMinutes,
+      ),
+    [endDate, endTime, slotSizeMinutes, startDate, startTime],
   );
   const cells = useMemo(() => days.flatMap((day) => day.cells), [days]);
-  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(
-    () => buildSelectedIds(cells, initialWindows),
+  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(() =>
+    buildSelectedIds(cells, initialWindows),
   );
   const [dragAction, setDragAction] = useState<"add" | "remove" | null>(null);
   const [visibleStartIndex, setVisibleStartIndex] = useState(0);
   const visibleDayCount = useVisibleDayCount();
   const maxVisibleStartIndex = Math.max(0, days.length - visibleDayCount);
-  const safeVisibleStartIndex = Math.min(visibleStartIndex, maxVisibleStartIndex);
+  const safeVisibleStartIndex = Math.min(
+    visibleStartIndex,
+    maxVisibleStartIndex,
+  );
   const visibleDays = days.slice(
     safeVisibleStartIndex,
     safeVisibleStartIndex + visibleDayCount,
   );
+  const visibleRows = visibleDays[0]?.cells ?? [];
   const canPageDays = days.length > visibleDayCount;
   const [state, formAction, isPending] = useActionState(
     saveAvailabilityAction,
@@ -146,11 +161,28 @@ export function AvailabilitySelector({
     applyCell(id, action);
   }
 
+  function handleCellKeyDown(
+    event: KeyboardEvent<HTMLButtonElement>,
+    id: string,
+    selected: boolean,
+  ) {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    event.preventDefault();
+    applyCell(id, selected ? "remove" : "add");
+  }
+
   return (
     <form action={formAction} className="space-y-4">
       <input name="eventId" type="hidden" value={eventId} />
       <input name="participantId" type="hidden" value={participantId} />
-      <input name="windows" type="hidden" value={JSON.stringify(selectedWindows)} />
+      <input
+        name="windows"
+        type="hidden"
+        value={JSON.stringify(selectedWindows)}
+      />
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
@@ -233,12 +265,10 @@ export function AvailabilitySelector({
             </div>
           ))}
 
-          {hours.map((hour, rowIndex) => (
-            <Fragment key={hour}>
-              <div
-                className="border-b border-[var(--line)] px-2 py-3 text-xs font-medium text-[var(--muted)]"
-              >
-                {formatHourForRow(hour)}
+          {visibleRows.map((row, rowIndex) => (
+            <Fragment key={row.label}>
+              <div className="border-b border-[var(--line)] px-2 py-3 text-xs font-medium text-[var(--muted)]">
+                {row.label.split(" -> ")[0]}
               </div>
               {visibleDays.map((day) => {
                 const cell = day.cells[rowIndex];
@@ -255,8 +285,8 @@ export function AvailabilitySelector({
                     }`}
                     data-availability-cell-id={cell.id}
                     key={cell.id}
-                    onClick={() =>
-                      applyCell(cell.id, selected ? "remove" : "add")
+                    onKeyDown={(event) =>
+                      handleCellKeyDown(event, cell.id, selected)
                     }
                     onPointerDown={(event) => {
                       event.preventDefault();
@@ -287,9 +317,14 @@ export function AvailabilitySelector({
 function buildAvailabilityDays(
   startDate: string,
   endDate: string,
+  startTime: string,
+  endTime: string,
+  slotSizeMinutes: number,
 ): AvailabilityDay[] {
   const start = parseDateOnly(startDate);
   const end = parseDateOnly(endDate);
+  const startMinutes = parseTimeToMinutes(startTime);
+  const endMinutes = parseTimeToMinutes(endTime);
   const days: AvailabilityDay[] = [];
 
   for (
@@ -307,19 +342,19 @@ function buildAvailabilityDays(
     days.push({
       id: dayId,
       label: dayLabel,
-      cells: hours.map((hour) => {
+      cells: range(startMinutes, endMinutes, slotSizeMinutes).map((minutes) => {
         const startAt = new Date(
           day.getFullYear(),
           day.getMonth(),
           day.getDate(),
-          hour,
+          Math.floor(minutes / 60),
+          minutes % 60,
         );
-        const endAt = new Date(startAt.getTime() + 60 * 60 * 1000);
+        const endAt = new Date(startAt.getTime() + slotSizeMinutes * 60 * 1000);
 
         return {
-          id: `${dayId}-${hour}`,
+          id: `${dayId}-${minutes}`,
           dayLabel,
-          timeLabel: formatHour(startAt),
           label: `${formatHour(startAt)} -> ${formatHour(endAt)}`,
           start: startAt.toISOString(),
           end: endAt.toISOString(),
@@ -350,11 +385,19 @@ function formatHour(value: Date): string {
   }).format(value);
 }
 
-function formatHourForRow(hour: number): string {
-  const value = new Date(2026, 0, 1, hour);
-  return new Intl.DateTimeFormat("en", {
-    hour: "2-digit",
-  }).format(value);
+function parseTimeToMinutes(value: string): number {
+  const [hours, minutes] = value.split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+function range(start: number, end: number, step: number): number[] {
+  const values: number[] = [];
+
+  for (let value = start; value + step <= end; value += step) {
+    values.push(value);
+  }
+
+  return values;
 }
 
 function buildSelectedIds(

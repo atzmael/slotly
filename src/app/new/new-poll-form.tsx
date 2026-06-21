@@ -22,6 +22,10 @@ const errorCopy: Record<string, string> = {
   end_date_invalid: "Choose a valid end date.",
   date_range_invalid: "End date must be after the start date.",
   date_range_too_long: "Keep the date range to 31 days or less.",
+  start_time_invalid: "Choose a valid start time.",
+  end_time_invalid: "Choose a valid end time.",
+  time_range_invalid: "End time must be after the start time.",
+  duration_exceeds_time_range: "Event duration must fit inside the time range.",
   duration_invalid: "Choose a supported event duration.",
   slot_size_invalid: "Choose a supported slot size.",
   create_event_failed: "The poll could not be created. Try again.",
@@ -39,10 +43,7 @@ export function NewPollForm() {
   );
 
   return (
-    <form
-      action={formAction}
-      className="sl-panel mt-8 space-y-5 p-5"
-    >
+    <form action={formAction} className="sl-panel mt-8 space-y-5 p-5">
       {state.status === "error" ? (
         <div className="sl-alert sl-alert-error" role="alert">
           <ul className="space-y-1">
@@ -82,6 +83,29 @@ export function NewPollForm() {
             name="endDate"
             required
             type="date"
+          />
+        </label>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="block">
+          <span className="text-sm font-medium">Start time</span>
+          <input
+            className="sl-field mt-2"
+            defaultValue="18:00"
+            name="startTime"
+            required
+            type="time"
+          />
+        </label>
+        <label className="block">
+          <span className="text-sm font-medium">End time</span>
+          <input
+            className="sl-field mt-2"
+            defaultValue="22:00"
+            name="endTime"
+            required
+            type="time"
           />
         </label>
       </div>

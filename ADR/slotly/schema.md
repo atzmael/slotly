@@ -32,6 +32,8 @@ Champs cibles :
 - `title`: nom de l'evenement ;
 - `start_date`: date locale de debut ;
 - `end_date`: date locale de fin ;
+- `start_time`: heure locale de debut de la fenetre quotidienne ;
+- `end_time`: heure locale de fin de la fenetre quotidienne ;
 - `duration_minutes`: 30, 60, 120, 180 ou 240 ;
 - `slot_size_minutes`: 30 ou 60 ;
 - `created_at`.
@@ -41,6 +43,8 @@ Regles :
 - Pas de compte createur en MVP.
 - Le lien `/e/{eventId}` est l'identifiant de partage.
 - La page resultats est `/e/{eventId}/results`.
+- La fenetre horaire quotidienne est configurable a la creation et remplace
+  toute plage horaire hardcodee cote UI.
 
 ### Participants
 
@@ -51,6 +55,7 @@ Champs cibles :
 - `id` ;
 - `event_id` ;
 - `name` ;
+- `normalized_name` ;
 - `timezone` ;
 - `created_at` ;
 - `updated_at`.
@@ -59,6 +64,12 @@ Regles :
 
 - Aucun compte requis.
 - Le nom est libre mais doit etre limite, nettoye et masque dans les logs.
+- `normalized_name` est calcule par trim, collapse des espaces, suppression des
+  accents et comparaison case-insensitive.
+- Un poll ne peut avoir qu'un participant par `normalized_name`.
+- Si le nom trimme correspond exactement a un participant existant, le join
+  reconnecte ce participant accountless ; si seulement le nom normalise
+  correspond, l'interface demande de choisir un nom plus specifique.
 - Le fuseau horaire est detecte automatiquement cote client et persiste avec le participant.
 
 ### Availability

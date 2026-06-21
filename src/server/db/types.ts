@@ -15,6 +15,8 @@ export interface Database {
           title: string;
           start_date: string;
           end_date: string;
+          start_time: string;
+          end_time: string;
           duration_minutes: number;
           slot_size_minutes: number;
           created_at: string;
@@ -24,6 +26,8 @@ export interface Database {
           title: string;
           start_date: string;
           end_date: string;
+          start_time: string;
+          end_time: string;
           duration_minutes: number;
           slot_size_minutes: number;
           created_at?: string;
@@ -33,6 +37,8 @@ export interface Database {
           title?: string;
           start_date?: string;
           end_date?: string;
+          start_time?: string;
+          end_time?: string;
           duration_minutes?: number;
           slot_size_minutes?: number;
           created_at?: string;
@@ -44,6 +50,7 @@ export interface Database {
           id: string;
           event_id: string;
           name: string;
+          normalized_name: string;
           timezone: string;
           created_at: string;
           updated_at: string;
@@ -52,6 +59,7 @@ export interface Database {
           id?: string;
           event_id: string;
           name: string;
+          normalized_name: string;
           timezone: string;
           created_at?: string;
           updated_at?: string;
@@ -60,6 +68,7 @@ export interface Database {
           id?: string;
           event_id?: string;
           name?: string;
+          normalized_name?: string;
           timezone?: string;
           created_at?: string;
           updated_at?: string;

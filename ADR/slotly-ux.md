@@ -44,6 +44,7 @@ Champs :
 
 - Event name.
 - Date range.
+- Daily time range.
 - Event duration : 30 min, 1 hour, 2 hours, 3 hours, 4 hours.
 - Slot size : 30 min ou 1 hour.
 
@@ -57,6 +58,8 @@ UX :
 - formulaire compact ;
 - libelles immediatement comprehensibles ;
 - erreurs inline ;
+- la grille de participation utilise la plage horaire choisie, sans plage
+  hardcodee ;
 - aucune option avancee en MVP.
 
 ### Join Poll
@@ -84,6 +87,9 @@ Regles :
 - deux etats seulement : available / not available ;
 - pas de preferences ;
 - pas de weighting.
+- un nom trimme identique a un participant existant reconnecte ce participant ;
+- un nom equivalent seulement par casse ou accents est refuse avec une erreur
+  demandant un nom plus specifique.
 
 ### Results
 

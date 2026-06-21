@@ -10,6 +10,8 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   await page.getByLabel("Event name").fill(title);
   await page.getByLabel("Start date").fill("2026-06-15");
   await page.getByLabel("End date").fill("2026-06-15");
+  await page.getByLabel("Start time").fill("19:00");
+  await page.getByLabel("End time").fill("22:00");
   await page.getByLabel("Event duration").selectOption("60");
   await page.getByLabel("Slot size").selectOption("30");
   await page.getByRole("button", { name: "Create Event" }).click();
@@ -23,11 +25,16 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
 
   await expect(page.getByText("You joined this poll.")).toBeVisible();
   const firstSlot = page.getByRole("button", {
-    name: /Mon, Jun 15.*06:00 PM -> 07:00 PM/,
+    name: /Mon, Jun 15.*07:00 PM -> 07:30 PM/,
   });
   const secondSlot = page.getByRole("button", {
-    name: /Mon, Jun 15.*07:00 PM -> 08:00 PM/,
+    name: /Mon, Jun 15.*07:30 PM -> 08:00 PM/,
   });
+
+  await firstSlot.click();
+  await expect(firstSlot).toHaveAttribute("aria-pressed", "true");
+  await firstSlot.click();
+  await expect(firstSlot).toHaveAttribute("aria-pressed", "false");
 
   await dragBetween(page, firstSlot, secondSlot);
   await expect(firstSlot).toHaveAttribute("aria-pressed", "true");
@@ -36,7 +43,9 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
 
   await expect(page.getByText("Availability saved.")).toBeVisible();
   await page.reload();
-  await expect(page.getByText(`Welcome back, ${participantName}.`)).toBeVisible();
+  await expect(
+    page.getByText(`Welcome back, ${participantName}.`),
+  ).toBeVisible();
   await expect(page.getByLabel("Your name")).toBeHidden();
   await expect(firstSlot).toHaveAttribute("aria-pressed", "true");
   await expect(secondSlot).toHaveAttribute("aria-pressed", "true");
@@ -50,7 +59,7 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   await expect(page.getByText("1 participant joined")).toBeVisible();
   await expect(page.getByText("1 available")).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: /06:00 PM -> 07:00 PM/ }),
+    page.getByRole("heading", { name: /07:00 PM -> 08:00 PM/ }),
   ).toBeVisible();
   await expect(page.getByText(participantName)).toBeVisible();
 });

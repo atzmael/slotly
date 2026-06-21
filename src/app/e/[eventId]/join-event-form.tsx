@@ -8,7 +8,10 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import type { EventAvailabilityWindow, EventParticipant } from "@/server/events";
+import type {
+  EventAvailabilityWindow,
+  EventParticipant,
+} from "@/server/events";
 import { joinEventAction } from "./actions";
 import { AvailabilitySelector } from "./availability-selector";
 import { broadcastEventChange } from "./event-realtime";
@@ -17,6 +20,8 @@ const errorCopy: Record<string, string> = {
   event_id_invalid: "This event link is invalid.",
   name_required: "Add your name.",
   name_too_long: "Keep your name under 60 characters.",
+  participant_name_taken:
+    "This name is already used in this poll. Add an initial or another detail.",
   timezone_invalid: "Your timezone could not be detected.",
   join_event_failed: "Could not join this poll. Try again.",
 };
@@ -31,13 +36,19 @@ export function JoinEventForm({
   eventId,
   participants,
   startDate,
+  startTime,
   endDate,
+  endTime,
+  slotSizeMinutes,
 }: {
   readonly availabilityWindows: readonly EventAvailabilityWindow[];
   readonly eventId: string;
   readonly participants: readonly EventParticipant[];
   readonly startDate: string;
+  readonly startTime: string;
   readonly endDate: string;
+  readonly endTime: string;
+  readonly slotSizeMinutes: number;
 }) {
   const [timezone] = useState(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
@@ -96,18 +107,22 @@ export function JoinEventForm({
 
       {state.status !== "success" && activeParticipant ? (
         <div className="sl-alert sl-alert-success" role="status">
-          Welcome back, {activeParticipant.name}. Update your availability below.
+          Welcome back, {activeParticipant.name}. Update your availability
+          below.
         </div>
       ) : null}
 
       {activeParticipantId ? (
         <AvailabilitySelector
           endDate={endDate}
+          endTime={endTime}
           eventId={eventId}
           initialWindows={activeAvailabilityWindows}
           key={activeParticipantId}
           participantId={activeParticipantId}
+          slotSizeMinutes={slotSizeMinutes}
           startDate={startDate}
+          startTime={startTime}
         />
       ) : null}
 

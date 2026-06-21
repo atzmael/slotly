@@ -31,6 +31,21 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
     name: /Mon, Jun 15.*07:30 PM -> 08:00 PM/,
   });
 
+  await expect(
+    page.getByRole("button", { name: "Save availability" }),
+  ).toBeDisabled();
+  await firstSlot.click();
+  await expect(firstSlot).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Cancel changes" }).click();
+  await expect(firstSlot).toHaveAttribute("aria-pressed", "false");
+
+  await page.getByRole("button", { name: "Apply to all days" }).click();
+  await expect(firstSlot).toHaveAttribute("aria-pressed", "true");
+  await expect(secondSlot).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Clear all" }).click();
+  await expect(firstSlot).toHaveAttribute("aria-pressed", "false");
+  await expect(secondSlot).toHaveAttribute("aria-pressed", "false");
+
   await firstSlot.click();
   await expect(firstSlot).toHaveAttribute("aria-pressed", "true");
   await firstSlot.click();

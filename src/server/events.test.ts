@@ -385,6 +385,30 @@ describe("saveAvailability", () => {
     ]);
   });
 
+  it("allows clearing all availability windows", async () => {
+    const replacements: Array<{
+      readonly participantId: string;
+      readonly windows: readonly AvailabilityInsert[];
+    }> = [];
+    const result = await saveAvailability(
+      {
+        participantId: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
+        windows: [],
+      },
+      createFakeAvailabilityRepository(async (participantId, windows) => {
+        replacements.push({ participantId, windows });
+      }),
+    );
+
+    expect(result).toEqual({ ok: true });
+    expect(replacements).toEqual([
+      {
+        participantId: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
+        windows: [],
+      },
+    ]);
+  });
+
   it("rejects invalid participant ids and windows before writing", async () => {
     let didReplace = false;
     const result = await saveAvailability(

@@ -6,8 +6,8 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
-  useSyncExternalStore,
 } from "react";
 import type { KeyboardEvent } from "react";
 import type { EventAvailabilityWindow } from "@/server/events";
@@ -29,6 +29,8 @@ interface AvailabilityCell {
   readonly id: string;
   readonly label: string;
   readonly dayLabel: string;
+  readonly startMinutes: number;
+  readonly endMinutes: number;
   readonly start: string;
   readonly end: string;
 }
@@ -74,38 +76,55 @@ export function AvailabilitySelector({
     [endDate, endTime, slotSizeMinutes, startDate, startTime],
   );
   const cells = useMemo(() => days.flatMap((day) => day.cells), [days]);
-  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(() =>
-    buildSelectedIds(cells, initialWindows),
+  const initialSelectedIds = useMemo(
+    () => buildSelectedIds(cells, initialWindows),
+    [cells, initialWindows],
+  );
+  const [savedSelectedIds, setSavedSelectedIds] =
+    useState<ReadonlySet<string>>(initialSelectedIds);
+  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(
+    () => initialSelectedIds,
   );
   const [dragAction, setDragAction] = useState<"add" | "remove" | null>(null);
-  const [visibleStartIndex, setVisibleStartIndex] = useState(0);
-  const visibleDayCount = useVisibleDayCount();
-  const maxVisibleStartIndex = Math.max(0, days.length - visibleDayCount);
-  const safeVisibleStartIndex = Math.min(
-    visibleStartIndex,
-    maxVisibleStartIndex,
-  );
-  const visibleDays = days.slice(
-    safeVisibleStartIndex,
-    safeVisibleStartIndex + visibleDayCount,
-  );
-  const visibleRows = visibleDays[0]?.cells ?? [];
-  const canPageDays = days.length > visibleDayCount;
+  const [bulkStartTime, setBulkStartTime] = useState(startTime);
+  const [bulkEndTime, setBulkEndTime] = useState(endTime);
+  const rows = days[0]?.cells ?? [];
   const [state, formAction, isPending] = useActionState(
     saveAvailabilityAction,
     initialSaveAvailabilityState,
   );
+  const handledSuccessState = useRef<typeof state | null>(null);
+  const isDirty = !areSetsEqual(selectedIds, savedSelectedIds);
+  const bulkStartMinutes = parseTimeToMinutes(bulkStartTime);
+  const bulkEndMinutes = parseTimeToMinutes(bulkEndTime);
+  const canApplyBulkRange = bulkStartMinutes < bulkEndMinutes;
   const selectedWindows = cells
     .filter((cell) => selectedIds.has(cell.id))
     .map((cell) => ({ start: cell.start, end: cell.end }));
 
   useEffect(() => {
-    if (state.status !== "success") {
+    const timeoutId = window.setTimeout(() => {
+      setSavedSelectedIds(initialSelectedIds);
+      setSelectedIds(initialSelectedIds);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [initialSelectedIds]);
+
+  useEffect(() => {
+    if (state.status !== "success" || handledSuccessState.current === state) {
       return;
     }
 
+    handledSuccessState.current = state;
+    const savedIds = selectedIds;
+    const timeoutId = window.setTimeout(() => {
+      setSavedSelectedIds(savedIds);
+    }, 0);
     void broadcastEventChange(eventId, "availability_saved");
-  }, [eventId, state]);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [eventId, selectedIds, state]);
 
   const applyCell = useCallback((id: string, action: "add" | "remove") => {
     setSelectedIds((current) => {
@@ -161,6 +180,35 @@ export function AvailabilitySelector({
     applyCell(id, action);
   }
 
+  function applyBulkRange() {
+    if (!canApplyBulkRange) {
+      return;
+    }
+
+    setSelectedIds((current) => {
+      const next = new Set(current);
+
+      for (const cell of cells) {
+        if (
+          cell.startMinutes >= bulkStartMinutes &&
+          cell.endMinutes <= bulkEndMinutes
+        ) {
+          next.add(cell.id);
+        }
+      }
+
+      return next;
+    });
+  }
+
+  function clearAll() {
+    setSelectedIds(new Set());
+  }
+
+  function cancelChanges() {
+    setSelectedIds(savedSelectedIds);
+  }
+
   function handleCellKeyDown(
     event: KeyboardEvent<HTMLButtonElement>,
     id: string,
@@ -192,7 +240,7 @@ export function AvailabilitySelector({
           </p>
         </div>
         <span className="text-sm font-medium text-[var(--primary)]">
-          {selectedIds.size} selected
+          {selectedIds.size} selected{isDirty ? " - unsaved" : ""}
         </span>
       </div>
 
@@ -212,51 +260,74 @@ export function AvailabilitySelector({
         </div>
       ) : null}
 
-      {canPageDays ? (
-        <div className="flex items-center justify-between gap-3">
+      <div className="sl-panel space-y-3 p-3">
+        <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+          <label className="block">
+            <span className="text-xs font-medium text-[var(--muted)]">
+              From
+            </span>
+            <input
+              className="sl-field mt-1"
+              max={endTime}
+              min={startTime}
+              onChange={(event) => setBulkStartTime(event.target.value)}
+              step={slotSizeMinutes * 60}
+              type="time"
+              value={bulkStartTime}
+            />
+          </label>
+          <label className="block">
+            <span className="text-xs font-medium text-[var(--muted)]">To</span>
+            <input
+              className="sl-field mt-1"
+              max={endTime}
+              min={startTime}
+              onChange={(event) => setBulkEndTime(event.target.value)}
+              step={slotSizeMinutes * 60}
+              type="time"
+              value={bulkEndTime}
+            />
+          </label>
           <button
             className="sl-button sl-button-secondary"
-            disabled={safeVisibleStartIndex === 0}
-            onClick={() =>
-              setVisibleStartIndex((current) =>
-                Math.max(0, current - visibleDayCount),
-              )
-            }
+            disabled={!canApplyBulkRange}
+            onClick={applyBulkRange}
             type="button"
           >
-            Previous
-          </button>
-          <span className="text-sm text-[var(--muted)]">
-            {safeVisibleStartIndex + 1}-
-            {Math.min(days.length, safeVisibleStartIndex + visibleDayCount)} of{" "}
-            {days.length}
-          </span>
-          <button
-            className="sl-button sl-button-secondary"
-            disabled={safeVisibleStartIndex >= maxVisibleStartIndex}
-            onClick={() =>
-              setVisibleStartIndex((current) =>
-                Math.min(maxVisibleStartIndex, current + visibleDayCount),
-              )
-            }
-            type="button"
-          >
-            Next
+            Apply to all days
           </button>
         </div>
-      ) : null}
+        <div className="flex flex-wrap gap-2">
+          <button
+            className="sl-button sl-button-secondary"
+            disabled={selectedIds.size === 0}
+            onClick={clearAll}
+            type="button"
+          >
+            Clear all
+          </button>
+          <button
+            className="sl-button sl-button-secondary"
+            disabled={!isDirty}
+            onClick={cancelChanges}
+            type="button"
+          >
+            Cancel changes
+          </button>
+        </div>
+      </div>
 
-      <div className="overflow-hidden rounded-[8px] border border-[var(--line)] bg-[var(--surface)]">
+      <div className="overflow-x-auto rounded-[8px] border border-[var(--line)] bg-[var(--surface)]">
         <div
-          className="grid select-none"
+          className="grid min-w-max select-none"
           style={{
-            gridTemplateColumns: `4.5rem repeat(${visibleDays.length}, minmax(5.5rem, 1fr))`,
+            gridTemplateColumns: `4.5rem repeat(${days.length}, minmax(7rem, 1fr))`,
           }}
         >
-          <div className="border-b border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-xs font-medium text-[var(--muted)]">
+          <div className="sticky left-0 z-10 border-b border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-xs font-medium text-[var(--muted)]">
             Time
           </div>
-          {visibleDays.map((day) => (
+          {days.map((day) => (
             <div
               className="border-b border-l border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-center text-xs font-semibold"
               key={day.id}
@@ -265,12 +336,12 @@ export function AvailabilitySelector({
             </div>
           ))}
 
-          {visibleRows.map((row, rowIndex) => (
+          {rows.map((row, rowIndex) => (
             <Fragment key={row.label}>
-              <div className="border-b border-[var(--line)] px-2 py-3 text-xs font-medium text-[var(--muted)]">
+              <div className="sticky left-0 z-10 border-b border-[var(--line)] bg-[var(--surface)] px-2 py-3 text-xs font-medium text-[var(--muted)]">
                 {row.label.split(" -> ")[0]}
               </div>
-              {visibleDays.map((day) => {
+              {days.map((day) => {
                 const cell = day.cells[rowIndex];
                 const selected = selectedIds.has(cell.id);
 
@@ -305,7 +376,7 @@ export function AvailabilitySelector({
 
       <button
         className="sl-button sl-button-primary w-full px-5 py-3"
-        disabled={isPending}
+        disabled={isPending || !isDirty}
         type="submit"
       >
         {isPending ? "Saving..." : "Save availability"}
@@ -355,6 +426,8 @@ function buildAvailabilityDays(
         return {
           id: `${dayId}-${minutes}`,
           dayLabel,
+          startMinutes: minutes,
+          endMinutes: minutes + slotSizeMinutes,
           label: `${formatHour(startAt)} -> ${formatHour(endAt)}`,
           start: startAt.toISOString(),
           end: endAt.toISOString(),
@@ -419,27 +492,19 @@ function getWindowKey(start: string, end: string): string {
   return `${Date.parse(start)}:${Date.parse(end)}`;
 }
 
-function useVisibleDayCount(): number {
-  return useSyncExternalStore(
-    subscribeToViewportChanges,
-    getVisibleDayCount,
-    () => 7,
-  );
-}
-
-function subscribeToViewportChanges(onStoreChange: () => void) {
-  window.addEventListener("resize", onStoreChange);
-  return () => window.removeEventListener("resize", onStoreChange);
-}
-
-function getVisibleDayCount(): number {
-  if (window.innerWidth < 640) {
-    return 1;
+function areSetsEqual(
+  left: ReadonlySet<string>,
+  right: ReadonlySet<string>,
+): boolean {
+  if (left.size !== right.size) {
+    return false;
   }
 
-  if (window.innerWidth < 1024) {
-    return 2;
+  for (const value of left) {
+    if (!right.has(value)) {
+      return false;
+    }
   }
 
-  return 7;
+  return true;
 }

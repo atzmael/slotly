@@ -297,10 +297,6 @@ export async function saveAvailability(
     errors.push("participant_id_invalid");
   }
 
-  if (input.windows.length === 0) {
-    errors.push("availability_required");
-  }
-
   if (input.windows.length > 400) {
     errors.push("availability_too_large");
   }

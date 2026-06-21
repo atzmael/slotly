@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 test("creates a poll, joins it, saves availability, and shows ranked results", async ({
   page,
@@ -22,18 +22,24 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   await page.getByRole("button", { name: "Join poll" }).click();
 
   await expect(page.getByText("You joined this poll.")).toBeVisible();
-  await page
-    .getByRole("button", { name: /Mon, Jun 15.*06:00 PM -> 07:00 PM/ })
-    .click();
+  const firstSlot = page.getByRole("button", {
+    name: /Mon, Jun 15.*06:00 PM -> 07:00 PM/,
+  });
+  const secondSlot = page.getByRole("button", {
+    name: /Mon, Jun 15.*07:00 PM -> 08:00 PM/,
+  });
+
+  await dragBetween(page, firstSlot, secondSlot);
+  await expect(firstSlot).toHaveAttribute("aria-pressed", "true");
+  await expect(secondSlot).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Save availability" }).click();
 
   await expect(page.getByText("Availability saved.")).toBeVisible();
   await page.reload();
   await expect(page.getByText(`Welcome back, ${participantName}.`)).toBeVisible();
   await expect(page.getByLabel("Your name")).toBeHidden();
-  await expect(
-    page.getByRole("button", { name: /Mon, Jun 15.*06:00 PM -> 07:00 PM/ }),
-  ).toHaveAttribute("aria-pressed", "true");
+  await expect(firstSlot).toHaveAttribute("aria-pressed", "true");
+  await expect(secondSlot).toHaveAttribute("aria-pressed", "true");
 
   await page.getByRole("link", { name: "View results" }).click();
 
@@ -48,3 +54,28 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   ).toBeVisible();
   await expect(page.getByText(participantName)).toBeVisible();
 });
+
+async function dragBetween(
+  page: Page,
+  startLocator: Locator,
+  endLocator: Locator,
+) {
+  const startBox = await startLocator.boundingBox();
+  const endBox = await endLocator.boundingBox();
+
+  if (!startBox || !endBox) {
+    throw new Error("Expected drag targets to be visible");
+  }
+
+  await page.mouse.move(
+    startBox.x + startBox.width / 2,
+    startBox.y + startBox.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    endBox.x + endBox.width / 2,
+    endBox.y + endBox.height / 2,
+    { steps: 8 },
+  );
+  await page.mouse.up();
+}

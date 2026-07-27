@@ -385,7 +385,7 @@ export function AvailabilitySelector({
           </div>
         </details>
 
-        <div className="mt-2 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-1.5 rounded-[var(--radius-panel)] border border-[var(--line)] bg-[var(--surface)] p-2 sm:gap-2">
+        <div className="mt-2 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-1.5 px-2 sm:gap-2 sm:px-0">
           <button
             className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:px-3 sm:text-xs"
             disabled={selectedIds.size === 0}

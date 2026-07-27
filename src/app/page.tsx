@@ -5,6 +5,7 @@ const valueProps = [
   "Mobile-first availability",
   "Automatic best-slot ranking",
 ];
+const supportEmail = "creadiv.tech+slotlysupport@gmail.com";
 
 export default function HomePage() {
   return (
@@ -68,10 +69,16 @@ export default function HomePage() {
           </div>
         </div>
 
-        <footer className="grid gap-3 border-t border-[var(--line)] py-5 text-sm text-[var(--muted)] sm:grid-cols-3">
+        <footer className="grid gap-3 border-t border-[var(--line)] py-5 text-sm text-[var(--muted)] sm:grid-cols-2 lg:grid-cols-4">
           {valueProps.map((value) => (
             <span key={value}>{value}</span>
           ))}
+          <a
+            className="font-medium text-[var(--primary)]"
+            href={`mailto:${supportEmail}`}
+          >
+            Submit feedback or a bug
+          </a>
         </footer>
       </section>
     </main>

@@ -27,6 +27,31 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   const joinedStatus = page.getByText("You joined this poll.");
   await expect(joinedStatus).toBeVisible();
   await expect(joinedStatus).toBeHidden({ timeout: 6000 });
+  await page.setViewportSize({ width: 393, height: 852 });
+  const quickActionsLayout = await page
+    .getByTestId("quick-actions-panel")
+    .evaluate((panel) => {
+      const panelRect = panel.getBoundingClientRect();
+      return Array.from(panel.querySelectorAll('input[type="time"]')).map(
+        (input) => {
+          const inputRect = input.getBoundingClientRect();
+
+          return {
+            left: inputRect.left,
+            right: inputRect.right,
+            panelLeft: panelRect.left,
+            panelRight: panelRect.right,
+          };
+        },
+      );
+    });
+
+  for (const inputLayout of quickActionsLayout) {
+    expect(inputLayout.left).toBeGreaterThanOrEqual(inputLayout.panelLeft);
+    expect(inputLayout.right).toBeLessThanOrEqual(inputLayout.panelRight);
+  }
+
+  await page.setViewportSize({ width: 1280, height: 720 });
   const firstSlot = page.getByRole("button", {
     name: /Mon, Jun 15.*19:00 -> 19:30/,
   });

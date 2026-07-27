@@ -317,17 +317,20 @@ export function AvailabilitySelector({
       ) : null}
 
       <div className="mx-[-1rem] space-y-0 sm:mx-0 sm:space-y-2">
-        <div className="sl-panel space-y-2 rounded-b-none p-2 sm:rounded-b-[var(--radius-panel)]">
+        <div
+          className="sl-panel space-y-2 rounded-b-none p-2 sm:rounded-b-[var(--radius-panel)]"
+          data-testid="quick-actions-panel"
+        >
           <p className="text-xs leading-5 text-[var(--muted)]">
             Quickly mark the same time range across all days or weekdays.
           </p>
-          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2">
-            <label className="block min-w-0">
+          <div className="grid grid-cols-2">
+            <label className="block min-w-0 overflow-hidden pr-1">
               <span className="text-xs font-medium text-[var(--muted)]">
                 From
               </span>
               <input
-                className="sl-field mt-1 h-9 min-h-0 min-w-0 max-w-full px-2 py-1 text-sm"
+                className="sl-field sl-time-field mt-1 h-9 min-h-0 px-2 py-1 text-sm"
                 max={endTime}
                 min={startTime}
                 onChange={(event) => setBulkStartTime(event.target.value)}
@@ -336,12 +339,12 @@ export function AvailabilitySelector({
                 value={bulkStartTime}
               />
             </label>
-            <label className="block min-w-0">
+            <label className="block min-w-0 overflow-hidden pl-1">
               <span className="text-xs font-medium text-[var(--muted)]">
                 To
               </span>
               <input
-                className="sl-field mt-1 h-9 min-h-0 min-w-0 max-w-full px-2 py-1 text-sm"
+                className="sl-field sl-time-field mt-1 h-9 min-h-0 px-2 py-1 text-sm"
                 max={endTime}
                 min={startTime}
                 onChange={(event) => setBulkEndTime(event.target.value)}

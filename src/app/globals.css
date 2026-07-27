@@ -135,6 +135,29 @@ a[href]:active {
     outline: none;
   }
 
+  .sl-time-field {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sl-time-field::-webkit-date-and-time-value,
+  .sl-time-field::-webkit-datetime-edit,
+  .sl-time-field::-webkit-datetime-edit-fields-wrapper {
+    min-width: 0;
+    padding: 0;
+    text-align: left;
+  }
+
+  @media (max-width: 639px) {
+    .sl-time-field::-webkit-calendar-picker-indicator {
+      display: none;
+    }
+  }
+
   select.sl-field {
     min-height: 2.875rem;
   }

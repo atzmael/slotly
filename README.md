@@ -63,6 +63,23 @@ Optional local mode flag:
 APP_ACCESS_MODE=public
 ```
 
+## Local Development
+
+Use the conservative webpack dev server by default:
+
+```bash
+pnpm dev
+```
+
+If you want to test Turbopack explicitly:
+
+```bash
+pnpm dev:turbo
+```
+
+If local dev becomes unstable, stop the server and prefer `pnpm dev` before
+retrying Turbopack.
+
 ## Supabase
 
 Apply the migrations in `supabase/migrations` to the target Supabase project before deploying the app.

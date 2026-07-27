@@ -131,7 +131,12 @@ a[href]:active {
     border-radius: var(--radius-panel);
     background: var(--surface);
     padding: 0.75rem;
+    line-height: 1.25rem;
     outline: none;
+  }
+
+  select.sl-field {
+    min-height: 2.875rem;
   }
 
   .sl-field:hover {
@@ -160,6 +165,17 @@ a[href]:active {
     border-color: var(--success-line);
     background: var(--success-surface);
     color: var(--success-text);
+  }
+
+  .sl-availability-cell {
+    position: relative;
+    outline: 2px solid transparent;
+    outline-offset: -2px;
+  }
+
+  .sl-availability-cell:hover {
+    z-index: 1;
+    outline-color: var(--primary);
   }
 }
 

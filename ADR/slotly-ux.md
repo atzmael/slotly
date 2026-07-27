@@ -79,6 +79,8 @@ Interaction disponibilite :
 - tap ;
 - drag ;
 - selection continue ;
+- drag rectangulaire : depuis une case de depart, glisser horizontalement puis
+  verticalement selectionne tout le rectangle de cases entre depart et arrivee ;
 - cibles tactiles confortables ;
 - pas de micro-cellules difficiles a toucher.
 

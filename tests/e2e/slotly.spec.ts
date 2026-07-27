@@ -13,6 +13,7 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   await page.getByLabel("Start time").fill("19:00");
   await page.getByLabel("End time").fill("22:00");
   await page.getByLabel("Event duration").selectOption("60");
+  await expect(page.getByLabel("Slot size")).toHaveValue("60");
   await page.getByLabel("Slot size").selectOption("30");
   await page.getByRole("button", { name: "Create Event" }).click();
 
@@ -29,6 +30,12 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   });
   const secondSlot = page.getByRole("button", {
     name: /Mon, Jun 15.*07:30 PM -> 08:00 PM/,
+  });
+  const nextDayFirstSlot = page.getByRole("button", {
+    name: /Tue, Jun 16.*07:00 PM -> 07:30 PM/,
+  });
+  const nextDaySecondSlot = page.getByRole("button", {
+    name: /Tue, Jun 16.*07:30 PM -> 08:00 PM/,
   });
   const saturdaySlot = page.getByRole("button", {
     name: /Sat, Jun 20.*07:00 PM -> 07:30 PM/,
@@ -62,9 +69,11 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   await firstSlot.click();
   await expect(firstSlot).toHaveAttribute("aria-pressed", "false");
 
-  await dragBetween(page, firstSlot, secondSlot);
+  await dragBetween(page, firstSlot, nextDaySecondSlot);
   await expect(firstSlot).toHaveAttribute("aria-pressed", "true");
   await expect(secondSlot).toHaveAttribute("aria-pressed", "true");
+  await expect(nextDayFirstSlot).toHaveAttribute("aria-pressed", "true");
+  await expect(nextDaySecondSlot).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Save availability" }).click();
 
   await expect(page.getByText("Availability saved.")).toBeVisible();
@@ -83,7 +92,7 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
     page.getByRole("heading", { name: `Best times for ${title}` }),
   ).toBeVisible();
   await expect(page.getByText("1 participant joined")).toBeVisible();
-  await expect(page.getByText("1 available")).toBeVisible();
+  await expect(page.getByText("1 available").first()).toBeVisible();
   await expect(
     page.getByRole("heading", { name: /07:00 PM -> 08:00 PM/ }),
   ).toBeVisible();

@@ -43,7 +43,7 @@ const initialCreateEventActionState = {
     startTime: "18:00",
     endTime: "22:00",
     durationMinutes: 60,
-    slotSizeMinutes: 30,
+    slotSizeMinutes: 60,
   },
 };
 

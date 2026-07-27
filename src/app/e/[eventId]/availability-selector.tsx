@@ -29,6 +29,8 @@ interface AvailabilityCell {
   readonly id: string;
   readonly label: string;
   readonly dayLabel: string;
+  readonly dayIndex: number;
+  readonly rowIndex: number;
   readonly startMinutes: number;
   readonly endMinutes: number;
   readonly start: string;
@@ -81,12 +83,19 @@ export function AvailabilitySelector({
     () => buildSelectedIds(cells, initialWindows),
     [cells, initialWindows],
   );
+  const cellById = useMemo(
+    () => new Map(cells.map((cell) => [cell.id, cell])),
+    [cells],
+  );
   const [savedSelectedIds, setSavedSelectedIds] =
     useState<ReadonlySet<string>>(initialSelectedIds);
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(
     () => initialSelectedIds,
   );
-  const [dragAction, setDragAction] = useState<"add" | "remove" | null>(null);
+  const dragSelection = useRef<{
+    readonly originId: string;
+    readonly action: "add" | "remove";
+  } | null>(null);
   const [bulkStartTime, setBulkStartTime] = useState(startTime);
   const [bulkEndTime, setBulkEndTime] = useState(endTime);
   const rows = days[0]?.cells ?? [];
@@ -141,44 +150,82 @@ export function AvailabilitySelector({
     });
   }, []);
 
-  useEffect(() => {
-    if (!dragAction) {
-      return;
-    }
+  const applyCells = useCallback(
+    (ids: readonly string[], action: "add" | "remove") => {
+      setSelectedIds((current) => {
+        const next = new Set(current);
 
-    const action = dragAction;
+        for (const id of ids) {
+          if (action === "add") {
+            next.add(id);
+          } else {
+            next.delete(id);
+          }
+        }
+
+        return next;
+      });
+    },
+    [],
+  );
+
+  const getRectCellIds = useCallback(
+    (originId: string, targetId: string) => {
+      const origin = cellById.get(originId);
+      const target = cellById.get(targetId);
+
+      if (!origin || !target) {
+        return [];
+      }
+
+      const minDayIndex = Math.min(origin.dayIndex, target.dayIndex);
+      const maxDayIndex = Math.max(origin.dayIndex, target.dayIndex);
+      const minRowIndex = Math.min(origin.rowIndex, target.rowIndex);
+      const maxRowIndex = Math.max(origin.rowIndex, target.rowIndex);
+      const ids: string[] = [];
+
+      for (const day of days.slice(minDayIndex, maxDayIndex + 1)) {
+        for (const cell of day.cells.slice(minRowIndex, maxRowIndex + 1)) {
+          ids.push(cell.id);
+        }
+      }
+
+      return ids;
+    },
+    [cellById, days],
+  );
+
+  function startCellDrag(id: string) {
+    const action = selectedIds.has(id) ? "remove" : "add";
+    dragSelection.current = { originId: id, action };
+    applyCell(id, action);
 
     function handlePointerMove(event: PointerEvent) {
       const target = document
         .elementFromPoint(event.clientX, event.clientY)
         ?.closest<HTMLElement>("[data-availability-cell-id]");
+      const selection = dragSelection.current;
 
-      if (!target?.dataset.availabilityCellId) {
+      if (!target?.dataset.availabilityCellId || !selection) {
         return;
       }
 
-      applyCell(target.dataset.availabilityCellId, action);
+      applyCells(
+        getRectCellIds(selection.originId, target.dataset.availabilityCellId),
+        selection.action,
+      );
     }
 
     function stopDragging() {
-      setDragAction(null);
+      dragSelection.current = null;
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", stopDragging);
+      window.removeEventListener("pointercancel", stopDragging);
     }
 
     window.addEventListener("pointermove", handlePointerMove);
     window.addEventListener("pointerup", stopDragging, { once: true });
     window.addEventListener("pointercancel", stopDragging, { once: true });
-
-    return () => {
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("pointerup", stopDragging);
-      window.removeEventListener("pointercancel", stopDragging);
-    };
-  }, [applyCell, dragAction]);
-
-  function startCellDrag(id: string) {
-    const action = selectedIds.has(id) ? "remove" : "add";
-    setDragAction(action);
-    applyCell(id, action);
   }
 
   function applyBulkRange(scope: "all" | "weekdays") {
@@ -269,6 +316,9 @@ export function AvailabilitySelector({
 
       <div className="space-y-0 sm:space-y-2">
         <div className="sl-panel space-y-2 rounded-b-none p-2 sm:rounded-b-[var(--radius-panel)]">
+          <p className="text-xs leading-5 text-[var(--muted)]">
+            Quickly mark the same time range across all days or weekdays.
+          </p>
           <div className="grid gap-2 sm:grid-cols-[minmax(7rem,1fr)_minmax(7rem,1fr)_auto_auto] sm:items-end">
             <label className="block">
               <span className="text-xs font-medium text-[var(--muted)]">
@@ -367,7 +417,7 @@ export function AvailabilitySelector({
                     <button
                       aria-label={`${cell.dayLabel} ${cell.label}`}
                       aria-pressed={selected}
-                      className={`min-h-14 touch-none border-b border-l border-[var(--line)] px-2 py-3 text-left text-xs hover:border-[var(--primary)] active:scale-[0.99] ${
+                      className={`sl-availability-cell min-h-14 touch-none border-b border-l border-[var(--line)] px-2 py-3 text-left text-xs active:scale-[0.99] ${
                         selected
                           ? "bg-[#dff4ed] text-[var(--foreground)]"
                           : "bg-[var(--surface)] text-[var(--muted)]"
@@ -422,6 +472,7 @@ function buildAvailabilityDays(
     day.getTime() <= end.getTime();
     day.setDate(day.getDate() + 1)
   ) {
+    const dayIndex = days.length;
     const dayId = toDateInputValue(day);
     const dayLabel = new Intl.DateTimeFormat("en", {
       weekday: "short",
@@ -433,26 +484,32 @@ function buildAvailabilityDays(
       id: dayId,
       label: dayLabel,
       isWeekday: isWeekday(day),
-      cells: range(startMinutes, endMinutes, slotSizeMinutes).map((minutes) => {
-        const startAt = new Date(
-          day.getFullYear(),
-          day.getMonth(),
-          day.getDate(),
-          Math.floor(minutes / 60),
-          minutes % 60,
-        );
-        const endAt = new Date(startAt.getTime() + slotSizeMinutes * 60 * 1000);
+      cells: range(startMinutes, endMinutes, slotSizeMinutes).map(
+        (minutes, rowIndex) => {
+          const startAt = new Date(
+            day.getFullYear(),
+            day.getMonth(),
+            day.getDate(),
+            Math.floor(minutes / 60),
+            minutes % 60,
+          );
+          const endAt = new Date(
+            startAt.getTime() + slotSizeMinutes * 60 * 1000,
+          );
 
-        return {
-          id: `${dayId}-${minutes}`,
-          dayLabel,
-          startMinutes: minutes,
-          endMinutes: minutes + slotSizeMinutes,
-          label: `${formatHour(startAt)} -> ${formatHour(endAt)}`,
-          start: startAt.toISOString(),
-          end: endAt.toISOString(),
-        };
-      }),
+          return {
+            id: `${dayId}-${minutes}`,
+            dayLabel,
+            dayIndex,
+            rowIndex,
+            startMinutes: minutes,
+            endMinutes: minutes + slotSizeMinutes,
+            label: `${formatHour(startAt)} -> ${formatHour(endAt)}`,
+            start: startAt.toISOString(),
+            end: endAt.toISOString(),
+          };
+        },
+      ),
     });
   }
 

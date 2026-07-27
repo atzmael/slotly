@@ -37,6 +37,9 @@
     "vitest": "^4.1.10"
   },
   "pnpm": {
+    "patchedDependencies": {
+      "next@16.2.12": "patches/next@16.2.12.patch"
+    },
     "onlyBuiltDependencies": [
       "sharp",
       "unrs-resolver"

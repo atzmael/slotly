@@ -25,22 +25,22 @@ Regles de maintenance :
 
 ## Index ADR
 
-| Fichier | Source de verite pour |
-|---------|----------------------|
-| [`slotly/README.md`](./slotly/README.md) | Index des ADR Slotly et regles de maintenance |
-| [`slotly/architecture.md`](./slotly/architecture.md) | Stack, architecture cible, strategie d'implementation |
-| [`slotly/feature-checklist.md`](./slotly/feature-checklist.md) | Checklist obligatoire pour developper une feature |
-| [`slotly/schema.md`](./slotly/schema.md) | Modele conceptuel DB |
-| [`slotly/admin-testing.md`](./slotly/admin-testing.md) | Debug futur, fixtures, tests unitaires et e2e |
-| [`slotly/observability.md`](./slotly/observability.md) | Erreurs production, logs, analytics, privacy |
-| [`slotly/monetization.md`](./slotly/monetization.md) | Strategie de monetisation future et protections du coeur gratuit |
-| [`slotly-ux.md`](./slotly-ux.md) | Interfaces, flows UX, etats, feedbacks |
+| Fichier                                                        | Source de verite pour                                            |
+| -------------------------------------------------------------- | ---------------------------------------------------------------- |
+| [`slotly/README.md`](./slotly/README.md)                       | Index des ADR Slotly et regles de maintenance                    |
+| [`slotly/architecture.md`](./slotly/architecture.md)           | Stack, architecture cible, strategie d'implementation            |
+| [`slotly/feature-checklist.md`](./slotly/feature-checklist.md) | Checklist obligatoire pour developper une feature                |
+| [`slotly/schema.md`](./slotly/schema.md)                       | Modele conceptuel DB                                             |
+| [`slotly/admin-testing.md`](./slotly/admin-testing.md)         | Debug futur, fixtures, tests unitaires et e2e                    |
+| [`slotly/observability.md`](./slotly/observability.md)         | Erreurs production, logs, analytics, privacy                     |
+| [`slotly/monetization.md`](./slotly/monetization.md)           | Strategie de monetisation future et protections du coeur gratuit |
+| [`slotly-ux.md`](./slotly-ux.md)                               | Interfaces, flows UX, etats, feedbacks                           |
 
 ---
 
 ## Vision
 
-Slotly est une alternative moderne a When2Meet, centree sur une UX mobile-first, une participation instantanee, la gestion automatique des fuseaux horaires et le classement automatique des meilleurs creneaux.
+Slotly est une alternative moderne aux outils de disponibilite historiques, centree sur une UX mobile-first, une participation instantanee, la gestion automatique des fuseaux horaires et le classement automatique des meilleurs creneaux.
 
 Promesse coeur :
 
@@ -52,7 +52,7 @@ Objectifs produit MVP :
 2. Renseigner ses disponibilites en moins de 30 secondes.
 3. Identifier le meilleur creneau en moins de 5 secondes.
 
-Le produit doit paraitre beaucoup plus rapide et clair que When2Meet, sans perdre sa simplicite.
+Le produit doit paraitre beaucoup plus rapide et clair que les outils de disponibilite historiques, sans perdre sa simplicite.
 
 ---
 

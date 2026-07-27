@@ -72,7 +72,7 @@ export function NewPollForm() {
           defaultValue={state.values.title}
           maxLength={80}
           name="title"
-          placeholder="Board Game Night"
+          placeholder="Réunion pôle communication, Restaurant avec la famille, ..."
           required
           type="text"
         />
@@ -88,6 +88,9 @@ export function NewPollForm() {
             required
             type="date"
           />
+          <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">
+            First day participants can pick availability.
+          </span>
         </label>
         <label className="block">
           <span className="text-sm font-medium">End date</span>
@@ -98,6 +101,9 @@ export function NewPollForm() {
             required
             type="date"
           />
+          <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">
+            Last day included in the poll.
+          </span>
         </label>
       </div>
 
@@ -111,6 +117,9 @@ export function NewPollForm() {
             required
             type="time"
           />
+          <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">
+            Earliest time shown each day.
+          </span>
         </label>
         <label className="block">
           <span className="text-sm font-medium">End time</span>
@@ -121,6 +130,9 @@ export function NewPollForm() {
             required
             type="time"
           />
+          <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">
+            Latest time shown each day.
+          </span>
         </label>
       </div>
 
@@ -138,6 +150,9 @@ export function NewPollForm() {
               </option>
             ))}
           </select>
+          <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">
+            Length of the meeting you want to schedule.
+          </span>
         </label>
         <label className="block">
           <span className="text-sm font-medium">Slot size</span>
@@ -152,6 +167,9 @@ export function NewPollForm() {
               </option>
             ))}
           </select>
+          <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">
+            Precision of the availability grid.
+          </span>
         </label>
       </div>
 

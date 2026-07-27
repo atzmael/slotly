@@ -12,10 +12,7 @@ export default function HomePage() {
       <section className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-5xl flex-col justify-between">
         <header className="flex items-center justify-between">
           <span className="text-lg font-semibold tracking-normal">Slotly</span>
-          <Link
-            className="sl-button sl-button-secondary"
-            href="/new"
-          >
+          <Link className="sl-button sl-button-secondary" href="/new">
             Create Poll
           </Link>
         </header>
@@ -23,7 +20,7 @@ export default function HomePage() {
         <div className="grid gap-10 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="max-w-2xl">
             <p className="mb-4 text-sm font-semibold uppercase text-[var(--primary)]">
-              When2Meet, rebuilt for phones
+              Fast planning, built for phones
             </p>
             <h1 className="max-w-3xl text-5xl font-semibold leading-[1.02] tracking-normal sm:text-7xl">
               Find the best time without the spreadsheet feeling.

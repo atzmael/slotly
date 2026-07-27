@@ -35,7 +35,7 @@ export function ShareLinkButton({ locale, path }: ShareLinkButtonProps) {
   return (
     <div className="flex flex-col items-stretch gap-2 sm:items-end">
       <button
-        className="sl-button sl-button-secondary"
+        className="sl-button sl-button-primary"
         onClick={copyLink}
         type="button"
       >

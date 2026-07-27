@@ -230,7 +230,7 @@ export function AvailabilitySelector({
   }
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className="flex flex-col gap-3 sm:gap-4">
       <input name="eventId" type="hidden" value={eventId} />
       <input name="participantId" type="hidden" value={participantId} />
       <input
@@ -267,125 +267,129 @@ export function AvailabilitySelector({
         </div>
       ) : null}
 
-      <div className="overflow-x-auto rounded-[8px] border border-[var(--line)] bg-[var(--surface)]">
-        <div
-          className="grid min-w-max select-none"
-          style={{
-            gridTemplateColumns: `4.5rem repeat(${days.length}, minmax(7rem, 1fr))`,
-          }}
-        >
-          <div className="sticky left-0 z-10 border-b border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-xs font-medium text-[var(--muted)]">
-            Time
-          </div>
-          {days.map((day) => (
-            <div
-              className="border-b border-l border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-center text-xs font-semibold"
-              key={day.id}
+      <div className="space-y-0 sm:space-y-2">
+        <div className="sl-panel space-y-2 rounded-b-none p-2 sm:rounded-b-[var(--radius-panel)]">
+          <div className="grid gap-2 sm:grid-cols-[minmax(7rem,1fr)_minmax(7rem,1fr)_auto_auto] sm:items-end">
+            <label className="block">
+              <span className="text-xs font-medium text-[var(--muted)]">
+                From
+              </span>
+              <input
+                className="sl-field mt-1 px-2 py-1.5 text-sm"
+                max={endTime}
+                min={startTime}
+                onChange={(event) => setBulkStartTime(event.target.value)}
+                step={slotSizeMinutes * 60}
+                type="time"
+                value={bulkStartTime}
+              />
+            </label>
+            <label className="block">
+              <span className="text-xs font-medium text-[var(--muted)]">
+                To
+              </span>
+              <input
+                className="sl-field mt-1 px-2 py-1.5 text-sm"
+                max={endTime}
+                min={startTime}
+                onChange={(event) => setBulkEndTime(event.target.value)}
+                step={slotSizeMinutes * 60}
+                type="time"
+                value={bulkEndTime}
+              />
+            </label>
+            <button
+              className="sl-button sl-button-secondary min-h-9 px-3 py-1.5 text-xs"
+              disabled={!canApplyBulkRange}
+              onClick={() => applyBulkRange("all")}
+              type="button"
             >
-              {day.label}
+              Apply to all days
+            </button>
+            <button
+              className="sl-button sl-button-secondary min-h-9 px-3 py-1.5 text-xs"
+              disabled={!canApplyBulkRange}
+              onClick={() => applyBulkRange("weekdays")}
+              type="button"
+            >
+              Apply to weekdays
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              className="sl-button sl-button-secondary min-h-8 px-3 py-1 text-xs"
+              disabled={selectedIds.size === 0}
+              onClick={clearAll}
+              type="button"
+            >
+              Clear all
+            </button>
+            <button
+              className="sl-button sl-button-secondary min-h-8 px-3 py-1 text-xs"
+              disabled={!isDirty}
+              onClick={cancelChanges}
+              type="button"
+            >
+              Cancel changes
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto rounded-t-none rounded-b-[8px] border border-[var(--line)] bg-[var(--surface)] sm:rounded-t-[8px]">
+          <div
+            className="grid min-w-max select-none"
+            style={{
+              gridTemplateColumns: `4.5rem repeat(${days.length}, minmax(7rem, 1fr))`,
+            }}
+          >
+            <div className="sticky left-0 z-10 border-b border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-xs font-medium text-[var(--muted)]">
+              Time
             </div>
-          ))}
-
-          {rows.map((row, rowIndex) => (
-            <Fragment key={row.label}>
-              <div className="sticky left-0 z-10 border-b border-[var(--line)] bg-[var(--surface)] px-2 py-3 text-xs font-medium text-[var(--muted)]">
-                {row.label.split(" -> ")[0]}
+            {days.map((day) => (
+              <div
+                className="border-b border-l border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-center text-xs font-semibold"
+                key={day.id}
+              >
+                {day.label}
               </div>
-              {days.map((day) => {
-                const cell = day.cells[rowIndex];
-                const selected = selectedIds.has(cell.id);
+            ))}
 
-                return (
-                  <button
-                    aria-label={`${cell.dayLabel} ${cell.label}`}
-                    aria-pressed={selected}
-                    className={`min-h-14 touch-none border-b border-l border-[var(--line)] px-2 py-3 text-left text-xs hover:border-[var(--primary)] active:scale-[0.99] ${
-                      selected
-                        ? "bg-[#dff4ed] text-[var(--foreground)]"
-                        : "bg-[var(--surface)] text-[var(--muted)]"
-                    }`}
-                    data-availability-cell-id={cell.id}
-                    key={cell.id}
-                    onKeyDown={(event) =>
-                      handleCellKeyDown(event, cell.id, selected)
-                    }
-                    onPointerDown={(event) => {
-                      event.preventDefault();
-                      startCellDrag(cell.id);
-                    }}
-                    type="button"
-                  >
-                    <span className="sr-only">{cell.label}</span>
-                  </button>
-                );
-              })}
-            </Fragment>
-          ))}
-        </div>
-      </div>
+            {rows.map((row, rowIndex) => (
+              <Fragment key={row.label}>
+                <div className="sticky left-0 z-10 border-b border-[var(--line)] bg-[var(--surface)] px-2 py-3 text-xs font-medium text-[var(--muted)]">
+                  {row.label.split(" -> ")[0]}
+                </div>
+                {days.map((day) => {
+                  const cell = day.cells[rowIndex];
+                  const selected = selectedIds.has(cell.id);
 
-      <div className="sl-panel space-y-3 p-3">
-        <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end">
-          <label className="block">
-            <span className="text-xs font-medium text-[var(--muted)]">
-              From
-            </span>
-            <input
-              className="sl-field mt-1"
-              max={endTime}
-              min={startTime}
-              onChange={(event) => setBulkStartTime(event.target.value)}
-              step={slotSizeMinutes * 60}
-              type="time"
-              value={bulkStartTime}
-            />
-          </label>
-          <label className="block">
-            <span className="text-xs font-medium text-[var(--muted)]">To</span>
-            <input
-              className="sl-field mt-1"
-              max={endTime}
-              min={startTime}
-              onChange={(event) => setBulkEndTime(event.target.value)}
-              step={slotSizeMinutes * 60}
-              type="time"
-              value={bulkEndTime}
-            />
-          </label>
-          <button
-            className="sl-button sl-button-secondary"
-            disabled={!canApplyBulkRange}
-            onClick={() => applyBulkRange("all")}
-            type="button"
-          >
-            Apply to all days
-          </button>
-          <button
-            className="sl-button sl-button-secondary"
-            disabled={!canApplyBulkRange}
-            onClick={() => applyBulkRange("weekdays")}
-            type="button"
-          >
-            Apply to weekdays
-          </button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            className="sl-button sl-button-secondary"
-            disabled={selectedIds.size === 0}
-            onClick={clearAll}
-            type="button"
-          >
-            Clear all
-          </button>
-          <button
-            className="sl-button sl-button-secondary"
-            disabled={!isDirty}
-            onClick={cancelChanges}
-            type="button"
-          >
-            Cancel changes
-          </button>
+                  return (
+                    <button
+                      aria-label={`${cell.dayLabel} ${cell.label}`}
+                      aria-pressed={selected}
+                      className={`min-h-14 touch-none border-b border-l border-[var(--line)] px-2 py-3 text-left text-xs hover:border-[var(--primary)] active:scale-[0.99] ${
+                        selected
+                          ? "bg-[#dff4ed] text-[var(--foreground)]"
+                          : "bg-[var(--surface)] text-[var(--muted)]"
+                      }`}
+                      data-availability-cell-id={cell.id}
+                      key={cell.id}
+                      onKeyDown={(event) =>
+                        handleCellKeyDown(event, cell.id, selected)
+                      }
+                      onPointerDown={(event) => {
+                        event.preventDefault();
+                        startCellDrag(cell.id);
+                      }}
+                      type="button"
+                    >
+                      <span className="sr-only">{cell.label}</span>
+                    </button>
+                  );
+                })}
+              </Fragment>
+            ))}
+          </div>
         </div>
       </div>
 

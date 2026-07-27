@@ -321,13 +321,13 @@ export function AvailabilitySelector({
           <p className="text-xs leading-5 text-[var(--muted)]">
             Quickly mark the same time range across all days or weekdays.
           </p>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-[minmax(7rem,1fr)_minmax(7rem,1fr)_auto_auto] sm:items-end">
-            <label className="block">
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2">
+            <label className="block min-w-0">
               <span className="text-xs font-medium text-[var(--muted)]">
                 From
               </span>
               <input
-                className="sl-field mt-1 h-9 min-h-0 px-2 py-1 text-sm"
+                className="sl-field mt-1 h-9 min-h-0 min-w-0 max-w-full px-2 py-1 text-sm"
                 max={endTime}
                 min={startTime}
                 onChange={(event) => setBulkStartTime(event.target.value)}
@@ -336,12 +336,12 @@ export function AvailabilitySelector({
                 value={bulkStartTime}
               />
             </label>
-            <label className="block">
+            <label className="block min-w-0">
               <span className="text-xs font-medium text-[var(--muted)]">
                 To
               </span>
               <input
-                className="sl-field mt-1 h-9 min-h-0 px-2 py-1 text-sm"
+                className="sl-field mt-1 h-9 min-h-0 min-w-0 max-w-full px-2 py-1 text-sm"
                 max={endTime}
                 min={startTime}
                 onChange={(event) => setBulkEndTime(event.target.value)}
@@ -350,8 +350,10 @@ export function AvailabilitySelector({
                 value={bulkEndTime}
               />
             </label>
+          </div>
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-1.5 sm:grid-cols-4 sm:gap-2">
             <button
-              className="sl-button sl-button-secondary min-h-9 px-2 py-1 text-xs sm:px-3 sm:py-1.5"
+              className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:min-h-9 sm:px-3 sm:py-1.5 sm:text-xs"
               disabled={!canApplyBulkRange}
               onClick={() => applyBulkRange("all")}
               type="button"
@@ -359,17 +361,15 @@ export function AvailabilitySelector({
               Apply to all days
             </button>
             <button
-              className="sl-button sl-button-secondary min-h-9 px-2 py-1 text-xs sm:px-3 sm:py-1.5"
+              className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:min-h-9 sm:px-3 sm:py-1.5 sm:text-xs"
               disabled={!canApplyBulkRange}
               onClick={() => applyBulkRange("weekdays")}
               type="button"
             >
               Apply to weekdays
             </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
             <button
-              className="sl-button sl-button-secondary min-h-8 px-2 py-1 text-xs sm:px-3"
+              className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:px-3 sm:text-xs"
               disabled={selectedIds.size === 0}
               onClick={clearAll}
               type="button"
@@ -377,7 +377,7 @@ export function AvailabilitySelector({
               Clear all
             </button>
             <button
-              className="sl-button sl-button-secondary min-h-8 px-2 py-1 text-xs sm:px-3"
+              className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:px-3 sm:text-xs"
               disabled={!isDirty}
               onClick={cancelChanges}
               type="button"
@@ -389,7 +389,7 @@ export function AvailabilitySelector({
 
         <div className="mt-2 overflow-x-auto rounded-t-none rounded-b-[8px] border border-[var(--line)] bg-[var(--surface)] sm:mt-0 sm:rounded-t-[8px]">
           <div
-            className="grid min-w-max select-none [--day-col-min:5.75rem] [--time-col-width:3.75rem] sm:[--day-col-min:7rem] sm:[--time-col-width:4.5rem]"
+            className="grid min-w-max select-none [--day-col-min:5.75rem] [--time-col-width:3.25rem] sm:[--day-col-min:7rem] sm:[--time-col-width:4.5rem]"
             style={{
               gridTemplateColumns: `var(--time-col-width) repeat(${days.length}, minmax(var(--day-col-min), 1fr))`,
             }}
@@ -537,6 +537,7 @@ function isWeekday(value: Date): boolean {
 
 function formatHour(value: Date): string {
   return new Intl.DateTimeFormat("en", {
+    hour12: false,
     hour: "2-digit",
     minute: "2-digit",
   }).format(value);

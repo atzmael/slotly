@@ -28,19 +28,19 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   await expect(joinedStatus).toBeVisible();
   await expect(joinedStatus).toBeHidden({ timeout: 6000 });
   const firstSlot = page.getByRole("button", {
-    name: /Mon, Jun 15.*07:00 PM -> 07:30 PM/,
+    name: /Mon, Jun 15.*19:00 -> 19:30/,
   });
   const secondSlot = page.getByRole("button", {
-    name: /Mon, Jun 15.*07:30 PM -> 08:00 PM/,
+    name: /Mon, Jun 15.*19:30 -> 20:00/,
   });
   const nextDayFirstSlot = page.getByRole("button", {
-    name: /Tue, Jun 16.*07:00 PM -> 07:30 PM/,
+    name: /Tue, Jun 16.*19:00 -> 19:30/,
   });
   const nextDaySecondSlot = page.getByRole("button", {
-    name: /Tue, Jun 16.*07:30 PM -> 08:00 PM/,
+    name: /Tue, Jun 16.*19:30 -> 20:00/,
   });
   const saturdaySlot = page.getByRole("button", {
-    name: /Sat, Jun 20.*07:00 PM -> 07:30 PM/,
+    name: /Sat, Jun 20.*19:00 -> 19:30/,
   });
 
   await expect(

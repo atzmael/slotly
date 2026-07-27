@@ -64,7 +64,11 @@ export default async function EventPage({ params }: EventPageProps) {
             >
               {t.event.viewResults}
             </Link>
-            <ShareLinkButton locale={locale} path={`/e/${event.id}`} />
+            <ShareLinkButton
+              locale={locale}
+              path={`/e/${event.id}`}
+              source="event"
+            />
           </div>
         </div>
 

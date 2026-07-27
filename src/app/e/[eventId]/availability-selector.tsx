@@ -10,6 +10,8 @@ import {
   useState,
 } from "react";
 import type { KeyboardEvent } from "react";
+import { trackEvent } from "@/analytics/client";
+import { getDeviceType, resolveRoutePattern } from "@/analytics/events";
 import { messages, type Locale } from "@/i18n/messages";
 import type { EventAvailabilityWindow } from "@/server/events";
 import { saveAvailabilityAction } from "./actions";
@@ -94,6 +96,7 @@ export function AvailabilitySelector({
     readonly originId: string;
     readonly action: "add" | "remove";
   } | null>(null);
+  const hasTrackedAvailabilityStart = useRef(false);
   const [bulkStartTime, setBulkStartTime] = useState(startTime);
   const [bulkEndTime, setBulkEndTime] = useState(endTime);
   const rows = days[0]?.cells ?? [];
@@ -126,13 +129,24 @@ export function AvailabilitySelector({
 
     handledSuccessState.current = state;
     const savedIds = selectedIds;
+    trackEvent({
+      name: "availability.saved",
+      properties: {
+        days_count: days.length,
+        device_type: getDeviceType(window.innerWidth),
+        locale,
+        route_pattern: resolveRoutePattern(window.location.pathname),
+        selected_slots_count: selectedIds.size,
+        slot_size_minutes: slotSizeMinutes,
+      },
+    });
     const timeoutId = window.setTimeout(() => {
       setSavedSelectedIds(savedIds);
     }, 0);
     void broadcastEventChange(eventId, "availability_saved");
 
     return () => window.clearTimeout(timeoutId);
-  }, [eventId, selectedIds, state]);
+  }, [days.length, eventId, locale, selectedIds, slotSizeMinutes, state]);
 
   const applyCell = useCallback((id: string, action: "add" | "remove") => {
     setSelectedIds((current) => {
@@ -194,6 +208,7 @@ export function AvailabilitySelector({
   );
 
   function startCellDrag(id: string) {
+    trackAvailabilityStart();
     const action = selectedIds.has(id) ? "remove" : "add";
     dragSelection.current = { originId: id, action };
     applyCell(id, action);
@@ -231,6 +246,19 @@ export function AvailabilitySelector({
       return;
     }
 
+    trackAvailabilityStart();
+    trackEvent({
+      name: "availability.quick_actions.applied",
+      properties: {
+        days_count: days.length,
+        device_type: getDeviceType(window.innerWidth),
+        locale,
+        route_pattern: resolveRoutePattern(window.location.pathname),
+        scope,
+        slot_size_minutes: slotSizeMinutes,
+      },
+    });
+
     setSelectedIds((current) => {
       const next = new Set(current);
 
@@ -254,6 +282,7 @@ export function AvailabilitySelector({
   }
 
   function clearAll() {
+    trackAvailabilityStart();
     setSelectedIds(new Set());
   }
 
@@ -271,7 +300,26 @@ export function AvailabilitySelector({
     }
 
     event.preventDefault();
+    trackAvailabilityStart();
     applyCell(id, selected ? "remove" : "add");
+  }
+
+  function trackAvailabilityStart() {
+    if (hasTrackedAvailabilityStart.current) {
+      return;
+    }
+
+    hasTrackedAvailabilityStart.current = true;
+    trackEvent({
+      name: "availability.started",
+      properties: {
+        days_count: days.length,
+        device_type: getDeviceType(window.innerWidth),
+        locale,
+        route_pattern: resolveRoutePattern(window.location.pathname),
+        slot_size_minutes: slotSizeMinutes,
+      },
+    });
   }
 
   return (
@@ -322,6 +370,20 @@ export function AvailabilitySelector({
         <details
           className="sl-panel sl-accordion"
           data-testid="quick-actions-panel"
+          onToggle={(event) => {
+            if (event.currentTarget.open) {
+              trackEvent({
+                name: "availability.quick_actions.opened",
+                properties: {
+                  days_count: days.length,
+                  device_type: getDeviceType(window.innerWidth),
+                  locale,
+                  route_pattern: resolveRoutePattern(window.location.pathname),
+                  slot_size_minutes: slotSizeMinutes,
+                },
+              });
+            }
+          }}
         >
           <summary className="flex min-h-10 items-center justify-between gap-2 px-2 py-2 text-sm font-medium">
             <span>{t.event.availability.quickActions}</span>

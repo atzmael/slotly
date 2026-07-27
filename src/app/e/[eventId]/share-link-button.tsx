@@ -1,14 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { trackEvent } from "@/analytics/client";
+import { getDeviceType, resolveRoutePattern } from "@/analytics/events";
 import { messages, type Locale } from "@/i18n/messages";
 
 interface ShareLinkButtonProps {
   readonly locale: Locale;
   readonly path: string;
+  readonly source: "event" | "results";
 }
 
-export function ShareLinkButton({ locale, path }: ShareLinkButtonProps) {
+export function ShareLinkButton({
+  locale,
+  path,
+  source,
+}: ShareLinkButtonProps) {
   const [status, setStatus] = useState<"idle" | "copied" | "failed">("idle");
   const t = messages[locale].event.share;
 
@@ -23,6 +30,16 @@ export function ShareLinkButton({ locale, path }: ShareLinkButtonProps) {
 
   async function copyLink() {
     const url = new URL(path, window.location.origin).toString();
+
+    trackEvent({
+      name: "share.clicked",
+      properties: {
+        device_type: getDeviceType(window.innerWidth),
+        locale,
+        route_pattern: resolveRoutePattern(window.location.pathname),
+        source,
+      },
+    });
 
     try {
       await navigator.clipboard.writeText(url);

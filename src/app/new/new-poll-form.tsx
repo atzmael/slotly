@@ -1,6 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
+import type { FocusEvent, FormEvent } from "react";
+import { trackEvent } from "@/analytics/client";
+import { getDeviceType, resolveRoutePattern } from "@/analytics/events";
 import { messages, type Locale } from "@/i18n/messages";
 import { createEventAction } from "./actions";
 
@@ -23,6 +26,7 @@ interface NewPollFormProps {
 }
 
 export function NewPollForm({ locale }: NewPollFormProps) {
+  const hasTrackedStart = useRef(false);
   const [state, formAction, isPending] = useActionState(
     createEventAction,
     initialCreateEventActionState,
@@ -40,8 +44,46 @@ export function NewPollForm({ locale }: NewPollFormProps) {
     { label: t.create.durations.hour1, value: 60 },
   ];
 
+  function getSafeFormProperties(form: HTMLFormElement) {
+    return {
+      device_type: getDeviceType(window.innerWidth),
+      duration_minutes: Number(
+        new FormData(form).get("durationMinutes") ?? Number.NaN,
+      ),
+      locale,
+      route_pattern: resolveRoutePattern(window.location.pathname),
+      slot_size_minutes: Number(
+        new FormData(form).get("slotSizeMinutes") ?? Number.NaN,
+      ),
+    } as const;
+  }
+
+  function trackCreateStarted(event: FocusEvent<HTMLFormElement>) {
+    if (hasTrackedStart.current) {
+      return;
+    }
+
+    hasTrackedStart.current = true;
+    trackEvent({
+      name: "create.started",
+      properties: getSafeFormProperties(event.currentTarget),
+    });
+  }
+
+  function trackCreateSubmitted(event: FormEvent<HTMLFormElement>) {
+    trackEvent({
+      name: "create.submitted",
+      properties: getSafeFormProperties(event.currentTarget),
+    });
+  }
+
   return (
-    <form action={formAction} className="sl-panel mt-8 space-y-5 p-5">
+    <form
+      action={formAction}
+      className="sl-panel mt-8 space-y-5 p-5"
+      onFocus={trackCreateStarted}
+      onSubmit={trackCreateSubmitted}
+    >
       {state.status === "error" ? (
         <div className="sl-alert sl-alert-error" role="alert">
           <ul className="space-y-1">

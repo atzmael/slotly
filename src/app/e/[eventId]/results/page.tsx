@@ -79,7 +79,11 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
             >
               {t.event.addAvailability}
             </Link>
-            <ShareLinkButton locale={locale} path={`/e/${event.id}`} />
+            <ShareLinkButton
+              locale={locale}
+              path={`/e/${event.id}`}
+              source="results"
+            />
           </div>
         </div>
 

@@ -44,7 +44,7 @@ export async function createEventAction(
     };
   }
 
-  redirect(`/e/${result.eventId}`);
+  redirect(`/e/${result.eventId}?created=1`);
 }
 
 function getString(formData: FormData, key: string): string {

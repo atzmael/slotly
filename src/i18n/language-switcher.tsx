@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { trackEvent } from "@/analytics/client";
+import { getDeviceType, resolveRoutePattern } from "@/analytics/events";
 import { localeCookieName, locales, messages, type Locale } from "./messages";
 
 interface LanguageSwitcherProps {
@@ -12,6 +14,20 @@ export function LanguageSwitcher({ locale }: LanguageSwitcherProps) {
   const t = messages[locale].common;
 
   function setLocale(nextLocale: Locale) {
+    if (nextLocale === locale) {
+      return;
+    }
+
+    trackEvent({
+      name: "locale.changed",
+      properties: {
+        device_type: getDeviceType(window.innerWidth),
+        locale: nextLocale,
+        locale_from: locale,
+        locale_to: nextLocale,
+        route_pattern: resolveRoutePattern(window.location.pathname),
+      },
+    });
     // eslint-disable-next-line react-hooks/immutability -- Persist the explicit locale choice for server-rendered pages.
     window.document.cookie = `${localeCookieName}=${nextLocale}; path=/; max-age=31536000; samesite=lax`;
     router.refresh();

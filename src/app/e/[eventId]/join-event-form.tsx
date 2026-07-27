@@ -8,6 +8,8 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import { trackEvent } from "@/analytics/client";
+import { getDeviceType, resolveRoutePattern } from "@/analytics/events";
 import type {
   EventAvailabilityWindow,
   EventParticipant,
@@ -52,6 +54,7 @@ export function JoinEventForm({
     initialJoinEventState,
   );
   const lastBroadcastParticipantId = useRef<string | null>(null);
+  const lastTrackedParticipantId = useRef<string | null>(null);
   const restoredParticipantId = useStoredParticipantId(eventId, participants);
   const activeParticipantId =
     state.status === "success" && state.participantId
@@ -81,6 +84,39 @@ export function JoinEventForm({
     );
     void broadcastEventChange(eventId, "participant_joined");
   }, [eventId, state]);
+
+  useEffect(() => {
+    if (
+      state.status !== "success" ||
+      !state.participantId ||
+      lastTrackedParticipantId.current === state.participantId
+    ) {
+      return;
+    }
+
+    lastTrackedParticipantId.current = state.participantId;
+    trackEvent({
+      name: "participant.joined",
+      properties: {
+        device_type: getDeviceType(window.innerWidth),
+        locale,
+        participants_count: participants.length,
+        route_pattern: resolveRoutePattern(window.location.pathname),
+      },
+    });
+  }, [locale, participants.length, state]);
+
+  function trackJoinSubmitted() {
+    trackEvent({
+      name: "join.submitted",
+      properties: {
+        device_type: getDeviceType(window.innerWidth),
+        locale,
+        participants_count: participants.length,
+        route_pattern: resolveRoutePattern(window.location.pathname),
+      },
+    });
+  }
 
   return (
     <div className="space-y-4">
@@ -126,7 +162,11 @@ export function JoinEventForm({
       ) : null}
 
       {!activeParticipantId ? (
-        <form action={formAction} className="space-y-4">
+        <form
+          action={formAction}
+          className="space-y-4"
+          onSubmit={trackJoinSubmitted}
+        >
           <input name="eventId" type="hidden" value={eventId} />
           <input name="timezone" type="hidden" value={timezone} />
 

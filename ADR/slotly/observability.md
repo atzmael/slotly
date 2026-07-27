@@ -20,15 +20,27 @@ Les outils externes ne remplacent pas les systemes produit :
 
 ## Outils Cibles A Confirmer
 
-| Besoin | Outil cible | Usage |
-|--------|-------------|-------|
-| Erreurs frontend/server | Sentry ou equivalent | Exceptions, stack traces, breadcrumbs |
-| Logs serveur structures | Axiom ou equivalent | Routes, services, guards, jobs, request id |
-| Analytics produit | PostHog ou equivalent | Funnels, evenements produit |
-| Web analytics leger | Vercel Web Analytics | Trafic global, pages publiques |
-| Performance reelle | Vercel Speed Insights | Web vitals et regressions perf |
+| Besoin                  | Outil cible           | Usage                                      |
+| ----------------------- | --------------------- | ------------------------------------------ |
+| Erreurs frontend/server | Sentry ou equivalent  | Exceptions, stack traces, breadcrumbs      |
+| Logs serveur structures | Axiom ou equivalent   | Routes, services, guards, jobs, request id |
+| Analytics produit       | PostHog ou equivalent | Funnels, evenements produit                |
+| Web analytics leger     | Vercel Web Analytics  | Trafic global, pages publiques             |
+| Performance reelle      | Vercel Speed Insights | Web vitals et regressions perf             |
 
 Tous les tokens, DSN, hosts, dataset names et cles publiques doivent venir de variables d'environnement.
+
+Decision MVP 2026-07-28 :
+
+- Vercel Web Analytics et Vercel Speed Insights sont actifs pour les mesures
+  globales de trafic et performance.
+- PostHog est utilise pour les analytics produit uniquement si
+  `NEXT_PUBLIC_POSTHOG_KEY` est configure.
+- `NEXT_PUBLIC_POSTHOG_HOST` peut etre configure pour choisir l'host PostHog ;
+  aucun host prive n'est hardcode dans le code.
+- Le session replay et l'autocapture PostHog sont desactives par defaut.
+- Les routes sont envoyees sous forme de pattern (`/e/[eventId]`) et jamais
+  avec l'identifiant public brut.
 
 Interdit :
 
@@ -39,13 +51,13 @@ Interdit :
 
 ## Categories De Pages
 
-| Categorie | Exemples | Analytics | Replay / heatmap |
-|-----------|----------|-----------|------------------|
-| Publique | `/`, pages legales, aide | Autorise | Autorise si champs sensibles masques |
-| Create | `/new` | Autorise avec payload type | Autorise si champs masques |
-| Event public | `/e/[id]` | Autorise avec payload type | Echantillonne et masque |
-| Results | `/e/[id]/results` | Autorise avec payload type | Echantillonne et masque |
-| Futur sensible | auth, admin, support, compte | Minimal | Desactive par defaut |
+| Categorie      | Exemples                     | Analytics                  | Replay / heatmap                     |
+| -------------- | ---------------------------- | -------------------------- | ------------------------------------ |
+| Publique       | `/`, pages legales, aide     | Autorise                   | Autorise si champs sensibles masques |
+| Create         | `/new`                       | Autorise avec payload type | Autorise si champs masques           |
+| Event public   | `/e/[id]`                    | Autorise avec payload type | Echantillonne et masque              |
+| Results        | `/e/[id]/results`            | Autorise avec payload type | Echantillonne et masque              |
+| Futur sensible | auth, admin, support, compte | Minimal                    | Desactive par defaut                 |
 
 ## Donnees Autorisees, Hachees, Masquees, Interdites
 
@@ -98,6 +110,24 @@ availability.updated
 results.viewed
 app_access.blocked
 ```
+
+Evenements MVP instrumentes :
+
+- `home.viewed`
+- `create.viewed`
+- `create.started`
+- `create.submitted`
+- `event.created`
+- `event.viewed`
+- `share.clicked`
+- `join.submitted`
+- `participant.joined`
+- `availability.started`
+- `availability.quick_actions.opened`
+- `availability.quick_actions.applied`
+- `availability.saved`
+- `results.viewed`
+- `locale.changed`
 
 A eviter :
 

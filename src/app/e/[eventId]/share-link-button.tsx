@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { messages, type Locale } from "@/i18n/messages";
 
 interface ShareLinkButtonProps {
+  readonly locale: Locale;
   readonly path: string;
 }
 
-export function ShareLinkButton({ path }: ShareLinkButtonProps) {
+export function ShareLinkButton({ locale, path }: ShareLinkButtonProps) {
   const [status, setStatus] = useState<"idle" | "copied" | "failed">("idle");
+  const t = messages[locale].event.share;
 
   useEffect(() => {
     if (status === "idle") {
@@ -36,14 +39,14 @@ export function ShareLinkButton({ path }: ShareLinkButtonProps) {
         onClick={copyLink}
         type="button"
       >
-        Share link
+        {t.button}
       </button>
       <p
         aria-live="polite"
         className="min-h-4 text-center text-xs text-[var(--muted)] sm:text-right"
       >
-        {status === "copied" ? "Link copied" : ""}
-        {status === "failed" ? "Copy failed" : ""}
+        {status === "copied" ? t.copied : ""}
+        {status === "failed" ? t.failed : ""}
       </p>
     </div>
   );

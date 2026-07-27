@@ -1,38 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
+import { messages, type Locale } from "@/i18n/messages";
 import { createEventAction } from "./actions";
-
-const durationOptions = [
-  { label: "30 min", value: 30 },
-  { label: "1 hour", value: 60 },
-  { label: "2 hours", value: 120 },
-  { label: "3 hours", value: 180 },
-  { label: "4 hours", value: 240 },
-];
-const slotSizeOptions = [
-  { label: "30 min", value: 30 },
-  { label: "1 hour", value: 60 },
-];
-
-const errorCopy: Record<string, string> = {
-  title_required: "Add an event name.",
-  title_too_long: "Keep the event name under 80 characters.",
-  start_date_invalid: "Choose a valid start date.",
-  end_date_invalid: "Choose a valid end date.",
-  date_range_invalid: "End date must be after the start date.",
-  date_range_too_long: "Keep the date range to 31 days or less.",
-  start_time_invalid: "Choose a valid start time.",
-  end_time_invalid: "Choose a valid end time.",
-  time_range_invalid: "End time must be after the start time.",
-  duration_exceeds_time_range: "Event duration must fit inside the time range.",
-  duration_invalid: "Choose a supported event duration.",
-  slot_size_invalid: "Choose a supported slot size.",
-  database_migration_required:
-    "The database is not up to date. Apply the latest Supabase migration, then try again.",
-  rate_limited: "Too many attempts. Wait a few minutes, then try again.",
-  create_event_failed: "The poll could not be created. Try again.",
-};
 
 const initialCreateEventActionState = {
   status: "idle" as const,
@@ -48,11 +18,27 @@ const initialCreateEventActionState = {
   },
 };
 
-export function NewPollForm() {
+interface NewPollFormProps {
+  readonly locale: Locale;
+}
+
+export function NewPollForm({ locale }: NewPollFormProps) {
   const [state, formAction, isPending] = useActionState(
     createEventAction,
     initialCreateEventActionState,
   );
+  const t = messages[locale];
+  const durationOptions = [
+    { label: t.create.durations.minutes30, value: 30 },
+    { label: t.create.durations.hour1, value: 60 },
+    { label: t.create.durations.hours2, value: 120 },
+    { label: t.create.durations.hours3, value: 180 },
+    { label: t.create.durations.hours4, value: 240 },
+  ];
+  const slotSizeOptions = [
+    { label: t.create.durations.minutes30, value: 30 },
+    { label: t.create.durations.hour1, value: 60 },
+  ];
 
   return (
     <form action={formAction} className="sl-panel mt-8 space-y-5 p-5">
@@ -60,20 +46,23 @@ export function NewPollForm() {
         <div className="sl-alert sl-alert-error" role="alert">
           <ul className="space-y-1">
             {state.errors.map((error) => (
-              <li key={error}>{errorCopy[error] ?? "Something went wrong."}</li>
+              <li key={error}>
+                {t.create.errors[error as keyof typeof t.create.errors] ??
+                  t.common.fallbackError}
+              </li>
             ))}
           </ul>
         </div>
       ) : null}
 
       <label className="block">
-        <span className="text-sm font-medium">Event name</span>
+        <span className="text-sm font-medium">{t.create.fields.title}</span>
         <input
           className="sl-field mt-2"
           defaultValue={state.values.title}
           maxLength={80}
           name="title"
-          placeholder="Réunion pôle communication, Restaurant avec la famille, ..."
+          placeholder={t.create.fields.titlePlaceholder}
           required
           type="text"
         />
@@ -81,7 +70,9 @@ export function NewPollForm() {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
-          <span className="text-sm font-medium">Start date</span>
+          <span className="text-sm font-medium">
+            {t.create.fields.startDate}
+          </span>
           <input
             className="sl-field mt-2"
             defaultValue={state.values.startDate}
@@ -90,11 +81,11 @@ export function NewPollForm() {
             type="date"
           />
           <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">
-            First day participants can pick availability.
+            {t.create.fields.startDateHelp}
           </span>
         </label>
         <label className="block">
-          <span className="text-sm font-medium">End date</span>
+          <span className="text-sm font-medium">{t.create.fields.endDate}</span>
           <input
             className="sl-field mt-2"
             defaultValue={state.values.endDate}
@@ -103,14 +94,16 @@ export function NewPollForm() {
             type="date"
           />
           <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">
-            Last day included in the poll.
+            {t.create.fields.endDateHelp}
           </span>
         </label>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
-          <span className="text-sm font-medium">Start time</span>
+          <span className="text-sm font-medium">
+            {t.create.fields.startTime}
+          </span>
           <input
             className="sl-field mt-2"
             defaultValue={state.values.startTime}
@@ -119,11 +112,11 @@ export function NewPollForm() {
             type="time"
           />
           <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">
-            Earliest time shown each day.
+            {t.create.fields.startTimeHelp}
           </span>
         </label>
         <label className="block">
-          <span className="text-sm font-medium">End time</span>
+          <span className="text-sm font-medium">{t.create.fields.endTime}</span>
           <input
             className="sl-field mt-2"
             defaultValue={state.values.endTime}
@@ -132,14 +125,16 @@ export function NewPollForm() {
             type="time"
           />
           <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">
-            Latest time shown each day.
+            {t.create.fields.endTimeHelp}
           </span>
         </label>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
-          <span className="text-sm font-medium">Event duration</span>
+          <span className="text-sm font-medium">
+            {t.create.fields.duration}
+          </span>
           <select
             className="sl-field mt-2"
             defaultValue={state.values.durationMinutes}
@@ -152,11 +147,13 @@ export function NewPollForm() {
             ))}
           </select>
           <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">
-            Length of the meeting you want to schedule.
+            {t.create.fields.durationHelp}
           </span>
         </label>
         <label className="block">
-          <span className="text-sm font-medium">Slot size</span>
+          <span className="text-sm font-medium">
+            {t.create.fields.slotSize}
+          </span>
           <select
             className="sl-field mt-2"
             defaultValue={state.values.slotSizeMinutes}
@@ -169,7 +166,7 @@ export function NewPollForm() {
             ))}
           </select>
           <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">
-            Precision of the availability grid.
+            {t.create.fields.slotSizeHelp}
           </span>
         </label>
       </div>
@@ -179,7 +176,7 @@ export function NewPollForm() {
         disabled={isPending}
         type="submit"
       >
-        {isPending ? "Creating..." : "Create Event"}
+        {isPending ? t.create.creating : t.create.submit}
       </button>
     </form>
   );

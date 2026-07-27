@@ -12,21 +12,11 @@ import type {
   EventAvailabilityWindow,
   EventParticipant,
 } from "@/server/events";
+import { messages, type Locale } from "@/i18n/messages";
 import { joinEventAction } from "./actions";
 import { AvailabilitySelector } from "./availability-selector";
 import { broadcastEventChange } from "./event-realtime";
 import { TemporaryStatusMessage } from "./temporary-status-message";
-
-const errorCopy: Record<string, string> = {
-  event_id_invalid: "This event link is invalid.",
-  name_required: "Add your name.",
-  name_too_long: "Keep your name under 60 characters.",
-  participant_name_taken:
-    "This name is already used in this poll. Add an initial or another detail.",
-  timezone_invalid: "Your timezone could not be detected.",
-  rate_limited: "Too many attempts. Wait a few minutes, then try again.",
-  join_event_failed: "Could not join this poll. Try again.",
-};
 
 const initialJoinEventState = {
   status: "idle" as const,
@@ -41,6 +31,7 @@ export function JoinEventForm({
   startTime,
   endDate,
   endTime,
+  locale,
   slotSizeMinutes,
 }: {
   readonly availabilityWindows: readonly EventAvailabilityWindow[];
@@ -50,6 +41,7 @@ export function JoinEventForm({
   readonly startTime: string;
   readonly endDate: string;
   readonly endTime: string;
+  readonly locale: Locale;
   readonly slotSizeMinutes: number;
 }) {
   const [timezone] = useState(
@@ -71,6 +63,7 @@ export function JoinEventForm({
   const activeAvailabilityWindows = availabilityWindows.filter(
     (window) => window.participantId === activeParticipantId,
   );
+  const t = messages[locale];
 
   useEffect(() => {
     if (
@@ -95,7 +88,11 @@ export function JoinEventForm({
         <div className="sl-alert sl-alert-error" role="alert">
           <ul className="space-y-1">
             {state.errors.map((error) => (
-              <li key={error}>{errorCopy[error] ?? "Something went wrong."}</li>
+              <li key={error}>
+                {t.event.join.errors[
+                  error as keyof typeof t.event.join.errors
+                ] ?? t.common.fallbackError}
+              </li>
             ))}
           </ul>
         </div>
@@ -103,14 +100,13 @@ export function JoinEventForm({
 
       {state.status === "success" ? (
         <TemporaryStatusMessage key={state.statusId}>
-          You joined this poll. Pick your availability next.
+          {t.event.join.joined}
         </TemporaryStatusMessage>
       ) : null}
 
       {state.status !== "success" && activeParticipant ? (
         <TemporaryStatusMessage key={`welcome-${activeParticipant.id}`}>
-          Welcome back, {activeParticipant.name}. Update your availability
-          below.
+          {t.event.join.welcomeBack(activeParticipant.name)}
         </TemporaryStatusMessage>
       ) : null}
 
@@ -121,6 +117,7 @@ export function JoinEventForm({
           eventId={eventId}
           initialWindows={activeAvailabilityWindows}
           key={activeParticipantId}
+          locale={locale}
           participantId={activeParticipantId}
           slotSizeMinutes={slotSizeMinutes}
           startDate={startDate}
@@ -134,19 +131,21 @@ export function JoinEventForm({
           <input name="timezone" type="hidden" value={timezone} />
 
           <label className="block">
-            <span className="text-sm font-medium">Your name</span>
+            <span className="text-sm font-medium">
+              {t.event.join.nameLabel}
+            </span>
             <input
               className="sl-field mt-2"
               maxLength={60}
               name="name"
-              placeholder="Mael"
+              placeholder={t.event.join.namePlaceholder}
               required
               type="text"
             />
           </label>
 
           <p className="text-sm leading-6 text-[var(--muted)]">
-            Times are shown in {timezone}. Availability selection comes next.
+            {t.event.join.timezoneNotice(timezone)}
           </p>
 
           <button
@@ -154,7 +153,7 @@ export function JoinEventForm({
             disabled={isPending}
             type="submit"
           >
-            {isPending ? "Joining..." : "Join poll"}
+            {isPending ? t.event.join.joining : t.event.join.submit}
           </button>
         </form>
       ) : null}

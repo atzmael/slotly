@@ -132,6 +132,10 @@ Heatmap :
 - Les etats importants doivent etre explicites : event introuvable, aucun participant, disponibilite sauvegardee, resultats vides.
 - Les erreurs doivent expliquer l'action possible suivante.
 - Les textes utilisateur doivent etre prepares pour l'i18n si la localisation est active.
+- La langue initiale est detectee depuis la langue navigateur (`Accept-Language`) ;
+  un choix manuel EN/FR peut ensuite etre conserve localement.
+- Les routes localisees (`/fr`, `/en`) restent hors scope MVP tant que le
+  besoin SEO multilingue n'est pas confirme.
 - Les informations temporelles doivent afficher le fuseau pertinent.
 - Les participants dans plusieurs pays doivent voir les memes slots traduits dans leur heure locale.
 - Ne jamais sacrifier la simplicite pour ajouter une feature.

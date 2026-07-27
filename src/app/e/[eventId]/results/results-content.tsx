@@ -2,13 +2,16 @@
 
 import { useMemo, useState } from "react";
 import type { RankedSlot } from "@/domain/availability";
+import { messages, type Locale } from "@/i18n/messages";
 
 interface ResultsContentProps {
+  readonly locale: Locale;
   readonly participantCount: number;
   readonly rankedSlots: readonly RankedSlot[];
 }
 
 export function ResultsContent({
+  locale,
   participantCount,
   rankedSlots,
 }: ResultsContentProps) {
@@ -17,6 +20,7 @@ export function ResultsContent({
   const rankedSlotsToShow = rankedSlots.slice(0, 10);
   const maxAvailableCount = rankedSlots[0]?.availableCount ?? 0;
   const timezone = useBrowserTimeZone();
+  const t = messages[locale].results;
 
   if (rankedSlotsToShow.length === 0) {
     return (
@@ -24,19 +28,19 @@ export function ResultsContent({
         <EmptyState
           description={
             participantCount === 0
-              ? "Share the event link so people can add their name and slots."
-              : "Ask participants to add availability, then the best times will appear here."
+              ? t.emptyNoParticipantsDescription
+              : t.emptyNoAvailabilityDescription
           }
           title={
             participantCount === 0
-              ? "No one has joined yet"
-              : "No availability yet"
+              ? t.emptyNoParticipantsTitle
+              : t.emptyNoAvailabilityTitle
           }
         />
         <section className="sl-panel p-5">
           <EmptyState
-            description="Results are calculated as soon as at least one participant saves availability."
-            title="Nothing to rank yet"
+            description={t.nothingToRankDescription}
+            title={t.nothingToRankTitle}
           />
         </section>
       </div>
@@ -64,11 +68,11 @@ export function ResultsContent({
                     #{index + 1}
                   </span>
                   <p className="mt-1 font-medium">
-                    {formatSlot(slot, timezone)}
+                    {formatSlot(slot, timezone, locale)}
                   </p>
                 </div>
                 <span className="shrink-0 text-sm text-[var(--muted)]">
-                  {slot.availableCount} available
+                  {t.availableCount(slot.availableCount)}
                 </span>
               </div>
               <div className="mt-4 h-2 rounded-full bg-[var(--line)]">
@@ -88,37 +92,38 @@ export function ResultsContent({
         {selectedSlot ? (
           <>
             <p className="text-sm font-semibold text-[var(--primary)]">
-              Selected recommendation
+              {t.selectedRecommendation}
             </p>
             <h2 className="mt-2 text-lg font-semibold">
-              {formatSlot(selectedSlot, timezone)}
+              {formatSlot(selectedSlot, timezone, locale)}
             </h2>
             <p className="mt-2 text-sm text-[var(--muted)]">
-              {selectedSlot.availableCount} of {participantCount} participant
-              {participantCount === 1 ? "" : "s"} can attend.
+              {t.attendance(selectedSlot.availableCount, participantCount)}
             </p>
             <p className="mt-1 text-xs text-[var(--muted)]">
-              Displayed in {timezone}
+              {t.displayedIn(timezone)}
             </p>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <ParticipantList
                 names={selectedSlot.availableParticipants.map(
                   (participant) => participant.name,
                 )}
-                title="Available"
+                noOne={t.noOne}
+                title={t.available}
               />
               <ParticipantList
                 names={selectedSlot.missingParticipants.map(
                   (participant) => participant.name,
                 )}
-                title="Missing"
+                noOne={t.noOne}
+                title={t.missing}
               />
             </div>
           </>
         ) : (
           <EmptyState
-            description="Results are calculated as soon as at least one participant saves availability."
-            title="Nothing to rank yet"
+            description={t.nothingToRankDescription}
+            title={t.nothingToRankTitle}
           />
         )}
       </section>
@@ -128,9 +133,11 @@ export function ResultsContent({
 
 function ParticipantList({
   names,
+  noOne,
   title,
 }: {
   readonly names: readonly string[];
+  readonly noOne: string;
   readonly title: string;
 }) {
   return (
@@ -143,7 +150,7 @@ function ParticipantList({
           ))}
         </ul>
       ) : (
-        <p className="mt-3 text-sm text-[var(--muted)]">No one</p>
+        <p className="mt-3 text-sm text-[var(--muted)]">{noOne}</p>
       )}
     </div>
   );
@@ -171,16 +178,21 @@ function useBrowserTimeZone(): string {
   );
 }
 
-function formatSlot(slot: RankedSlot, timezone: string): string {
+function formatSlot(
+  slot: RankedSlot,
+  timezone: string,
+  locale: Locale,
+): string {
   const start = new Date(slot.start);
   const end = new Date(slot.end);
-  const day = new Intl.DateTimeFormat("en", {
+  const day = new Intl.DateTimeFormat(locale, {
     weekday: "short",
     month: "short",
     day: "numeric",
     timeZone: timezone,
   }).format(start);
-  const timeFormat = new Intl.DateTimeFormat("en", {
+  const timeFormat = new Intl.DateTimeFormat(locale, {
+    hour12: false,
     hour: "2-digit",
     minute: "2-digit",
     timeZone: timezone,

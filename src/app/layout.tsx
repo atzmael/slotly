@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getRequestLocale } from "@/i18n/locale";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -7,13 +8,15 @@ export const metadata: Metadata = {
     "Create a link, collect availability, instantly know the best time to meet.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getRequestLocale();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body>{children}</body>
     </html>
   );

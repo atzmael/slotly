@@ -1,58 +1,57 @@
 import Link from "next/link";
+import { getRequestLocale } from "@/i18n/locale";
+import { LanguageSwitcher } from "@/i18n/language-switcher";
+import { messages } from "@/i18n/messages";
 
-const valueProps = [
-  "No accounts",
-  "Mobile-first availability",
-  "Automatic best-slot ranking",
-];
 const supportEmail = "creadiv.tech+slotlysupport@gmail.com";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const locale = await getRequestLocale();
+  const t = messages[locale];
+
   return (
     <main className="min-h-screen px-5 py-6 sm:px-8">
       <section className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-5xl flex-col justify-between">
-        <header className="flex items-center justify-between">
+        <header className="flex items-center justify-between gap-3">
           <span className="text-lg font-semibold tracking-normal">Slotly</span>
-          <Link className="sl-button sl-button-secondary" href="/new">
-            Create Poll
-          </Link>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher locale={locale} />
+            <Link className="sl-button sl-button-secondary" href="/new">
+              {t.home.createPoll}
+            </Link>
+          </div>
         </header>
 
         <div className="grid gap-10 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="max-w-2xl">
             <p className="mb-4 text-sm font-semibold uppercase text-[var(--primary)]">
-              Fast planning, built for phones
+              {t.home.eyebrow}
             </p>
             <h1 className="max-w-3xl text-5xl font-semibold leading-[1.02] tracking-normal sm:text-7xl">
-              Find the best time without the spreadsheet feeling.
+              {t.home.title}
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-8 text-[var(--muted)]">
-              Create a link, collect availability, and instantly know the best
-              time to meet.
+              {t.home.subtitle}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 className="sl-button sl-button-primary px-5 py-3"
                 href="/new"
               >
-                Create Poll
+                {t.home.createPoll}
               </Link>
             </div>
           </div>
 
           <div className="sl-panel p-4 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-sm font-semibold">Best slots</span>
+              <span className="text-sm font-semibold">{t.home.bestSlots}</span>
               <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold">
-                Live
+                {t.home.live}
               </span>
             </div>
             <div className="space-y-3">
-              {[
-                ["Tue 20:00", "12 available", "w-full"],
-                ["Wed 20:00", "11 available", "w-11/12"],
-                ["Thu 21:00", "10 available", "w-10/12"],
-              ].map(([time, count, width]) => (
+              {t.home.demoSlots.map(([time, count, width]) => (
                 <div key={time} className="sl-panel p-3">
                   <div className="mb-2 flex items-center justify-between gap-3">
                     <span className="font-medium">{time}</span>
@@ -70,14 +69,14 @@ export default function HomePage() {
         </div>
 
         <footer className="grid gap-3 border-t border-[var(--line)] py-5 text-sm text-[var(--muted)] sm:grid-cols-2 lg:grid-cols-4">
-          {valueProps.map((value) => (
+          {t.home.valueProps.map((value) => (
             <span key={value}>{value}</span>
           ))}
           <a
             className="font-medium text-[var(--primary)]"
             href={`mailto:${supportEmail}`}
           >
-            Submit feedback or a bug
+            {t.home.feedback}
           </a>
         </footer>
       </section>

@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import type { KeyboardEvent } from "react";
+import { messages, type Locale } from "@/i18n/messages";
 import type { EventAvailabilityWindow } from "@/server/events";
 import { saveAvailabilityAction } from "./actions";
 import { broadcastEventChange } from "./event-realtime";
@@ -23,6 +24,7 @@ interface AvailabilitySelectorProps {
   readonly startTime: string;
   readonly endDate: string;
   readonly endTime: string;
+  readonly locale: Locale;
   readonly slotSizeMinutes: number;
 }
 
@@ -50,15 +52,6 @@ const initialSaveAvailabilityState = {
   errors: [] as readonly string[],
 };
 
-const errorCopy: Record<string, string> = {
-  participant_id_invalid: "Join the poll again before saving availability.",
-  availability_required: "Select at least one slot.",
-  availability_too_large: "Too many slots selected.",
-  availability_window_invalid: "One selected slot is invalid.",
-  rate_limited: "Too many attempts. Wait a few minutes, then try again.",
-  save_availability_failed: "Could not save availability. Try again.",
-};
-
 export function AvailabilitySelector({
   eventId,
   initialWindows = [],
@@ -67,8 +60,10 @@ export function AvailabilitySelector({
   startTime,
   endDate,
   endTime,
+  locale,
   slotSizeMinutes,
 }: AvailabilitySelectorProps) {
+  const t = messages[locale];
   const days = useMemo(
     () =>
       buildAvailabilityDays(
@@ -77,8 +72,9 @@ export function AvailabilitySelector({
         startTime,
         endTime,
         slotSizeMinutes,
+        locale,
       ),
-    [endDate, endTime, slotSizeMinutes, startDate, startTime],
+    [endDate, endTime, locale, slotSizeMinutes, startDate, startTime],
   );
   const cells = useMemo(() => days.flatMap((day) => day.cells), [days]);
   const initialSelectedIds = useMemo(
@@ -290,13 +286,15 @@ export function AvailabilitySelector({
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold">Pick availability</h2>
+          <h2 className="text-lg font-semibold">
+            {t.event.availability.title}
+          </h2>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            Tap or drag across every slot that works for you.
+            {t.event.availability.help}
           </p>
         </div>
         <span className="text-sm font-medium text-[var(--primary)]">
-          {selectedIds.size} selected{isDirty ? " - unsaved" : ""}
+          {t.event.availability.selected(selectedIds.size, isDirty)}
         </span>
       </div>
 
@@ -304,7 +302,11 @@ export function AvailabilitySelector({
         <div className="sl-alert sl-alert-error" role="alert">
           <ul className="space-y-1">
             {state.errors.map((error) => (
-              <li key={error}>{errorCopy[error] ?? "Something went wrong."}</li>
+              <li key={error}>
+                {t.event.availability.errors[
+                  error as keyof typeof t.event.availability.errors
+                ] ?? t.common.fallbackError}
+              </li>
             ))}
           </ul>
         </div>
@@ -312,7 +314,7 @@ export function AvailabilitySelector({
 
       {state.status === "success" ? (
         <TemporaryStatusMessage key={state.statusId}>
-          Availability saved.
+          {t.event.availability.saved}
         </TemporaryStatusMessage>
       ) : null}
 
@@ -322,7 +324,7 @@ export function AvailabilitySelector({
           data-testid="quick-actions-panel"
         >
           <summary className="flex min-h-10 items-center justify-between gap-2 px-2 py-2 text-sm font-medium">
-            <span>Quick actions</span>
+            <span>{t.event.availability.quickActions}</span>
             <span
               aria-hidden="true"
               className="sl-accordion-icon text-xs text-[var(--muted)]"
@@ -332,12 +334,12 @@ export function AvailabilitySelector({
           </summary>
           <div className="space-y-2 border-t border-[var(--line)] p-2">
             <p className="text-xs leading-5 text-[var(--muted)]">
-              Fill the same time range across several days at once.
+              {t.event.availability.quickActionsHelp}
             </p>
             <div className="grid grid-cols-2">
               <label className="block min-w-0 overflow-hidden pr-1">
                 <span className="text-xs font-medium text-[var(--muted)]">
-                  From
+                  {t.event.availability.from}
                 </span>
                 <input
                   className="sl-field sl-time-field mt-1 h-9 min-h-0 px-2 py-1 text-sm"
@@ -351,7 +353,7 @@ export function AvailabilitySelector({
               </label>
               <label className="block min-w-0 overflow-hidden pl-1">
                 <span className="text-xs font-medium text-[var(--muted)]">
-                  To
+                  {t.event.availability.to}
                 </span>
                 <input
                   className="sl-field sl-time-field mt-1 h-9 min-h-0 px-2 py-1 text-sm"
@@ -371,7 +373,7 @@ export function AvailabilitySelector({
                 onClick={() => applyBulkRange("all")}
                 type="button"
               >
-                Apply to all days
+                {t.event.availability.applyAll}
               </button>
               <button
                 className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:min-h-9 sm:px-3 sm:py-1.5 sm:text-xs"
@@ -379,7 +381,7 @@ export function AvailabilitySelector({
                 onClick={() => applyBulkRange("weekdays")}
                 type="button"
               >
-                Apply to weekdays
+                {t.event.availability.applyWeekdays}
               </button>
             </div>
           </div>
@@ -392,7 +394,7 @@ export function AvailabilitySelector({
             onClick={clearAll}
             type="button"
           >
-            Clear all
+            {t.event.availability.clearAll}
           </button>
           <button
             className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:px-3 sm:text-xs"
@@ -400,7 +402,7 @@ export function AvailabilitySelector({
             onClick={cancelChanges}
             type="button"
           >
-            Cancel changes
+            {t.event.availability.cancelChanges}
           </button>
         </div>
 
@@ -412,7 +414,7 @@ export function AvailabilitySelector({
             }}
           >
             <div className="sticky left-0 z-10 border-r border-b border-[var(--line)] bg-[#f5f5ef] px-1.5 py-2.5 text-xs font-medium text-[var(--muted)] sm:px-2 sm:py-3">
-              Time
+              {t.event.availability.timeHeader}
             </div>
             {days.map((day) => (
               <div
@@ -467,7 +469,7 @@ export function AvailabilitySelector({
         disabled={isPending || !isDirty}
         type="submit"
       >
-        {isPending ? "Saving..." : "Save availability"}
+        {isPending ? t.event.availability.saving : t.event.availability.save}
       </button>
     </form>
   );
@@ -479,6 +481,7 @@ function buildAvailabilityDays(
   startTime: string,
   endTime: string,
   slotSizeMinutes: number,
+  locale: Locale,
 ): AvailabilityDay[] {
   const start = parseDateOnly(startDate);
   const end = parseDateOnly(endDate);
@@ -493,7 +496,7 @@ function buildAvailabilityDays(
   ) {
     const dayIndex = days.length;
     const dayId = toDateInputValue(day);
-    const dayLabel = new Intl.DateTimeFormat("en", {
+    const dayLabel = new Intl.DateTimeFormat(locale, {
       weekday: "short",
       month: "short",
       day: "numeric",
@@ -523,7 +526,7 @@ function buildAvailabilityDays(
             rowIndex,
             startMinutes: minutes,
             endMinutes: minutes + slotSizeMinutes,
-            label: `${formatHour(startAt)} -> ${formatHour(endAt)}`,
+            label: `${formatHour(startAt, locale)} -> ${formatHour(endAt, locale)}`,
             start: startAt.toISOString(),
             end: endAt.toISOString(),
           };
@@ -552,8 +555,8 @@ function isWeekday(value: Date): boolean {
   return day >= 1 && day <= 5;
 }
 
-function formatHour(value: Date): string {
-  return new Intl.DateTimeFormat("en", {
+function formatHour(value: Date, locale: Locale): string {
+  return new Intl.DateTimeFormat(locale, {
     hour12: false,
     hour: "2-digit",
     minute: "2-digit",

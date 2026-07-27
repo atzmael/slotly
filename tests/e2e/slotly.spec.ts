@@ -128,7 +128,7 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   await expect(page.getByText("1 participant joined")).toBeVisible();
   await expect(page.getByText("1 available").first()).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: /07:00 PM -> 08:00 PM/ }),
+    page.getByRole("heading", { name: /19:00 -> 20:00/ }),
   ).toBeVisible();
   await expect(page.getByText(participantName)).toBeVisible();
 });

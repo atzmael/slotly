@@ -57,6 +57,8 @@ No `alter publication supabase_realtime add table ...` step is required for this
 Production runs `/api/cron/cleanup-stale-events` daily through Vercel Cron.
 
 - Set `CRON_SECRET` in Vercel so the route can verify the cron request.
+- Vercel Cron automatically sends it as
+  `Authorization: Bearer <CRON_SECRET>` when invoking the configured path.
 - The cleanup deletes polls whose `end_date` is at least 14 days old and whose
   latest activity is older than 14 days.
 - Activity is computed from `events.created_at`, `participants.updated_at`, and

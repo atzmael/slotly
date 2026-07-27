@@ -27,6 +27,11 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   const joinedStatus = page.getByText("You joined this poll.");
   await expect(joinedStatus).toBeVisible();
   await expect(joinedStatus).toBeHidden({ timeout: 6000 });
+  await expect(page.getByRole("button", { name: "Clear all" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Cancel changes" }),
+  ).toBeVisible();
+  await page.getByText("Quick actions").click();
   await page.setViewportSize({ width: 393, height: 852 });
   const quickActionsLayout = await page
     .getByTestId("quick-actions-panel")

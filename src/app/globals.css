@@ -125,6 +125,22 @@ a[href]:active {
     background: var(--surface);
   }
 
+  .sl-accordion summary {
+    list-style: none;
+  }
+
+  .sl-accordion summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .sl-accordion-icon {
+    transition: transform var(--transition-fast);
+  }
+
+  .sl-accordion[open] .sl-accordion-icon {
+    transform: rotate(45deg);
+  }
+
   .sl-field {
     width: 100%;
     border: 1px solid var(--line);

@@ -317,77 +317,91 @@ export function AvailabilitySelector({
       ) : null}
 
       <div className="mx-[-1rem] space-y-0 sm:mx-0 sm:space-y-2">
-        <div
-          className="sl-panel space-y-2 rounded-b-none p-2 sm:rounded-b-[var(--radius-panel)]"
+        <details
+          className="sl-panel sl-accordion rounded-b-none sm:rounded-b-[var(--radius-panel)]"
           data-testid="quick-actions-panel"
         >
-          <p className="text-xs leading-5 text-[var(--muted)]">
-            Quickly mark the same time range across all days or weekdays.
-          </p>
-          <div className="grid grid-cols-2">
-            <label className="block min-w-0 overflow-hidden pr-1">
-              <span className="text-xs font-medium text-[var(--muted)]">
-                From
-              </span>
-              <input
-                className="sl-field sl-time-field mt-1 h-9 min-h-0 px-2 py-1 text-sm"
-                max={endTime}
-                min={startTime}
-                onChange={(event) => setBulkStartTime(event.target.value)}
-                step={slotSizeMinutes * 60}
-                type="time"
-                value={bulkStartTime}
-              />
-            </label>
-            <label className="block min-w-0 overflow-hidden pl-1">
-              <span className="text-xs font-medium text-[var(--muted)]">
-                To
-              </span>
-              <input
-                className="sl-field sl-time-field mt-1 h-9 min-h-0 px-2 py-1 text-sm"
-                max={endTime}
-                min={startTime}
-                onChange={(event) => setBulkEndTime(event.target.value)}
-                step={slotSizeMinutes * 60}
-                type="time"
-                value={bulkEndTime}
-              />
-            </label>
+          <summary className="flex min-h-10 items-center justify-between gap-2 px-2 py-2 text-sm font-medium">
+            <span>Quick actions</span>
+            <span
+              aria-hidden="true"
+              className="sl-accordion-icon text-xs text-[var(--muted)]"
+            >
+              +
+            </span>
+          </summary>
+          <div className="space-y-2 border-t border-[var(--line)] p-2">
+            <p className="text-xs leading-5 text-[var(--muted)]">
+              Fill the same time range across several days at once.
+            </p>
+            <div className="grid grid-cols-2">
+              <label className="block min-w-0 overflow-hidden pr-1">
+                <span className="text-xs font-medium text-[var(--muted)]">
+                  From
+                </span>
+                <input
+                  className="sl-field sl-time-field mt-1 h-9 min-h-0 px-2 py-1 text-sm"
+                  max={endTime}
+                  min={startTime}
+                  onChange={(event) => setBulkStartTime(event.target.value)}
+                  step={slotSizeMinutes * 60}
+                  type="time"
+                  value={bulkStartTime}
+                />
+              </label>
+              <label className="block min-w-0 overflow-hidden pl-1">
+                <span className="text-xs font-medium text-[var(--muted)]">
+                  To
+                </span>
+                <input
+                  className="sl-field sl-time-field mt-1 h-9 min-h-0 px-2 py-1 text-sm"
+                  max={endTime}
+                  min={startTime}
+                  onChange={(event) => setBulkEndTime(event.target.value)}
+                  step={slotSizeMinutes * 60}
+                  type="time"
+                  value={bulkEndTime}
+                />
+              </label>
+            </div>
+            <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-1.5 sm:gap-2">
+              <button
+                className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:min-h-9 sm:px-3 sm:py-1.5 sm:text-xs"
+                disabled={!canApplyBulkRange}
+                onClick={() => applyBulkRange("all")}
+                type="button"
+              >
+                Apply to all days
+              </button>
+              <button
+                className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:min-h-9 sm:px-3 sm:py-1.5 sm:text-xs"
+                disabled={!canApplyBulkRange}
+                onClick={() => applyBulkRange("weekdays")}
+                type="button"
+              >
+                Apply to weekdays
+              </button>
+            </div>
           </div>
-          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-1.5 sm:grid-cols-4 sm:gap-2">
-            <button
-              className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:min-h-9 sm:px-3 sm:py-1.5 sm:text-xs"
-              disabled={!canApplyBulkRange}
-              onClick={() => applyBulkRange("all")}
-              type="button"
-            >
-              Apply to all days
-            </button>
-            <button
-              className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:min-h-9 sm:px-3 sm:py-1.5 sm:text-xs"
-              disabled={!canApplyBulkRange}
-              onClick={() => applyBulkRange("weekdays")}
-              type="button"
-            >
-              Apply to weekdays
-            </button>
-            <button
-              className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:px-3 sm:text-xs"
-              disabled={selectedIds.size === 0}
-              onClick={clearAll}
-              type="button"
-            >
-              Clear all
-            </button>
-            <button
-              className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:px-3 sm:text-xs"
-              disabled={!isDirty}
-              onClick={cancelChanges}
-              type="button"
-            >
-              Cancel changes
-            </button>
-          </div>
+        </details>
+
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-1.5 border-x border-b border-[var(--line)] bg-[var(--surface)] p-2 sm:rounded-[var(--radius-panel)] sm:border sm:gap-2">
+          <button
+            className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:px-3 sm:text-xs"
+            disabled={selectedIds.size === 0}
+            onClick={clearAll}
+            type="button"
+          >
+            Clear all
+          </button>
+          <button
+            className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:px-3 sm:text-xs"
+            disabled={!isDirty}
+            onClick={cancelChanges}
+            type="button"
+          >
+            Cancel changes
+          </button>
         </div>
 
         <div className="mt-2 overflow-x-auto rounded-t-none rounded-b-[8px] border border-[var(--line)] bg-[var(--surface)] sm:mt-0 sm:rounded-t-[8px]">

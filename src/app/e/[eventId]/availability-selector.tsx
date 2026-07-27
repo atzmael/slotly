@@ -13,6 +13,7 @@ import type { KeyboardEvent } from "react";
 import type { EventAvailabilityWindow } from "@/server/events";
 import { saveAvailabilityAction } from "./actions";
 import { broadcastEventChange } from "./event-realtime";
+import { TemporaryStatusMessage } from "./temporary-status-message";
 
 interface AvailabilitySelectorProps {
   readonly eventId: string;
@@ -309,9 +310,9 @@ export function AvailabilitySelector({
       ) : null}
 
       {state.status === "success" ? (
-        <div className="sl-alert sl-alert-success" role="status">
+        <TemporaryStatusMessage key={state.statusId}>
           Availability saved.
-        </div>
+        </TemporaryStatusMessage>
       ) : null}
 
       <div className="space-y-0 sm:space-y-2">

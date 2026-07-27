@@ -24,7 +24,9 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   await page.getByLabel("Your name").fill(participantName);
   await page.getByRole("button", { name: "Join poll" }).click();
 
-  await expect(page.getByText("You joined this poll.")).toBeVisible();
+  const joinedStatus = page.getByText("You joined this poll.");
+  await expect(joinedStatus).toBeVisible();
+  await expect(joinedStatus).toBeHidden({ timeout: 6000 });
   const firstSlot = page.getByRole("button", {
     name: /Mon, Jun 15.*07:00 PM -> 07:30 PM/,
   });
@@ -76,11 +78,13 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   await expect(nextDaySecondSlot).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Save availability" }).click();
 
-  await expect(page.getByText("Availability saved.")).toBeVisible();
+  const savedStatus = page.getByText("Availability saved.");
+  await expect(savedStatus).toBeVisible();
+  await expect(savedStatus).toBeHidden({ timeout: 6000 });
   await page.reload();
-  await expect(
-    page.getByText(`Welcome back, ${participantName}.`),
-  ).toBeVisible();
+  const welcomeBackStatus = page.getByText(`Welcome back, ${participantName}.`);
+  await expect(welcomeBackStatus).toBeVisible();
+  await expect(welcomeBackStatus).toBeHidden({ timeout: 6000 });
   await expect(page.getByLabel("Your name")).toBeHidden();
   await expect(firstSlot).toHaveAttribute("aria-pressed", "true");
   await expect(secondSlot).toHaveAttribute("aria-pressed", "true");

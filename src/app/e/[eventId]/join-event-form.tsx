@@ -15,6 +15,7 @@ import type {
 import { joinEventAction } from "./actions";
 import { AvailabilitySelector } from "./availability-selector";
 import { broadcastEventChange } from "./event-realtime";
+import { TemporaryStatusMessage } from "./temporary-status-message";
 
 const errorCopy: Record<string, string> = {
   event_id_invalid: "This event link is invalid.",
@@ -100,16 +101,16 @@ export function JoinEventForm({
       ) : null}
 
       {state.status === "success" ? (
-        <div className="sl-alert sl-alert-success" role="status">
+        <TemporaryStatusMessage key={state.statusId}>
           You joined this poll. Pick your availability next.
-        </div>
+        </TemporaryStatusMessage>
       ) : null}
 
       {state.status !== "success" && activeParticipant ? (
-        <div className="sl-alert sl-alert-success" role="status">
+        <TemporaryStatusMessage key={`welcome-${activeParticipant.id}`}>
           Welcome back, {activeParticipant.name}. Update your availability
           below.
-        </div>
+        </TemporaryStatusMessage>
       ) : null}
 
       {activeParticipantId ? (

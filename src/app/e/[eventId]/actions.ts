@@ -7,6 +7,7 @@ interface JoinEventActionState {
   readonly status: "idle" | "error" | "success";
   readonly errors: readonly string[];
   readonly participantId?: string;
+  readonly statusId?: string;
 }
 
 export async function joinEventAction(
@@ -33,12 +34,14 @@ export async function joinEventAction(
     status: "success",
     errors: [],
     participantId: result.participantId,
+    statusId: crypto.randomUUID(),
   };
 }
 
 interface SaveAvailabilityActionState {
   readonly status: "idle" | "error" | "success";
   readonly errors: readonly string[];
+  readonly statusId?: string;
 }
 
 export async function saveAvailabilityAction(
@@ -64,6 +67,7 @@ export async function saveAvailabilityAction(
   return {
     status: "success",
     errors: [],
+    statusId: crypto.randomUUID(),
   };
 }
 

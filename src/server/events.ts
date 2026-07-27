@@ -44,6 +44,10 @@ export interface AvailabilityRepository {
   ) => Promise<void>;
 }
 
+export interface StaleEventCleanupRepository {
+  readonly deleteStaleEvents: (retentionDays: number) => Promise<number>;
+}
+
 export interface ParticipantInsert {
   readonly event_id: string;
   readonly name: string;
@@ -126,6 +130,16 @@ export type JoinEventResult =
 export type SaveAvailabilityResult =
   | {
       readonly ok: true;
+    }
+  | {
+      readonly ok: false;
+      readonly errors: readonly string[];
+    };
+
+export type CleanupStaleEventsResult =
+  | {
+      readonly ok: true;
+      readonly deletedCount: number;
     }
   | {
       readonly ok: false;
@@ -334,6 +348,38 @@ export async function saveAvailability(
   }
 }
 
+export async function cleanupStaleEvents(
+  input: { readonly retentionDays?: number } = {},
+  repository: StaleEventCleanupRepository = createSupabaseStaleEventCleanupRepository(),
+): Promise<CleanupStaleEventsResult> {
+  const retentionDays = input.retentionDays ?? 14;
+
+  if (
+    !Number.isInteger(retentionDays) ||
+    retentionDays < 1 ||
+    retentionDays > 365
+  ) {
+    return {
+      ok: false,
+      errors: ["retention_days_invalid"],
+    };
+  }
+
+  try {
+    const deletedCount = await repository.deleteStaleEvents(retentionDays);
+
+    return {
+      ok: true,
+      deletedCount,
+    };
+  } catch {
+    return {
+      ok: false,
+      errors: ["cleanup_stale_events_failed"],
+    };
+  }
+}
+
 function createSupabaseCreateEventRepository(): CreateEventRepository {
   return {
     async insertEvent(event) {
@@ -428,6 +474,23 @@ function createSupabaseAvailabilityRepository(): AvailabilityRepository {
       if (insertResult.error) {
         throw insertResult.error;
       }
+    },
+  };
+}
+
+function createSupabaseStaleEventCleanupRepository(): StaleEventCleanupRepository {
+  return {
+    async deleteStaleEvents(retentionDays) {
+      const supabase = createServiceSupabaseClient();
+      const { data, error } = await supabase.rpc("delete_stale_events", {
+        retention_days: retentionDays,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return typeof data === "number" ? data : 0;
     },
   };
 }

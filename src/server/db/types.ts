@@ -127,6 +127,12 @@ export interface Database {
         };
         Returns: Json;
       };
+      delete_stale_events: {
+        Args: {
+          retention_days?: number;
+        };
+        Returns: number;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

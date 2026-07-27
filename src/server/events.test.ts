@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  cleanupStaleEvents,
   createEvent,
   getEventSnapshot,
   joinEvent,
@@ -10,6 +11,7 @@ import {
   type EventInsert,
   type ParticipantInsert,
   type ParticipantRepository,
+  type StaleEventCleanupRepository,
 } from "./events";
 
 function createFakeRepository(
@@ -45,6 +47,14 @@ function createFakeParticipantRepository(
       return existingParticipant;
     },
     insertParticipant: onInsert,
+  };
+}
+
+function createFakeStaleEventCleanupRepository(
+  onDelete: (retentionDays: number) => Promise<number>,
+): StaleEventCleanupRepository {
+  return {
+    deleteStaleEvents: onDelete,
   };
 }
 
@@ -452,6 +462,56 @@ describe("saveAvailability", () => {
     expect(result).toEqual({
       ok: false,
       errors: ["save_availability_failed"],
+    });
+  });
+});
+
+describe("cleanupStaleEvents", () => {
+  it("deletes stale events with the default retention window", async () => {
+    const retentionDaysSeen: number[] = [];
+    const result = await cleanupStaleEvents(
+      {},
+      createFakeStaleEventCleanupRepository(async (retentionDays) => {
+        retentionDaysSeen.push(retentionDays);
+        return 3;
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      deletedCount: 3,
+    });
+    expect(retentionDaysSeen).toEqual([14]);
+  });
+
+  it("rejects invalid retention windows before deleting", async () => {
+    let didDelete = false;
+    const result = await cleanupStaleEvents(
+      { retentionDays: 0 },
+      createFakeStaleEventCleanupRepository(async () => {
+        didDelete = true;
+        return 0;
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      errors: ["retention_days_invalid"],
+    });
+    expect(didDelete).toBe(false);
+  });
+
+  it("maps cleanup failures to a safe error", async () => {
+    const result = await cleanupStaleEvents(
+      {},
+      createFakeStaleEventCleanupRepository(async () => {
+        throw new Error("database unavailable");
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      errors: ["cleanup_stale_events_failed"],
     });
   });
 });

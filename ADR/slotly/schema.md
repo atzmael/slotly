@@ -45,6 +45,8 @@ Regles :
 - La page resultats est `/e/{eventId}/results`.
 - La fenetre horaire quotidienne est configurable a la creation et remplace
   toute plage horaire hardcodee cote UI.
+- Un poll sans activite pendant 14 jours apres sa date de fin peut etre supprime
+  automatiquement pour proteger le quota de la base gratuite.
 
 ### Participants
 
@@ -134,3 +136,8 @@ Principes :
 Migration initiale :
 
 - [`../../supabase/migrations/202605310001_initial_mvp.sql`](../../supabase/migrations/202605310001_initial_mvp.sql)
+
+Maintenance :
+
+- [`../../supabase/migrations/202607270001_stale_event_cleanup.sql`](../../supabase/migrations/202607270001_stale_event_cleanup.sql)
+  ajoute `delete_stale_events(retention_days)`.

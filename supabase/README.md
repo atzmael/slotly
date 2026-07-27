@@ -12,6 +12,7 @@ Initial schema:
 - `participants`
 - `availability_windows`
 - `get_event_snapshot(event_id)` public RPC for narrow link-based reads
+- `delete_stale_events(retention_days)` service-only RPC for scheduled cleanup
 
 The MVP is accountless. Next server services should use `SUPABASE_SECRET_KEY` for writes. Direct anonymous table access is intentionally closed by RLS; public reads should go through RPCs that accept a non-enumerable event id.
 
@@ -51,12 +52,24 @@ Slotly currently uses Supabase Realtime Broadcast, not Postgres changes:
 
 No `alter publication supabase_realtime add table ...` step is required for this implementation.
 
+## Scheduled Cleanup
+
+Production runs `/api/cron/cleanup-stale-events` daily through Vercel Cron.
+
+- Set `CRON_SECRET` in Vercel so the route can verify the cron request.
+- The cleanup deletes polls whose `end_date` is at least 14 days old and whose
+  latest activity is older than 14 days.
+- Activity is computed from `events.created_at`, `participants.updated_at`, and
+  `availability_windows.updated_at`.
+- Deleting an event cascades to participants and availability windows.
+
 ## Production Checklist
 
 - Confirm the initial migration is applied once to the production Supabase project.
+- Confirm the stale event cleanup migration is applied.
 - Confirm RLS is enabled on `events`, `participants`, and `availability_windows`.
 - Confirm anonymous direct table reads remain closed.
 - Confirm `get_event_snapshot(uuid)` is executable by `anon`.
-- Confirm Vercel has all three Supabase env vars.
+- Confirm Vercel has all three Supabase env vars and `CRON_SECRET`.
 - Run `pnpm build` before deploy.
 - Run `pnpm e2e` against a local server connected to the target Supabase project before the first public test.

@@ -316,18 +316,18 @@ export function AvailabilitySelector({
         </TemporaryStatusMessage>
       ) : null}
 
-      <div className="space-y-0 sm:space-y-2">
+      <div className="mx-[-1rem] space-y-0 sm:mx-0 sm:space-y-2">
         <div className="sl-panel space-y-2 rounded-b-none p-2 sm:rounded-b-[var(--radius-panel)]">
           <p className="text-xs leading-5 text-[var(--muted)]">
             Quickly mark the same time range across all days or weekdays.
           </p>
-          <div className="grid gap-2 sm:grid-cols-[minmax(7rem,1fr)_minmax(7rem,1fr)_auto_auto] sm:items-end">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-[minmax(7rem,1fr)_minmax(7rem,1fr)_auto_auto] sm:items-end">
             <label className="block">
               <span className="text-xs font-medium text-[var(--muted)]">
                 From
               </span>
               <input
-                className="sl-field mt-1 px-2 py-1.5 text-sm"
+                className="sl-field mt-1 h-9 min-h-0 px-2 py-1 text-sm"
                 max={endTime}
                 min={startTime}
                 onChange={(event) => setBulkStartTime(event.target.value)}
@@ -341,7 +341,7 @@ export function AvailabilitySelector({
                 To
               </span>
               <input
-                className="sl-field mt-1 px-2 py-1.5 text-sm"
+                className="sl-field mt-1 h-9 min-h-0 px-2 py-1 text-sm"
                 max={endTime}
                 min={startTime}
                 onChange={(event) => setBulkEndTime(event.target.value)}
@@ -351,7 +351,7 @@ export function AvailabilitySelector({
               />
             </label>
             <button
-              className="sl-button sl-button-secondary min-h-9 px-3 py-1.5 text-xs"
+              className="sl-button sl-button-secondary min-h-9 px-2 py-1 text-xs sm:px-3 sm:py-1.5"
               disabled={!canApplyBulkRange}
               onClick={() => applyBulkRange("all")}
               type="button"
@@ -359,7 +359,7 @@ export function AvailabilitySelector({
               Apply to all days
             </button>
             <button
-              className="sl-button sl-button-secondary min-h-9 px-3 py-1.5 text-xs"
+              className="sl-button sl-button-secondary min-h-9 px-2 py-1 text-xs sm:px-3 sm:py-1.5"
               disabled={!canApplyBulkRange}
               onClick={() => applyBulkRange("weekdays")}
               type="button"
@@ -369,7 +369,7 @@ export function AvailabilitySelector({
           </div>
           <div className="flex flex-wrap gap-2">
             <button
-              className="sl-button sl-button-secondary min-h-8 px-3 py-1 text-xs"
+              className="sl-button sl-button-secondary min-h-8 px-2 py-1 text-xs sm:px-3"
               disabled={selectedIds.size === 0}
               onClick={clearAll}
               type="button"
@@ -377,7 +377,7 @@ export function AvailabilitySelector({
               Clear all
             </button>
             <button
-              className="sl-button sl-button-secondary min-h-8 px-3 py-1 text-xs"
+              className="sl-button sl-button-secondary min-h-8 px-2 py-1 text-xs sm:px-3"
               disabled={!isDirty}
               onClick={cancelChanges}
               type="button"
@@ -387,19 +387,19 @@ export function AvailabilitySelector({
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-t-none rounded-b-[8px] border border-[var(--line)] bg-[var(--surface)] sm:rounded-t-[8px]">
+        <div className="mt-2 overflow-x-auto rounded-t-none rounded-b-[8px] border border-[var(--line)] bg-[var(--surface)] sm:mt-0 sm:rounded-t-[8px]">
           <div
-            className="grid min-w-max select-none"
+            className="grid min-w-max select-none [--day-col-min:5.75rem] [--time-col-width:3.75rem] sm:[--day-col-min:7rem] sm:[--time-col-width:4.5rem]"
             style={{
-              gridTemplateColumns: `4.5rem repeat(${days.length}, minmax(7rem, 1fr))`,
+              gridTemplateColumns: `var(--time-col-width) repeat(${days.length}, minmax(var(--day-col-min), 1fr))`,
             }}
           >
-            <div className="sticky left-0 z-10 border-r border-b border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-xs font-medium text-[var(--muted)]">
+            <div className="sticky left-0 z-10 border-r border-b border-[var(--line)] bg-[#f5f5ef] px-1.5 py-2.5 text-xs font-medium text-[var(--muted)] sm:px-2 sm:py-3">
               Time
             </div>
             {days.map((day) => (
               <div
-                className="border-b border-l border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-center text-xs font-semibold"
+                className="border-b border-l border-[var(--line)] bg-[#f5f5ef] px-1.5 py-2.5 text-center text-xs font-semibold sm:px-2 sm:py-3"
                 key={day.id}
               >
                 {day.label}
@@ -408,7 +408,7 @@ export function AvailabilitySelector({
 
             {rows.map((row, rowIndex) => (
               <Fragment key={row.label}>
-                <div className="sticky left-0 z-10 border-r border-b border-[var(--line)] bg-[var(--surface)] px-2 py-3 text-xs font-medium text-[var(--muted)]">
+                <div className="sticky left-0 z-10 border-r border-b border-[var(--line)] bg-[var(--surface)] px-1.5 py-2.5 text-xs font-medium text-[var(--muted)] sm:px-2 sm:py-3">
                   {row.label.split(" -> ")[0]}
                 </div>
                 {days.map((day) => {
@@ -419,7 +419,7 @@ export function AvailabilitySelector({
                     <button
                       aria-label={`${cell.dayLabel} ${cell.label}`}
                       aria-pressed={selected}
-                      className={`sl-availability-cell min-h-14 touch-none border-b border-l border-[var(--line)] px-2 py-3 text-left text-xs active:scale-[0.99] ${
+                      className={`sl-availability-cell min-h-12 touch-none border-b border-l border-[var(--line)] px-1.5 py-2.5 text-left text-xs active:scale-[0.99] sm:min-h-14 sm:px-2 sm:py-3 ${
                         selected
                           ? "bg-[#dff4ed] text-[var(--foreground)]"
                           : "bg-[var(--surface)] text-[var(--muted)]"

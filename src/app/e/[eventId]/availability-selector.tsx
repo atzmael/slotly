@@ -393,7 +393,7 @@ export function AvailabilitySelector({
               gridTemplateColumns: `4.5rem repeat(${days.length}, minmax(7rem, 1fr))`,
             }}
           >
-            <div className="sticky left-0 z-10 border-b border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-xs font-medium text-[var(--muted)]">
+            <div className="sticky left-0 z-10 border-r border-b border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-xs font-medium text-[var(--muted)]">
               Time
             </div>
             {days.map((day) => (
@@ -407,7 +407,7 @@ export function AvailabilitySelector({
 
             {rows.map((row, rowIndex) => (
               <Fragment key={row.label}>
-                <div className="sticky left-0 z-10 border-b border-[var(--line)] bg-[var(--surface)] px-2 py-3 text-xs font-medium text-[var(--muted)]">
+                <div className="sticky left-0 z-10 border-r border-b border-[var(--line)] bg-[var(--surface)] px-2 py-3 text-xs font-medium text-[var(--muted)]">
                   {row.label.split(" -> ")[0]}
                 </div>
                 {days.map((day) => {

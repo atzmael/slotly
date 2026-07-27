@@ -95,10 +95,13 @@ Realtime uses Supabase Broadcast topics named `event:{eventId}`. No Postgres tab
 - `NEXT_PUBLIC_SUPABASE_URL` configured in Vercel.
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` configured in Vercel.
 - `SUPABASE_SECRET_KEY` configured in Vercel as a server-only secret.
+- `CRON_SECRET` configured in Vercel for scheduled cleanup.
 - `pnpm build` passes locally.
+- `pnpm audit --prod` has no high or moderate production findings.
 - `pnpm e2e` passes locally against the target environment variables.
 - Vercel preview opens `/new`.
 - Preview happy path works: create poll, join, save availability, view results.
+- Vercel Firewall or another edge protection is ready if public traffic spikes.
 
 ## Quality Checks
 

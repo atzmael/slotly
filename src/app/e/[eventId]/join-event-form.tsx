@@ -24,6 +24,7 @@ const errorCopy: Record<string, string> = {
   participant_name_taken:
     "This name is already used in this poll. Add an initial or another detail.",
   timezone_invalid: "Your timezone could not be detected.",
+  rate_limited: "Too many attempts. Wait a few minutes, then try again.",
   join_event_failed: "Could not join this poll. Try again.",
 };
 

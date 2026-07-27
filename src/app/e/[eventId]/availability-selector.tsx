@@ -55,6 +55,7 @@ const errorCopy: Record<string, string> = {
   availability_required: "Select at least one slot.",
   availability_too_large: "Too many slots selected.",
   availability_window_invalid: "One selected slot is invalid.",
+  rate_limited: "Too many attempts. Wait a few minutes, then try again.",
   save_availability_failed: "Could not save availability. Try again.",
 };
 

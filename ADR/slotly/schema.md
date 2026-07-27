@@ -130,8 +130,17 @@ Principes :
 - pas de lecture directe anon des tables MVP par defaut ;
 - insertion event/participant/availability via services serveur et `SUPABASE_SECRET_KEY` ;
 - event ids non enumerables ;
-- rate limiting applicatif si necessaire ;
+- rate limiting applicatif minimum sur les mutations publiques ;
 - aucune donnee sensible stockee hors nom libre et timezone.
+
+Protection mutations publiques :
+
+- creation poll, join poll et save availability sont limites par IP en memoire
+  cote serveur pour reduire le spam opportuniste ;
+- cette protection est best-effort en serverless et doit etre completee par
+  Vercel Firewall ou une protection externe si l'audience devient large ;
+- `saveAvailability` doit verifier que `participant_id` appartient au `event_id`
+  soumis avant de supprimer ou inserer des disponibilites.
 
 Migration initiale :
 

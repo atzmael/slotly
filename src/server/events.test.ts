@@ -24,9 +24,10 @@ function createFakeRepository(
 
 function createFakeAvailabilityRepository(
   onReplace: (
+    eventId: string,
     participantId: string,
     windows: readonly AvailabilityInsert[],
-  ) => Promise<void>,
+  ) => Promise<"replaced" | "participant_not_found">,
 ): AvailabilityRepository {
   return {
     replaceAvailability: onReplace,
@@ -353,11 +354,13 @@ describe("joinEvent", () => {
 describe("saveAvailability", () => {
   it("replaces a participant availability windows", async () => {
     const replacements: Array<{
+      readonly eventId: string;
       readonly participantId: string;
       readonly windows: readonly AvailabilityInsert[];
     }> = [];
     const result = await saveAvailability(
       {
+        eventId: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
         participantId: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
         windows: [
           {
@@ -370,14 +373,18 @@ describe("saveAvailability", () => {
           },
         ],
       },
-      createFakeAvailabilityRepository(async (participantId, windows) => {
-        replacements.push({ participantId, windows });
-      }),
+      createFakeAvailabilityRepository(
+        async (eventId, participantId, windows) => {
+          replacements.push({ eventId, participantId, windows });
+          return "replaced";
+        },
+      ),
     );
 
     expect(result).toEqual({ ok: true });
     expect(replacements).toEqual([
       {
+        eventId: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
         participantId: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
         windows: [
           {
@@ -397,22 +404,28 @@ describe("saveAvailability", () => {
 
   it("allows clearing all availability windows", async () => {
     const replacements: Array<{
+      readonly eventId: string;
       readonly participantId: string;
       readonly windows: readonly AvailabilityInsert[];
     }> = [];
     const result = await saveAvailability(
       {
+        eventId: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
         participantId: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
         windows: [],
       },
-      createFakeAvailabilityRepository(async (participantId, windows) => {
-        replacements.push({ participantId, windows });
-      }),
+      createFakeAvailabilityRepository(
+        async (eventId, participantId, windows) => {
+          replacements.push({ eventId, participantId, windows });
+          return "replaced";
+        },
+      ),
     );
 
     expect(result).toEqual({ ok: true });
     expect(replacements).toEqual([
       {
+        eventId: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
         participantId: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
         windows: [],
       },
@@ -423,6 +436,7 @@ describe("saveAvailability", () => {
     let didReplace = false;
     const result = await saveAvailability(
       {
+        eventId: "abc123",
         participantId: "not-a-uuid",
         windows: [
           {
@@ -433,19 +447,46 @@ describe("saveAvailability", () => {
       },
       createFakeAvailabilityRepository(async () => {
         didReplace = true;
+        return "replaced";
       }),
     );
 
     expect(result).toEqual({
       ok: false,
-      errors: ["participant_id_invalid", "availability_window_invalid"],
+      errors: [
+        "event_id_invalid",
+        "participant_id_invalid",
+        "availability_window_invalid",
+      ],
     });
     expect(didReplace).toBe(false);
+  });
+
+  it("rejects participants that do not belong to the event", async () => {
+    let didAttemptReplace = false;
+    const result = await saveAvailability(
+      {
+        eventId: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
+        participantId: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
+        windows: [],
+      },
+      createFakeAvailabilityRepository(async () => {
+        didAttemptReplace = true;
+        return "participant_not_found";
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      errors: ["participant_id_invalid"],
+    });
+    expect(didAttemptReplace).toBe(true);
   });
 
   it("maps persistence failures to a safe error", async () => {
     const result = await saveAvailability(
       {
+        eventId: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
         participantId: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
         windows: [
           {

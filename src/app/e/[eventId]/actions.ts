@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { joinEvent, saveAvailability } from "@/server/events";
+import { checkActionRateLimit } from "@/server/rate-limit";
 
 interface JoinEventActionState {
   readonly status: "idle" | "error" | "success";
@@ -15,6 +16,14 @@ export async function joinEventAction(
   formData: FormData,
 ): Promise<JoinEventActionState> {
   const eventId = getString(formData, "eventId");
+
+  if (!(await checkActionRateLimit("join_event"))) {
+    return {
+      status: "error",
+      errors: ["rate_limited"],
+    };
+  }
+
   const result = await joinEvent({
     eventId,
     name: getString(formData, "name"),
@@ -49,7 +58,16 @@ export async function saveAvailabilityAction(
   formData: FormData,
 ): Promise<SaveAvailabilityActionState> {
   const eventId = getString(formData, "eventId");
+
+  if (!(await checkActionRateLimit("save_availability"))) {
+    return {
+      status: "error",
+      errors: ["rate_limited"],
+    };
+  }
+
   const result = await saveAvailability({
+    eventId,
     participantId: getString(formData, "participantId"),
     windows: parseWindows(getString(formData, "windows")),
   });

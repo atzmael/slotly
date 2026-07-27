@@ -39,9 +39,10 @@ export interface ParticipantRepository {
 
 export interface AvailabilityRepository {
   readonly replaceAvailability: (
+    eventId: string,
     participantId: string,
     windows: readonly AvailabilityInsert[],
-  ) => Promise<void>;
+  ) => Promise<"replaced" | "participant_not_found">;
 }
 
 export interface StaleEventCleanupRepository {
@@ -297,6 +298,7 @@ export async function joinEvent(
 
 export async function saveAvailability(
   input: {
+    readonly eventId: string;
     readonly participantId: string;
     readonly windows: readonly {
       readonly start: string;
@@ -306,6 +308,10 @@ export async function saveAvailability(
   repository: AvailabilityRepository = createSupabaseAvailabilityRepository(),
 ): Promise<SaveAvailabilityResult> {
   const errors: string[] = [];
+
+  if (!isUuid(input.eventId)) {
+    errors.push("event_id_invalid");
+  }
 
   if (!isUuid(input.participantId)) {
     errors.push("participant_id_invalid");
@@ -338,7 +344,19 @@ export async function saveAvailability(
   }
 
   try {
-    await repository.replaceAvailability(input.participantId, windows);
+    const result = await repository.replaceAvailability(
+      input.eventId,
+      input.participantId,
+      windows,
+    );
+
+    if (result === "participant_not_found") {
+      return {
+        ok: false,
+        errors: ["participant_id_invalid"],
+      };
+    }
+
     return { ok: true };
   } catch {
     return {
@@ -452,8 +470,23 @@ function createSupabaseParticipantRepository(): ParticipantRepository {
 
 function createSupabaseAvailabilityRepository(): AvailabilityRepository {
   return {
-    async replaceAvailability(participantId, windows) {
+    async replaceAvailability(eventId, participantId, windows) {
       const supabase = createServiceSupabaseClient();
+      const { data: participant, error: participantError } = await supabase
+        .from("participants")
+        .select("id")
+        .eq("id", participantId)
+        .eq("event_id", eventId)
+        .maybeSingle();
+
+      if (participantError) {
+        throw participantError;
+      }
+
+      if (!participant) {
+        return "participant_not_found";
+      }
+
       const deleteResult = await supabase
         .from("availability_windows")
         .delete()
@@ -464,7 +497,7 @@ function createSupabaseAvailabilityRepository(): AvailabilityRepository {
       }
 
       if (windows.length === 0) {
-        return;
+        return "replaced";
       }
 
       const insertResult = await supabase
@@ -474,6 +507,8 @@ function createSupabaseAvailabilityRepository(): AvailabilityRepository {
       if (insertResult.error) {
         throw insertResult.error;
       }
+
+      return "replaced";
     },
   };
 }

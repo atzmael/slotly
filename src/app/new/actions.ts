@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createEvent } from "@/server/events";
+import { checkActionRateLimit } from "@/server/rate-limit";
 
 interface CreateEventActionState {
   readonly status: "idle" | "error";
@@ -24,6 +25,15 @@ export async function createEventAction(
   formData: FormData,
 ): Promise<CreateEventActionState> {
   const values = getCreateEventActionValues(formData);
+
+  if (!(await checkActionRateLimit("create_event"))) {
+    return {
+      status: "error",
+      errors: ["rate_limited"],
+      values,
+    };
+  }
+
   const result = await createEvent(values);
 
   if (!result.ok) {

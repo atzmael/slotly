@@ -30,6 +30,7 @@ const errorCopy: Record<string, string> = {
   slot_size_invalid: "Choose a supported slot size.",
   database_migration_required:
     "The database is not up to date. Apply the latest Supabase migration, then try again.",
+  rate_limited: "Too many attempts. Wait a few minutes, then try again.",
   create_event_failed: "The poll could not be created. Try again.",
 };
 

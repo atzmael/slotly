@@ -318,7 +318,7 @@ export function AvailabilitySelector({
 
       <div className="mx-[-1rem] space-y-0 sm:mx-0 sm:space-y-2">
         <details
-          className="sl-panel sl-accordion rounded-b-none sm:rounded-b-[var(--radius-panel)]"
+          className="sl-panel sl-accordion"
           data-testid="quick-actions-panel"
         >
           <summary className="flex min-h-10 items-center justify-between gap-2 px-2 py-2 text-sm font-medium">
@@ -385,7 +385,7 @@ export function AvailabilitySelector({
           </div>
         </details>
 
-        <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-1.5 border-x border-b border-[var(--line)] bg-[var(--surface)] p-2 sm:rounded-[var(--radius-panel)] sm:border sm:gap-2">
+        <div className="mt-2 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-1.5 rounded-[var(--radius-panel)] border border-[var(--line)] bg-[var(--surface)] p-2 sm:gap-2">
           <button
             className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:px-3 sm:text-xs"
             disabled={selectedIds.size === 0}

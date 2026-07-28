@@ -323,7 +323,10 @@ export function AvailabilitySelector({
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-3 sm:gap-4">
+    <form
+      action={formAction}
+      className="flex flex-col gap-3 pb-20 sm:gap-4 sm:pb-0"
+    >
       <input name="eventId" type="hidden" value={eventId} />
       <input name="participantId" type="hidden" value={participantId} />
       <input
@@ -452,7 +455,7 @@ export function AvailabilitySelector({
         <div className="mt-2 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-1.5 px-2 sm:gap-2 sm:px-0">
           <button
             className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:px-3 sm:text-xs"
-            disabled={selectedIds.size === 0}
+            disabled={isPending || selectedIds.size === 0}
             onClick={clearAll}
             type="button"
           >
@@ -460,7 +463,7 @@ export function AvailabilitySelector({
           </button>
           <button
             className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:px-3 sm:text-xs"
-            disabled={!isDirty}
+            disabled={isPending || !isDirty}
             onClick={cancelChanges}
             type="button"
           >
@@ -526,15 +529,17 @@ export function AvailabilitySelector({
         </div>
       </div>
 
-      <button
-        className={`sl-button sticky bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-20 w-full px-5 py-3 shadow-[0_10px_30px_rgb(29_29_27_/_18%)] sm:static sm:shadow-none ${
-          isDirty ? "sl-button-primary" : "sl-button-secondary"
-        }`}
-        disabled={isPending || !isDirty}
-        type="submit"
-      >
-        {isPending ? t.event.availability.saving : t.event.availability.save}
-      </button>
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--line)] bg-[var(--background)]/95 px-5 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] backdrop-blur sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+        <button
+          className={`sl-button w-full px-5 py-3 shadow-[0_10px_30px_rgb(29_29_27_/_18%)] sm:shadow-none ${
+            isDirty ? "sl-button-primary" : "sl-button-secondary"
+          }`}
+          disabled={isPending || !isDirty}
+          type="submit"
+        >
+          {isPending ? t.event.availability.saving : t.event.availability.save}
+        </button>
+      </div>
     </form>
   );
 }

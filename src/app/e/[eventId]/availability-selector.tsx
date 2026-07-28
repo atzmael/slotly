@@ -325,7 +325,9 @@ export function AvailabilitySelector({
   return (
     <form
       action={formAction}
-      className="flex flex-col gap-3 pb-20 sm:gap-4 sm:pb-0"
+      className={`flex flex-col gap-3 sm:gap-4 ${
+        isDirty || isPending ? "pb-20 sm:pb-0" : ""
+      }`}
     >
       <input name="eventId" type="hidden" value={eventId} />
       <input name="participantId" type="hidden" value={participantId} />
@@ -529,7 +531,11 @@ export function AvailabilitySelector({
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--line)] bg-[var(--background)]/95 px-5 pt-2 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] backdrop-blur sm:static sm:border-0 sm:bg-transparent sm:p-0 sm:backdrop-blur-none">
+      <div
+        className={`inset-x-0 bottom-0 z-30 px-5 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:static sm:block sm:p-0 ${
+          isDirty || isPending ? "fixed" : "hidden sm:block"
+        }`}
+      >
         <button
           className={`sl-button w-full px-5 py-3 shadow-[0_10px_30px_rgb(29_29_27_/_18%)] sm:shadow-none ${
             isDirty ? "sl-button-primary" : "sl-button-secondary"

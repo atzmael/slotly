@@ -475,12 +475,12 @@ export function AvailabilitySelector({
               gridTemplateColumns: `var(--time-col-width) repeat(${days.length}, minmax(var(--day-col-min), 1fr))`,
             }}
           >
-            <div className="sticky left-0 z-10 border-r border-b border-[var(--line)] bg-[#f5f5ef] px-1.5 py-2.5 text-xs font-medium text-[var(--muted)] sm:px-2 sm:py-3">
+            <div className="sticky left-0 z-10 flex min-h-12 items-center border-r border-b border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-sm font-medium text-[var(--muted)] sm:min-h-11 sm:px-2 sm:py-3 sm:text-xs">
               {t.event.availability.timeHeader}
             </div>
             {days.map((day) => (
               <div
-                className="border-b border-l border-[var(--line)] bg-[#f5f5ef] px-1.5 py-2.5 text-center text-xs font-semibold sm:px-2 sm:py-3"
+                className="flex min-h-12 items-center justify-center border-b border-l border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-center text-sm font-semibold sm:min-h-11 sm:px-2 sm:py-3 sm:text-xs"
                 key={day.id}
               >
                 {day.label}
@@ -527,7 +527,9 @@ export function AvailabilitySelector({
       </div>
 
       <button
-        className="sl-button sl-button-primary w-full px-5 py-3"
+        className={`sl-button sticky bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-20 w-full px-5 py-3 shadow-[0_10px_30px_rgb(29_29_27_/_18%)] sm:static sm:shadow-none ${
+          isDirty ? "sl-button-primary" : "sl-button-secondary"
+        }`}
         disabled={isPending || !isDirty}
         type="submit"
       >

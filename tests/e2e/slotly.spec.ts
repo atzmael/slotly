@@ -75,10 +75,16 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
 
   await expect(
     page.getByRole("button", { name: "Save availability" }),
-  ).toBeDisabled();
+  ).toBeHidden();
   await firstSlot.click();
+  await expect(
+    page.getByRole("button", { name: "Save availability" }),
+  ).toBeEnabled();
   await expect(firstSlot).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Cancel changes" }).click();
+  await expect(
+    page.getByRole("button", { name: "Save availability" }),
+  ).toBeHidden();
   await expect(firstSlot).toHaveAttribute("aria-pressed", "false");
 
   await page.getByRole("button", { name: "Apply to all days" }).click();

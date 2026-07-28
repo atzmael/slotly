@@ -532,8 +532,8 @@ export function AvailabilitySelector({
       </div>
 
       <div
-        className={`inset-x-0 bottom-0 z-30 px-5 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:static sm:block sm:p-0 ${
-          isDirty || isPending ? "fixed" : "hidden sm:block"
+        className={`fixed inset-x-0 bottom-0 z-30 px-5 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:inset-x-auto sm:right-8 sm:bottom-6 sm:w-80 sm:p-0 ${
+          isDirty || isPending ? "block" : "hidden"
         }`}
       >
         <button

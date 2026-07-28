@@ -451,41 +451,30 @@ export function AvailabilitySelector({
                 {t.event.availability.applyWeekdays}
               </button>
             </div>
+            <button
+              className="sl-button sl-button-secondary min-h-8 w-full px-1.5 py-1 text-[0.8125rem] leading-tight sm:w-1/2 sm:px-3 sm:text-xs"
+              disabled={isPending || selectedIds.size === 0}
+              onClick={clearAll}
+              type="button"
+            >
+              {t.event.availability.clearAll}
+            </button>
           </div>
         </details>
 
-        <div className="mt-2 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-1.5 px-2 sm:gap-2 sm:px-0">
-          <button
-            className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:px-3 sm:text-xs"
-            disabled={isPending || selectedIds.size === 0}
-            onClick={clearAll}
-            type="button"
-          >
-            {t.event.availability.clearAll}
-          </button>
-          <button
-            className="sl-button sl-button-secondary min-h-8 min-w-0 px-1.5 py-1 text-[0.8125rem] leading-tight sm:px-3 sm:text-xs"
-            disabled={isPending || !isDirty}
-            onClick={cancelChanges}
-            type="button"
-          >
-            {t.event.availability.cancelChanges}
-          </button>
-        </div>
-
-        <div className="mt-2 overflow-x-auto rounded-t-none rounded-b-[8px] border border-[var(--line)] bg-[var(--surface)] sm:mt-0 sm:rounded-t-[8px]">
+        <div className="mt-2 max-h-[calc(100svh-16rem)] overflow-auto rounded-t-none rounded-b-[8px] border border-[var(--line)] bg-[var(--surface)] sm:mt-0 sm:max-h-[calc(100vh-17rem)] sm:rounded-t-[8px]">
           <div
             className="grid min-w-max select-none [--day-col-min:5.75rem] [--time-col-width:3.25rem] sm:[--day-col-min:7rem] sm:[--time-col-width:4.5rem]"
             style={{
               gridTemplateColumns: `var(--time-col-width) repeat(${days.length}, minmax(var(--day-col-min), 1fr))`,
             }}
           >
-            <div className="sticky left-0 z-10 flex min-h-12 items-center border-r border-b border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-sm font-medium text-[var(--muted)] sm:min-h-11 sm:px-2 sm:py-3 sm:text-xs">
+            <div className="sticky top-0 left-0 z-20 flex min-h-12 items-center border-r border-b border-l border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-sm font-medium text-[var(--muted)] sm:min-h-11 sm:px-2 sm:py-3 sm:text-xs">
               {t.event.availability.timeHeader}
             </div>
             {days.map((day) => (
               <div
-                className="flex min-h-12 items-center justify-center border-b border-l border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-center text-sm font-semibold sm:min-h-11 sm:px-2 sm:py-3 sm:text-xs"
+                className="sticky top-0 z-10 flex min-h-12 items-center justify-center border-r border-b border-l border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-center text-sm font-semibold sm:min-h-11 sm:px-2 sm:py-3 sm:text-xs"
                 key={day.id}
               >
                 {day.label}
@@ -494,7 +483,7 @@ export function AvailabilitySelector({
 
             {rows.map((row, rowIndex) => (
               <Fragment key={row.label}>
-                <div className="sticky left-0 z-10 border-r border-b border-[var(--line)] bg-[var(--surface)] px-1.5 py-2.5 text-xs font-medium text-[var(--muted)] sm:px-2 sm:py-3">
+                <div className="sticky left-0 z-10 border-r border-b border-l border-[var(--line)] bg-[var(--surface)] px-1.5 py-2.5 text-xs font-medium text-[var(--muted)] sm:px-2 sm:py-3">
                   {row.label.split(" -> ")[0]}
                 </div>
                 {days.map((day) => {
@@ -505,7 +494,7 @@ export function AvailabilitySelector({
                     <button
                       aria-label={`${cell.dayLabel} ${cell.label}`}
                       aria-pressed={selected}
-                      className={`sl-availability-cell min-h-12 touch-none border-b border-l border-[var(--line)] px-1.5 py-2.5 text-left text-xs active:scale-[0.99] sm:min-h-14 sm:px-2 sm:py-3 ${
+                      className={`sl-availability-cell min-h-12 touch-none border-r border-b border-l border-[var(--line)] px-1.5 py-2.5 text-left text-xs active:scale-[0.99] sm:min-h-14 sm:px-2 sm:py-3 ${
                         selected
                           ? "bg-[#dff4ed] text-[var(--foreground)]"
                           : "bg-[var(--surface)] text-[var(--muted)]"
@@ -532,10 +521,18 @@ export function AvailabilitySelector({
       </div>
 
       <div
-        className={`fixed inset-x-0 bottom-0 z-30 px-5 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:inset-x-auto sm:right-8 sm:bottom-6 sm:w-80 sm:p-0 ${
-          isDirty || isPending ? "block" : "hidden"
+        className={`fixed inset-x-0 bottom-0 z-30 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 px-5 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:inset-x-auto sm:right-8 sm:bottom-6 sm:w-[28rem] sm:p-0 ${
+          isDirty || isPending ? "grid" : "hidden"
         }`}
       >
+        <button
+          className="sl-button sl-button-secondary w-full px-5 py-3 shadow-[0_10px_30px_rgb(29_29_27_/_18%)] sm:shadow-none"
+          disabled={isPending || !isDirty}
+          onClick={cancelChanges}
+          type="button"
+        >
+          {t.event.availability.cancelChanges}
+        </button>
         <button
           className={`sl-button w-full px-5 py-3 shadow-[0_10px_30px_rgb(29_29_27_/_18%)] sm:shadow-none ${
             isDirty ? "sl-button-primary" : "sl-button-secondary"

@@ -27,11 +27,16 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   const joinedStatus = page.getByText("You joined this poll.");
   await expect(joinedStatus).toBeVisible();
   await expect(joinedStatus).toBeHidden({ timeout: 6000 });
-  await expect(page.getByRole("button", { name: "Clear all" })).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Cancel changes" }),
-  ).toBeVisible();
+  ).toBeHidden();
+  await expect(
+    page.getByRole("button", { name: "Save availability" }),
+  ).toBeHidden();
   await page.getByText("Quick actions").click();
+  await expect(
+    page.getByRole("button", { name: "Deselect all" }),
+  ).toBeVisible();
   await page.setViewportSize({ width: 393, height: 852 });
   const quickActionsLayout = await page
     .getByTestId("quick-actions-panel")
@@ -91,7 +96,7 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   await expect(firstSlot).toHaveAttribute("aria-pressed", "true");
   await expect(secondSlot).toHaveAttribute("aria-pressed", "true");
   await expect(saturdaySlot).toHaveAttribute("aria-pressed", "true");
-  await page.getByRole("button", { name: "Clear all" }).click();
+  await page.getByRole("button", { name: "Deselect all" }).click();
   await expect(firstSlot).toHaveAttribute("aria-pressed", "false");
   await expect(secondSlot).toHaveAttribute("aria-pressed", "false");
   await expect(saturdaySlot).toHaveAttribute("aria-pressed", "false");
@@ -99,7 +104,7 @@ test("creates a poll, joins it, saves availability, and shows ranked results", a
   await page.getByRole("button", { name: "Apply to weekdays" }).click();
   await expect(firstSlot).toHaveAttribute("aria-pressed", "true");
   await expect(saturdaySlot).toHaveAttribute("aria-pressed", "false");
-  await page.getByRole("button", { name: "Clear all" }).click();
+  await page.getByRole("button", { name: "Deselect all" }).click();
   await expect(firstSlot).toHaveAttribute("aria-pressed", "false");
 
   await firstSlot.click();

@@ -24,10 +24,9 @@
   --success-text: #0f766e;
   --radius-control: 999px;
   --radius-panel: 10px;
-  --shadow-panel: 0 1px 2px rgb(15 23 42 / 4%),
-    0 12px 32px rgb(15 23 42 / 7%);
-  --shadow-panel-hover: 0 2px 4px rgb(15 23 42 / 5%),
-    0 16px 40px rgb(15 23 42 / 10%);
+  --shadow-panel: 0 1px 2px rgb(15 23 42 / 4%), 0 12px 32px rgb(15 23 42 / 7%);
+  --shadow-panel-hover:
+    0 2px 4px rgb(15 23 42 / 5%), 0 16px 40px rgb(15 23 42 / 10%);
   --shadow-floating: 0 12px 32px rgb(15 23 42 / 18%);
   --focus-ring: 0 0 0 3px rgb(15 118 110 / 14%);
   --transition-fast: 160ms ease;

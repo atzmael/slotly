@@ -11,6 +11,10 @@ const en = {
     languageEnglish: "EN",
     languageFrench: "FR",
     fallbackError: "Something went wrong.",
+    legalNotice: "Legal notice",
+    terms: "Terms",
+    privacy: "Privacy",
+    feedback: "Feedback or bug",
   },
   home: {
     createPoll: "Create Poll",
@@ -30,7 +34,6 @@ const en = {
       ["Wed 20:00", "11 available", "w-11/12"],
       ["Thu 21:00", "10 available", "w-10/12"],
     ],
-    feedback: "Submit feedback or a bug",
   },
   create: {
     backlink: "Slotly",
@@ -175,6 +178,10 @@ const fr: Messages = {
     languageEnglish: "EN",
     languageFrench: "FR",
     fallbackError: "Une erreur est survenue.",
+    legalNotice: "Mentions légales",
+    terms: "Conditions d’utilisation",
+    privacy: "Confidentialité",
+    feedback: "Feedback ou bug",
   },
   home: {
     createPoll: "Créer un sondage",
@@ -194,7 +201,6 @@ const fr: Messages = {
       ["Mer 20:00", "11 disponibles", "w-11/12"],
       ["Jeu 21:00", "10 disponibles", "w-10/12"],
     ],
-    feedback: "Envoyer un feedback ou un bug",
   },
   create: {
     backlink: "Slotly",

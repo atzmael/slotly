@@ -1,21 +1,21 @@
 # Slotly
 
-**Find the best time or date to meet, without accounts or spreadsheets.**
+**Find the right time, together.**
 
-Slotly is a lightweight availability poll built for quick plans: meetings,
-dinners, weekends with friends, family events, and any moment where asking
-"when are you free?" should not become project management.
+Slotly is a lightweight availability poll built for friends, clubs, volunteer
+teams, associations, families, and small crews that need to find a moment
+without turning a simple plan into project management.
 
 [Try Slotly](https://slotly-meetings.vercel.app)
 
 ## What It Does
 
-Slotly lets anyone create a poll, share a link, and collect availability from
-participants in a few seconds.
+Slotly lets anyone create a poll, share a link, collect availability, and see
+the best option in a few seconds.
 
 - **No accounts**: organizers and participants can use it immediately.
 - **One link**: create a poll and share it anywhere.
-- **Mobile-first selection**: tap or drag across the slots that work.
+- **Mobile-first selection**: tap or drag across the options that work.
 - **Time-slot polls**: find the best meeting time across several days.
 - **Full-day polls**: pick whole dates for weekends, trips, and date-only plans.
 - **Instant results**: Slotly ranks the best options automatically.
@@ -26,7 +26,7 @@ participants in a few seconds.
 
 Most scheduling products are either too formal, too account-heavy, or awkward on
 phones. Slotly is intentionally small: no onboarding, no team setup, no calendar
-integration required before you can get an answer.
+integration required before a group can get an answer.
 
 The goal is simple:
 

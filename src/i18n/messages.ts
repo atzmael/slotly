@@ -18,16 +18,16 @@ const en = {
   },
   home: {
     createPoll: "Create Poll",
-    eyebrow: "Fast planning, built for phones",
-    title: "Find the best time without the spreadsheet feeling.",
+    eyebrow: "For friends, clubs, volunteer teams, and small crews",
+    title: "Find the right time, together.",
     subtitle:
-      "Create a link, collect availability, and instantly know the best time to meet.",
+      "Plan dinners, weekends, association meetings, or lightweight team sessions with one simple availability link.",
     bestSlots: "Best slots",
     live: "Live",
     valueProps: [
       "No accounts",
-      "Mobile-first availability",
-      "Automatic best-slot ranking",
+      "Made for group chats",
+      "Useful for small teams too",
     ],
     demoSlots: [
       ["Tue 20:00", "12 available", "w-full"],
@@ -188,16 +188,16 @@ const fr: Messages = {
   },
   home: {
     createPoll: "Créer un sondage",
-    eyebrow: "Planification rapide, pensée pour mobile",
-    title: "Trouvez le meilleur créneau sans tableur.",
+    eyebrow: "Pour amis, assos, clubs et petites équipes",
+    title: "Trouvez le bon moment, ensemble.",
     subtitle:
-      "Créez un lien, collectez les disponibilités, et voyez tout de suite le meilleur moment.",
+      "Organisez un dîner, un week-end, une réunion d’asso ou un point d’équipe avec un simple lien de disponibilités.",
     bestSlots: "Meilleurs créneaux",
     live: "Live",
     valueProps: [
       "Aucun compte",
-      "Disponibilités mobile-first",
-      "Classement automatique",
+      "Pensé pour les groupes",
+      "Utile aussi en petite équipe",
     ],
     demoSlots: [
       ["Mar 20:00", "12 disponibles", "w-full"],

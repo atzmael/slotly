@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { PageViewTracker } from "@/analytics/page-view-tracker";
 import { getRequestLocale } from "@/i18n/locale";
+import { LegalFooter } from "./legal-footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -23,6 +24,7 @@ export default async function RootLayout({
       <body>
         <PageViewTracker locale={locale} />
         {children}
+        <LegalFooter />
         <Analytics />
         <SpeedInsights />
       </body>

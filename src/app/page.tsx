@@ -3,8 +3,6 @@ import { getRequestLocale } from "@/i18n/locale";
 import { LanguageSwitcher } from "@/i18n/language-switcher";
 import { messages } from "@/i18n/messages";
 
-const supportEmail = "creadiv.tech+slotlysupport@gmail.com";
-
 export default async function HomePage() {
   const locale = await getRequestLocale();
   const t = messages[locale];
@@ -68,17 +66,11 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <footer className="grid gap-3 border-t border-[var(--line)] py-5 text-sm text-[var(--muted)] sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 border-t border-[var(--line)] py-5 text-sm text-[var(--muted)] sm:grid-cols-3">
           {t.home.valueProps.map((value) => (
             <span key={value}>{value}</span>
           ))}
-          <a
-            className="font-medium text-[var(--primary)]"
-            href={`mailto:${supportEmail}`}
-          >
-            {t.home.feedback}
-          </a>
-        </footer>
+        </div>
       </section>
     </main>
   );

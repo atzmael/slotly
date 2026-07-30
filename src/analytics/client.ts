@@ -12,7 +12,7 @@ export function initializeAnalytics() {
 
   const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 
-  if (!key) {
+  if (!key || process.env.NEXT_PUBLIC_POSTHOG_ENABLED !== "true") {
     initialized = true;
     return;
   }
@@ -30,7 +30,10 @@ export function initializeAnalytics() {
 export function trackEvent(event: AnalyticsEvent) {
   initializeAnalytics();
 
-  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+  if (
+    !process.env.NEXT_PUBLIC_POSTHOG_KEY ||
+    process.env.NEXT_PUBLIC_POSTHOG_ENABLED !== "true"
+  ) {
     return;
   }
 

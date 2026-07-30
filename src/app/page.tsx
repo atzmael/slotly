@@ -39,6 +39,16 @@ export default async function HomePage() {
                 {t.home.createPoll}
               </Link>
             </div>
+            <div className="mt-6 flex flex-wrap gap-2">
+              {t.home.valueProps.map((value) => (
+                <span
+                  className="rounded-full border border-[var(--line)] bg-[var(--surface)] px-3 py-1.5 text-xs font-medium text-[var(--muted)] shadow-[0_4px_14px_rgb(15_23_42_/_5%)]"
+                  key={value}
+                >
+                  {value}
+                </span>
+              ))}
+            </div>
           </div>
 
           <div className="sl-panel p-4">
@@ -66,11 +76,6 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <div className="grid gap-3 border-t border-[var(--line)] py-5 text-sm text-[var(--muted)] sm:grid-cols-3">
-          {t.home.valueProps.map((value) => (
-            <span key={value}>{value}</span>
-          ))}
-        </div>
       </section>
     </main>
   );

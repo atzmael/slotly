@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getRequestLocale } from "@/i18n/locale";
@@ -5,6 +6,7 @@ import { LanguageSwitcher } from "@/i18n/language-switcher";
 import { messages, type Locale } from "@/i18n/messages";
 import { getEventSnapshot } from "@/server/events";
 import { BrandMark } from "../../brand-mark";
+import { createPageMetadata } from "../../site-metadata";
 import { EventRealtimeRefresh } from "./event-realtime";
 import { JoinEventForm } from "./join-event-form";
 import { ShareLinkButton } from "./share-link-button";
@@ -13,6 +15,26 @@ interface EventPageProps {
   readonly params: Promise<{
     readonly eventId: string;
   }>;
+}
+
+export async function generateMetadata({
+  params,
+}: EventPageProps): Promise<Metadata> {
+  const { eventId } = await params;
+  const locale = await getRequestLocale();
+  const t = messages[locale].meta;
+  const result = await getEventSnapshot(eventId);
+  const title = result.ok
+    ? t.eventTitle(result.snapshot.event.title)
+    : t.unavailableEventTitle;
+
+  return createPageMetadata({
+    locale,
+    title,
+    description: t.eventDescription,
+    path: `/e/${eventId}`,
+    noIndex: true,
+  });
 }
 
 export default async function EventPage({ params }: EventPageProps) {

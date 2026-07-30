@@ -1,9 +1,23 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getRequestLocale } from "@/i18n/locale";
 import { LanguageSwitcher } from "@/i18n/language-switcher";
 import { messages } from "@/i18n/messages";
 import { BrandMark } from "../brand-mark";
+import { createPageMetadata } from "../site-metadata";
 import { NewPollForm } from "./new-poll-form";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestLocale();
+  const t = messages[locale].meta;
+
+  return createPageMetadata({
+    locale,
+    title: t.createTitle,
+    description: t.createDescription,
+    path: "/new",
+  });
+}
 
 export default async function NewPollPage() {
   const locale = await getRequestLocale();

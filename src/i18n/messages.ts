@@ -5,6 +5,34 @@ export type Locale = (typeof locales)[number];
 export const localeCookieName = "slotly_locale";
 
 const en = {
+  meta: {
+    siteTitle: "Slotly - Find the right time, together",
+    siteDescription:
+      "Create a simple availability poll for friends, clubs, volunteer teams, and small teams. No account required.",
+    ogImageAlt: "Slotly - Find the right time, together",
+    createTitle: "Create a poll - Slotly",
+    createDescription:
+      "Create a Slotly availability poll in seconds and share one link with your group.",
+    legalTitle: "Legal notice - Slotly",
+    legalDescription:
+      "Legal information for Slotly: publisher, hosting, intellectual property, and contact.",
+    privacyTitle: "Privacy - Slotly",
+    privacyDescription:
+      "Slotly privacy policy: collected data, retention, analytics, processors, and user rights.",
+    termsTitle: "Terms - Slotly",
+    termsDescription:
+      "Slotly terms: service access, authorized use, availability, poll deletion, and contact.",
+    eventTitle: (eventTitle: string) => `${eventTitle} - Slotly`,
+    eventDescription:
+      "Add your availability to this Slotly poll. No account required.",
+    resultsTitle: (eventTitle: string) =>
+      `Best times for ${eventTitle} - Slotly`,
+    fullDayResultsTitle: (eventTitle: string) =>
+      `Best dates for ${eventTitle} - Slotly`,
+    resultsDescription:
+      "See the best availability options for this Slotly poll.",
+    unavailableEventTitle: "Poll unavailable - Slotly",
+  },
   common: {
     brand: "Slotly",
     languageLabel: "Language",
@@ -175,6 +203,34 @@ const en = {
 type Messages = typeof en;
 
 const fr: Messages = {
+  meta: {
+    siteTitle: "Slotly - Trouvez le bon moment, ensemble",
+    siteDescription:
+      "Créez un sondage de disponibilités simple pour vos amis, assos, clubs, équipes bénévoles et petites équipes. Aucun compte requis.",
+    ogImageAlt: "Slotly - Trouvez le bon moment, ensemble",
+    createTitle: "Créer un sondage - Slotly",
+    createDescription:
+      "Créez un sondage de disponibilités Slotly en quelques secondes et partagez un lien avec votre groupe.",
+    legalTitle: "Mentions légales - Slotly",
+    legalDescription:
+      "Informations légales de Slotly : éditeur, hébergement, propriété intellectuelle et contact.",
+    privacyTitle: "Confidentialité - Slotly",
+    privacyDescription:
+      "Politique de confidentialité de Slotly : données collectées, conservation, analytics, sous-traitants et droits des utilisateurs.",
+    termsTitle: "Conditions d’utilisation - Slotly",
+    termsDescription:
+      "Conditions d’utilisation de Slotly : accès au service, usages autorisés, disponibilité, suppression des sondages et contact.",
+    eventTitle: (eventTitle: string) => `${eventTitle} - Slotly`,
+    eventDescription:
+      "Ajoutez vos disponibilités à ce sondage Slotly. Aucun compte requis.",
+    resultsTitle: (eventTitle: string) =>
+      `Meilleurs créneaux pour ${eventTitle} - Slotly`,
+    fullDayResultsTitle: (eventTitle: string) =>
+      `Meilleures dates pour ${eventTitle} - Slotly`,
+    resultsDescription:
+      "Consultez les meilleures options de disponibilité pour ce sondage Slotly.",
+    unavailableEventTitle: "Sondage indisponible - Slotly",
+  },
   common: {
     brand: "Slotly",
     languageLabel: "Langue",

@@ -4,22 +4,49 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { PageViewTracker } from "@/analytics/page-view-tracker";
 import { getRequestLocale } from "@/i18n/locale";
 import { LegalFooter } from "./legal-footer";
+import { messages } from "@/i18n/messages";
+import { createPageMetadata, siteName, siteUrl } from "./site-metadata";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "Slotly",
-  description:
-    "Create a link, collect availability, instantly know the best time to meet.",
-  icons: {
-    icon: [
-      { url: "/favicon.ico" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestLocale();
+  const t = messages[locale].meta;
+
+  return {
+    ...createPageMetadata({
+      locale,
+      title: t.siteTitle,
+      description: t.siteDescription,
+    }),
+    metadataBase: new URL(siteUrl),
+    applicationName: siteName,
+    appleWebApp: {
+      capable: true,
+      title: siteName,
+    },
+    category: "productivity",
+    creator: "Maël Maltete",
+    publisher: "Maël Maltete",
+    keywords: [
+      "Slotly",
+      "availability poll",
+      "meeting scheduler",
+      "group planning",
+      "event planning",
+      "sondage disponibilités",
+      "planification",
     ],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
-  },
-  manifest: "/site.webmanifest",
-};
+    icons: {
+      icon: [
+        { url: "/favicon.ico" },
+        { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+        { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      ],
+      apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    },
+    manifest: "/site.webmanifest",
+  };
+}
 
 export default async function RootLayout({
   children,

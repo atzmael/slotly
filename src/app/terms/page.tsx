@@ -1,9 +1,20 @@
 import type { Metadata } from "next";
+import { getRequestLocale } from "@/i18n/locale";
+import { messages } from "@/i18n/messages";
 import { LegalPage } from "../legal-page";
+import { createPageMetadata } from "../site-metadata";
 
-export const metadata: Metadata = {
-  title: "Conditions d’utilisation - Slotly",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getRequestLocale();
+  const t = messages[locale].meta;
+
+  return createPageMetadata({
+    locale,
+    title: t.termsTitle,
+    description: t.termsDescription,
+    path: "/terms",
+  });
+}
 
 export default function TermsPage() {
   return (

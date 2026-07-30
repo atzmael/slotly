@@ -1,7 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { joinEvent, saveAvailability } from "@/server/events";
+import { getCreatorTokenHashFromCookie } from "@/server/creator-token";
+import {
+  cancelEventFinalization,
+  finalizeEvent,
+  joinEvent,
+  saveAvailability,
+} from "@/server/events";
 import { checkActionRateLimit } from "@/server/rate-limit";
 
 interface JoinEventActionState {
@@ -53,6 +59,12 @@ interface SaveAvailabilityActionState {
   readonly statusId?: string;
 }
 
+export interface FinalizationActionState {
+  readonly status: "idle" | "error" | "success";
+  readonly errors: readonly string[];
+  readonly statusId?: string;
+}
+
 export async function saveAvailabilityAction(
   _previousState: SaveAvailabilityActionState,
   formData: FormData,
@@ -70,6 +82,96 @@ export async function saveAvailabilityAction(
     eventId,
     participantId: getString(formData, "participantId"),
     windows: parseWindows(getString(formData, "windows")),
+  });
+
+  if (!result.ok) {
+    return {
+      status: "error",
+      errors: result.errors,
+    };
+  }
+
+  revalidatePath(`/e/${eventId}`);
+  revalidatePath(`/e/${eventId}/results`);
+
+  return {
+    status: "success",
+    errors: [],
+    statusId: crypto.randomUUID(),
+  };
+}
+
+export async function finalizeEventAction(
+  _previousState: FinalizationActionState,
+  formData: FormData,
+): Promise<FinalizationActionState> {
+  const eventId = getString(formData, "eventId");
+
+  if (!(await checkActionRateLimit("finalize_event"))) {
+    return {
+      status: "error",
+      errors: ["rate_limited"],
+    };
+  }
+
+  const creatorTokenHash = await getCreatorTokenHashFromCookie(eventId);
+
+  if (!creatorTokenHash) {
+    return {
+      status: "error",
+      errors: ["creator_token_invalid"],
+    };
+  }
+
+  const result = await finalizeEvent({
+    eventId,
+    creatorTokenHash,
+    finalStart: getString(formData, "finalStart"),
+    finalEnd: getString(formData, "finalEnd"),
+  });
+
+  if (!result.ok) {
+    return {
+      status: "error",
+      errors: result.errors,
+    };
+  }
+
+  revalidatePath(`/e/${eventId}`);
+  revalidatePath(`/e/${eventId}/results`);
+
+  return {
+    status: "success",
+    errors: [],
+    statusId: crypto.randomUUID(),
+  };
+}
+
+export async function cancelEventFinalizationAction(
+  _previousState: FinalizationActionState,
+  formData: FormData,
+): Promise<FinalizationActionState> {
+  const eventId = getString(formData, "eventId");
+
+  if (!(await checkActionRateLimit("finalize_event"))) {
+    return {
+      status: "error",
+      errors: ["rate_limited"],
+    };
+  }
+
+  const creatorTokenHash = await getCreatorTokenHashFromCookie(eventId);
+
+  if (!creatorTokenHash) {
+    return {
+      status: "error",
+      errors: ["creator_token_invalid"],
+    };
+  }
+
+  const result = await cancelEventFinalization({
+    eventId,
+    creatorTokenHash,
   });
 
   if (!result.ok) {

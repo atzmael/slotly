@@ -6,7 +6,11 @@ import { createBrowserSupabaseClient } from "@/client/supabase";
 
 const realtimeEventName = "event_changed";
 
-type EventChangeReason = "participant_joined" | "availability_saved";
+type EventChangeReason =
+  | "participant_joined"
+  | "availability_saved"
+  | "event_finalized"
+  | "event_reopened";
 
 interface EventRealtimeRefreshProps {
   readonly eventId: string;

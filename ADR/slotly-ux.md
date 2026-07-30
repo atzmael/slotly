@@ -117,6 +117,14 @@ Contenu attendu :
 - heatmap visible avec intensite basee sur `availableCount`.
 - pour un poll full-day, le ranking affiche des dates completes plutot que des
   creneaux horaires.
+- le createur du sondage peut choisir une date ou un creneau definitif parmi le
+  ranking ;
+- une fois le choix definitif effectue, le sondage est ferme : les participants
+  ne peuvent plus voter ou modifier leurs disponibilites ;
+- le createur peut annuler le choix definitif pour rouvrir le vote ;
+- un sondage ferme affiche uniquement la date ou le creneau definitif, avec des
+  actions pour l'ajouter a Google Calendar ou l'importer dans iCloud Agenda via
+  un fichier `.ics`.
 
 Exemple de ranking :
 
@@ -146,6 +154,8 @@ Heatmap :
 - Les informations temporelles doivent afficher le fuseau pertinent.
 - Les participants dans plusieurs pays doivent voir les memes slots traduits dans leur heure locale.
 - Ne jamais sacrifier la simplicite pour ajouter une feature.
+- Les exports calendrier restent des liens ou fichiers generes depuis le choix
+  definitif ; aucune connexion a un compte calendrier n'est demandee en MVP.
 
 ## Hors Scope UX MVP
 
@@ -153,7 +163,8 @@ Heatmap :
 - Onboarding.
 - Parametres compte.
 - Notifications email.
-- Integrations calendrier.
+- Integrations calendrier connectees avec OAuth, synchronisation ou edition
+  distante.
 - Integrations Discord.
 - Recurrence.
 - Team management.

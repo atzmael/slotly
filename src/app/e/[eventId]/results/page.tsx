@@ -8,9 +8,11 @@ import {
 import { getRequestLocale } from "@/i18n/locale";
 import { LanguageSwitcher } from "@/i18n/language-switcher";
 import { messages, type Locale } from "@/i18n/messages";
-import { getEventSnapshot } from "@/server/events";
+import { getCreatorTokenHashFromCookie } from "@/server/creator-token";
+import { canManageEvent, getEventSnapshot } from "@/server/events";
 import { BrandMark } from "../../../brand-mark";
 import { createPageMetadata } from "../../../site-metadata";
+import { FinalEventCard } from "../final-event-card";
 import { EventRealtimeRefresh } from "../event-realtime";
 import { ShareLinkButton } from "../share-link-button";
 import { ResultsContent } from "./results-content";
@@ -54,6 +56,14 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
   }
 
   const { event, participants, availabilityWindows } = result.snapshot;
+  const creatorTokenHash = await getCreatorTokenHashFromCookie(event.id);
+  const isCreator = await canManageEvent({
+    eventId: event.id,
+    creatorTokenHash,
+  });
+  const isFinalized = Boolean(
+    event.finalizedStart && event.finalizedEnd && event.finalizedAt,
+  );
   const rankInput = {
     participants: participants.map((participant) => ({
       id: participant.id,
@@ -127,12 +137,26 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
           </div>
         </div>
 
-        <ResultsContent
-          locale={locale}
-          isFullDay={event.isFullDay}
-          participantCount={participants.length}
-          rankedSlots={rankedSlots}
-        />
+        {isFinalized && event.finalizedStart && event.finalizedEnd ? (
+          <FinalEventCard
+            eventId={event.id}
+            eventTitle={event.title}
+            finalEnd={event.finalizedEnd}
+            finalStart={event.finalizedStart}
+            isCreator={isCreator}
+            isFullDay={event.isFullDay}
+            locale={locale}
+          />
+        ) : (
+          <ResultsContent
+            canFinalize={isCreator}
+            eventId={event.id}
+            locale={locale}
+            isFullDay={event.isFullDay}
+            participantCount={participants.length}
+            rankedSlots={rankedSlots}
+          />
+        )}
       </section>
     </main>
   );

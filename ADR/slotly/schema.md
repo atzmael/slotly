@@ -38,11 +38,18 @@ Champs cibles :
 - `slot_size_minutes`: 30 ou 60 ;
 - `is_full_day`: si `true`, les participants choisissent des dates entieres
   sans grille horaire ;
+- `creator_token_hash`: hash SHA-256 du token createur accountless, le token
+  brut restant dans un cookie serveur du navigateur createur ;
+- `finalized_start_at`: debut du creneau ou de la date definitive ;
+- `finalized_end_at`: fin du creneau ou de la date definitive ;
+- `finalized_at`: date de verrouillage du sondage ;
 - `created_at`.
 
 Regles :
 
 - Pas de compte createur en MVP.
+- Le createur est reconnu sans compte par un token prive cree avec le sondage,
+  stocke en cookie httpOnly et compare cote serveur via `creator_token_hash`.
 - Le lien `/e/{eventId}` est l'identifiant de partage.
 - La page resultats est `/e/{eventId}/results`.
 - La fenetre horaire quotidienne est configurable a la creation et remplace
@@ -52,6 +59,11 @@ Regles :
   selectionnee.
 - Un poll sans activite pendant 14 jours apres sa date de fin peut etre supprime
   automatiquement pour proteger le quota de la base gratuite.
+- Quand `finalized_at` est renseigne, le sondage est verrouille : join et
+  save availability sont refuses cote serveur, l'UI affiche uniquement la date
+  definitive et des exports calendrier.
+- Le createur peut annuler la date definitive, ce qui remet le sondage en etat
+  ouvert.
 
 ### Participants
 
@@ -150,6 +162,8 @@ Protection mutations publiques :
   Vercel Firewall ou une protection externe si l'audience devient large ;
 - `saveAvailability` doit verifier que `participant_id` appartient au `event_id`
   soumis avant de supprimer ou inserer des disponibilites.
+- `finalizeEvent` doit verifier le token createur cote serveur et valider que
+  le creneau final correspond a une option rankee calculee par le domaine.
 
 Migration initiale :
 

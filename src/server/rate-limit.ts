@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 
-type RateLimitAction = "create_event" | "join_event" | "save_availability";
+type RateLimitAction =
+  "create_event" | "join_event" | "save_availability" | "finalize_event";
 
 interface RateLimitRule {
   readonly limit: number;
@@ -16,6 +17,7 @@ const rateLimitRules: Record<RateLimitAction, RateLimitRule> = {
   create_event: { limit: 5, windowMs: 10 * 60 * 1000 },
   join_event: { limit: 40, windowMs: 10 * 60 * 1000 },
   save_availability: { limit: 120, windowMs: 10 * 60 * 1000 },
+  finalize_event: { limit: 30, windowMs: 10 * 60 * 1000 },
 };
 
 const buckets = new Map<string, RateLimitEntry>();

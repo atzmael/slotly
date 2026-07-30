@@ -1,6 +1,8 @@
 import {
   isValidTimeZone,
   normalizeParticipantName,
+  rankAvailabilitySlots,
+  rankFullDayAvailabilitySlots,
   validateEventDraft,
   type EventDraft,
 } from "../domain/availability";
@@ -16,6 +18,7 @@ export interface EventInsert {
   readonly duration_minutes: number;
   readonly slot_size_minutes: number;
   readonly is_full_day: boolean;
+  readonly creator_token_hash: string;
 }
 
 export interface CreateEventRepository {
@@ -29,6 +32,9 @@ export interface EventSnapshotRepository {
 }
 
 export interface ParticipantRepository {
+  readonly getEventLockState: (
+    eventId: string,
+  ) => Promise<{ readonly finalized_at: string | null } | null>;
   readonly findParticipantByNormalizedName: (
     eventId: string,
     normalizedName: string,
@@ -39,6 +45,9 @@ export interface ParticipantRepository {
 }
 
 export interface AvailabilityRepository {
+  readonly getEventLockState: (
+    eventId: string,
+  ) => Promise<{ readonly finalized_at: string | null } | null>;
   readonly replaceAvailability: (
     eventId: string,
     participantId: string,
@@ -48,6 +57,22 @@ export interface AvailabilityRepository {
 
 export interface StaleEventCleanupRepository {
   readonly deleteStaleEvents: (retentionDays: number) => Promise<number>;
+}
+
+export interface EventFinalizationRepository {
+  readonly getEventSnapshot: (eventId: string) => Promise<Json>;
+  readonly getEventFinalizationState: (eventId: string) => Promise<{
+    readonly id: string;
+    readonly is_full_day: boolean;
+    readonly creator_token_hash: string | null;
+    readonly finalized_at: string | null;
+  } | null>;
+  readonly finalizeEvent: (
+    eventId: string,
+    finalStart: string,
+    finalEnd: string,
+  ) => Promise<void>;
+  readonly cancelFinalization: (eventId: string) => Promise<void>;
 }
 
 export interface ParticipantInsert {
@@ -73,6 +98,10 @@ export interface SlotlyEvent {
   readonly durationMinutes: number;
   readonly slotSizeMinutes: number;
   readonly isFullDay: boolean;
+  readonly creatorTokenHash: string | null;
+  readonly finalizedStart: string | null;
+  readonly finalizedEnd: string | null;
+  readonly finalizedAt: string | null;
   readonly createdAt: string;
 }
 
@@ -149,16 +178,59 @@ export type CleanupStaleEventsResult =
       readonly errors: readonly string[];
     };
 
+export type FinalizeEventResult =
+  | {
+      readonly ok: true;
+    }
+  | {
+      readonly ok: false;
+      readonly errors: readonly string[];
+    };
+
+export async function canManageEvent(
+  input: {
+    readonly eventId: string;
+    readonly creatorTokenHash: string | null;
+  },
+  repository: Pick<
+    EventFinalizationRepository,
+    "getEventFinalizationState"
+  > = createSupabaseEventFinalizationRepository(),
+): Promise<boolean> {
+  if (
+    !isUuid(input.eventId) ||
+    !input.creatorTokenHash ||
+    input.creatorTokenHash.length !== 64
+  ) {
+    return false;
+  }
+
+  try {
+    const event = await repository.getEventFinalizationState(input.eventId);
+
+    return Boolean(
+      event?.creator_token_hash &&
+      event.creator_token_hash === input.creatorTokenHash,
+    );
+  } catch {
+    return false;
+  }
+}
+
 export async function createEvent(
-  draft: EventDraft,
+  draft: EventDraft & { readonly creatorTokenHash: string },
   repository: CreateEventRepository = createSupabaseCreateEventRepository(),
 ): Promise<CreateEventResult> {
   const validation = validateEventDraft(draft);
+  const creatorTokenHashValid = /^[0-9a-f]{64}$/i.test(draft.creatorTokenHash);
 
-  if (!validation.valid) {
+  if (!validation.valid || !creatorTokenHashValid) {
     return {
       ok: false,
-      errors: validation.errors,
+      errors: [
+        ...(validation.valid ? [] : validation.errors),
+        ...(creatorTokenHashValid ? [] : ["creator_token_invalid"]),
+      ],
     };
   }
 
@@ -172,6 +244,7 @@ export async function createEvent(
       duration_minutes: validation.value.durationMinutes,
       slot_size_minutes: validation.value.slotSizeMinutes,
       is_full_day: validation.value.isFullDay,
+      creator_token_hash: draft.creatorTokenHash,
     });
 
     return {
@@ -253,6 +326,22 @@ export async function joinEvent(
   }
 
   try {
+    const eventState = await repository.getEventLockState(input.eventId);
+
+    if (!eventState) {
+      return {
+        ok: false,
+        errors: ["event_id_invalid"],
+      };
+    }
+
+    if (eventState.finalized_at) {
+      return {
+        ok: false,
+        errors: ["event_finalized"],
+      };
+    }
+
     const existingParticipant =
       await repository.findParticipantByNormalizedName(
         input.eventId,
@@ -347,6 +436,22 @@ export async function saveAvailability(
   }
 
   try {
+    const eventState = await repository.getEventLockState(input.eventId);
+
+    if (!eventState) {
+      return {
+        ok: false,
+        errors: ["event_id_invalid"],
+      };
+    }
+
+    if (eventState.finalized_at) {
+      return {
+        ok: false,
+        errors: ["event_finalized"],
+      };
+    }
+
     const result = await repository.replaceAvailability(
       input.eventId,
       input.participantId,
@@ -365,6 +470,124 @@ export async function saveAvailability(
     return {
       ok: false,
       errors: ["save_availability_failed"],
+    };
+  }
+}
+
+export async function finalizeEvent(
+  input: {
+    readonly eventId: string;
+    readonly creatorTokenHash: string;
+    readonly finalStart: string;
+    readonly finalEnd: string;
+  },
+  repository: EventFinalizationRepository = createSupabaseEventFinalizationRepository(),
+): Promise<FinalizeEventResult> {
+  const errors = validateFinalizationInput(input);
+
+  if (errors.length > 0) {
+    return {
+      ok: false,
+      errors,
+    };
+  }
+
+  try {
+    const event = await repository.getEventFinalizationState(input.eventId);
+
+    if (!event) {
+      return {
+        ok: false,
+        errors: ["event_id_invalid"],
+      };
+    }
+
+    if (
+      !event.creator_token_hash ||
+      event.creator_token_hash !== input.creatorTokenHash
+    ) {
+      return {
+        ok: false,
+        errors: ["creator_token_invalid"],
+      };
+    }
+
+    if (event.finalized_at) {
+      return {
+        ok: false,
+        errors: ["event_finalized"],
+      };
+    }
+
+    const snapshot = parseEventSnapshot(
+      await repository.getEventSnapshot(input.eventId),
+    );
+
+    if (
+      !isRankedFinalizationWindow(snapshot, input.finalStart, input.finalEnd)
+    ) {
+      return {
+        ok: false,
+        errors: ["final_window_invalid"],
+      };
+    }
+
+    await repository.finalizeEvent(
+      input.eventId,
+      input.finalStart,
+      input.finalEnd,
+    );
+
+    return { ok: true };
+  } catch {
+    return {
+      ok: false,
+      errors: ["finalize_event_failed"],
+    };
+  }
+}
+
+export async function cancelEventFinalization(
+  input: {
+    readonly eventId: string;
+    readonly creatorTokenHash: string;
+  },
+  repository: EventFinalizationRepository = createSupabaseEventFinalizationRepository(),
+): Promise<FinalizeEventResult> {
+  if (!isUuid(input.eventId) || input.creatorTokenHash.length !== 64) {
+    return {
+      ok: false,
+      errors: ["creator_token_invalid"],
+    };
+  }
+
+  try {
+    const event = await repository.getEventFinalizationState(input.eventId);
+
+    if (!event) {
+      return {
+        ok: false,
+        errors: ["event_id_invalid"],
+      };
+    }
+
+    if (
+      !event.creator_token_hash ||
+      event.creator_token_hash !== input.creatorTokenHash
+    ) {
+      return {
+        ok: false,
+        errors: ["creator_token_invalid"],
+      };
+    }
+
+    await repository.cancelFinalization(input.eventId);
+
+    return { ok: true };
+  } catch {
+    return {
+      ok: false,
+      errors: ["cancel_finalization_failed"],
     };
   }
 }
@@ -439,6 +662,20 @@ function createSupabaseEventSnapshotRepository(): EventSnapshotRepository {
 
 function createSupabaseParticipantRepository(): ParticipantRepository {
   return {
+    async getEventLockState(eventId) {
+      const supabase = createServiceSupabaseClient();
+      const { data, error } = await supabase
+        .from("events")
+        .select("finalized_at")
+        .eq("id", eventId)
+        .maybeSingle();
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
     async findParticipantByNormalizedName(eventId, normalizedName) {
       const supabase = createServiceSupabaseClient();
       const { data, error } = await supabase
@@ -473,6 +710,20 @@ function createSupabaseParticipantRepository(): ParticipantRepository {
 
 function createSupabaseAvailabilityRepository(): AvailabilityRepository {
   return {
+    async getEventLockState(eventId) {
+      const supabase = createServiceSupabaseClient();
+      const { data, error } = await supabase
+        .from("events")
+        .select("finalized_at")
+        .eq("id", eventId)
+        .maybeSingle();
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
     async replaceAvailability(eventId, participantId, windows) {
       const supabase = createServiceSupabaseClient();
       const { data: participant, error: participantError } = await supabase
@@ -516,6 +767,101 @@ function createSupabaseAvailabilityRepository(): AvailabilityRepository {
   };
 }
 
+function createSupabaseEventFinalizationRepository(): EventFinalizationRepository {
+  return {
+    async getEventSnapshot(eventId) {
+      const supabase = createServiceSupabaseClient();
+      const { data, error } = await supabase.rpc("get_event_snapshot", {
+        public_event_id: eventId,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+    async getEventFinalizationState(eventId) {
+      const supabase = createServiceSupabaseClient();
+      const { data, error } = await supabase
+        .from("events")
+        .select("id, is_full_day, creator_token_hash, finalized_at")
+        .eq("id", eventId)
+        .maybeSingle();
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    },
+    async finalizeEvent(eventId, finalStart, finalEnd) {
+      const supabase = createServiceSupabaseClient();
+      const { error } = await supabase
+        .from("events")
+        .update({
+          finalized_start_at: finalStart,
+          finalized_end_at: finalEnd,
+          finalized_at: new Date().toISOString(),
+        })
+        .eq("id", eventId);
+
+      if (error) {
+        throw error;
+      }
+    },
+    async cancelFinalization(eventId) {
+      const supabase = createServiceSupabaseClient();
+      const { error } = await supabase
+        .from("events")
+        .update({
+          finalized_start_at: null,
+          finalized_end_at: null,
+          finalized_at: null,
+        })
+        .eq("id", eventId);
+
+      if (error) {
+        throw error;
+      }
+    },
+  };
+}
+
+function isRankedFinalizationWindow(
+  snapshot: EventSnapshot,
+  finalStart: string,
+  finalEnd: string,
+): boolean {
+  const rankInput = {
+    participants: snapshot.participants.map((participant) => ({
+      id: participant.id,
+      name: participant.name,
+      timezone: participant.timezone,
+    })),
+    availability: snapshot.availabilityWindows.map((window) => ({
+      participantId: window.participantId,
+      start: window.start,
+      end: window.end,
+    })),
+  };
+  const rankedSlots = snapshot.event.isFullDay
+    ? rankFullDayAvailabilitySlots({
+        ...rankInput,
+        startDate: snapshot.event.startDate,
+        endDate: snapshot.event.endDate,
+      })
+    : rankAvailabilitySlots({
+        ...rankInput,
+        durationMinutes: snapshot.event.durationMinutes,
+        slotSizeMinutes: snapshot.event.slotSizeMinutes,
+      });
+
+  return rankedSlots.some(
+    (slot) => slot.start === finalStart && slot.end === finalEnd,
+  );
+}
+
 function createSupabaseStaleEventCleanupRepository(): StaleEventCleanupRepository {
   return {
     async deleteStaleEvents(retentionDays) {
@@ -553,6 +899,10 @@ function parseEventSnapshot(payload: Json): EventSnapshot {
       durationMinutes: asNumber(event.duration_minutes),
       slotSizeMinutes: asNumber(event.slot_size_minutes),
       isFullDay: asBoolean(event.is_full_day ?? false),
+      creatorTokenHash: asNullableString(event.creator_token_hash),
+      finalizedStart: asNullableString(event.finalized_start_at),
+      finalizedEnd: asNullableString(event.finalized_end_at),
+      finalizedAt: asNullableString(event.finalized_at),
       createdAt: asString(event.created_at),
     },
     participants: participants.map((participant) => {
@@ -582,6 +932,31 @@ function parseEventSnapshot(payload: Json): EventSnapshot {
   };
 }
 
+function validateFinalizationInput(input: {
+  readonly eventId: string;
+  readonly creatorTokenHash: string;
+  readonly finalStart: string;
+  readonly finalEnd: string;
+}): string[] {
+  const errors: string[] = [];
+  const startMs = Date.parse(input.finalStart);
+  const endMs = Date.parse(input.finalEnd);
+
+  if (!isUuid(input.eventId)) {
+    errors.push("event_id_invalid");
+  }
+
+  if (input.creatorTokenHash.length !== 64) {
+    errors.push("creator_token_invalid");
+  }
+
+  if (Number.isNaN(startMs) || Number.isNaN(endMs) || startMs >= endMs) {
+    errors.push("final_window_invalid");
+  }
+
+  return errors;
+}
+
 function isUuid(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     value,
@@ -601,7 +976,11 @@ function isEventSchemaMigrationError(error: unknown): boolean {
     typeof message === "string" &&
     (message.includes("start_time") ||
       message.includes("end_time") ||
-      message.includes("is_full_day"))
+      message.includes("is_full_day") ||
+      message.includes("creator_token_hash") ||
+      message.includes("finalized_start_at") ||
+      message.includes("finalized_end_at") ||
+      message.includes("finalized_at"))
   );
 }
 
@@ -643,6 +1022,14 @@ function asString(value: Json | undefined): string {
   }
 
   return value;
+}
+
+function asNullableString(value: Json | undefined): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  return asString(value);
 }
 
 function asTimeString(value: Json | undefined): string {

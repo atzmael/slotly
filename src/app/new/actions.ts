@@ -1,6 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import {
+  createCreatorToken,
+  hashCreatorToken,
+  storeCreatorToken,
+} from "@/server/creator-token";
 import { createEvent } from "@/server/events";
 import { checkActionRateLimit } from "@/server/rate-limit";
 
@@ -35,7 +40,11 @@ export async function createEventAction(
     };
   }
 
-  const result = await createEvent(values);
+  const creatorToken = createCreatorToken();
+  const result = await createEvent({
+    ...values,
+    creatorTokenHash: hashCreatorToken(creatorToken),
+  });
 
   if (!result.ok) {
     return {
@@ -44,6 +53,8 @@ export async function createEventAction(
       values,
     };
   }
+
+  await storeCreatorToken(result.eventId, creatorToken);
 
   redirect(`/e/${result.eventId}?created=1`);
 }

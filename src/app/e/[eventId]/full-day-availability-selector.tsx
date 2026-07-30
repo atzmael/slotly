@@ -241,21 +241,35 @@ export function FullDayAvailabilitySelector({
       ) : null}
 
       {isDirty || isPending ? (
-        <div className="pointer-events-none fixed right-4 bottom-4 left-4 z-30 grid grid-cols-2 gap-2 sm:right-[max(1rem,calc((100vw-56rem)/2))] sm:left-auto sm:w-[22rem]">
+        <div className="pointer-events-none fixed right-4 bottom-4 left-4 z-30 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 sm:right-[max(1rem,calc((100vw-56rem)/2))] sm:left-auto sm:flex sm:justify-end">
           <button
-            className="sl-button sl-button-secondary pointer-events-auto w-full whitespace-nowrap px-2 py-3 text-xs shadow-[var(--shadow-floating)] sm:px-5 sm:text-sm sm:shadow-none"
+            className="sl-button sl-button-secondary pointer-events-auto min-w-0 whitespace-nowrap px-2 py-3 text-xs shadow-[var(--shadow-floating)] sm:w-auto sm:px-5 sm:text-sm sm:shadow-none"
             disabled={isPending || !isDirty}
             onClick={cancelChanges}
             type="button"
           >
-            {t.event.availability.cancelChanges}
+            <span className="sm:hidden">
+              {t.event.availability.cancelChangesShort}
+            </span>
+            <span className="hidden sm:inline">
+              {t.event.availability.cancelChanges}
+            </span>
           </button>
           <button
-            className="sl-button sl-button-primary pointer-events-auto w-full whitespace-nowrap px-2 py-3 text-xs shadow-[var(--shadow-floating)] sm:px-5 sm:text-sm sm:shadow-none"
+            className="sl-button sl-button-primary pointer-events-auto min-w-0 whitespace-nowrap px-2 py-3 text-xs shadow-[var(--shadow-floating)] sm:w-auto sm:px-5 sm:text-sm sm:shadow-none"
             disabled={isPending || !isDirty}
             type="submit"
           >
-            {isPending ? t.event.availability.saving : t.event.availability.save}
+            <span className="sm:hidden">
+              {isPending
+                ? t.event.availability.savingShort
+                : t.event.availability.saveShort}
+            </span>
+            <span className="hidden sm:inline">
+              {isPending
+                ? t.event.availability.saving
+                : t.event.availability.save}
+            </span>
           </button>
         </div>
       ) : null}

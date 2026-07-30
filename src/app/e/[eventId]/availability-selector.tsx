@@ -521,12 +521,12 @@ export function AvailabilitySelector({
       </div>
 
       <div
-        className={`fixed inset-x-0 bottom-0 z-30 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 px-5 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:inset-x-auto sm:right-8 sm:bottom-6 sm:w-[28rem] sm:p-0 ${
+        className={`fixed inset-x-0 bottom-0 z-30 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 px-5 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:inset-x-auto sm:right-8 sm:bottom-6 sm:w-[32rem] sm:p-0 ${
           isDirty || isPending ? "grid" : "hidden"
         }`}
       >
         <button
-          className="sl-button sl-button-secondary w-full px-5 py-3 shadow-[0_10px_30px_rgb(29_29_27_/_18%)] sm:shadow-none"
+          className="sl-button sl-button-secondary w-full whitespace-nowrap px-2 py-3 text-xs shadow-[0_10px_30px_rgb(29_29_27_/_18%)] sm:px-5 sm:text-sm sm:shadow-none"
           disabled={isPending || !isDirty}
           onClick={cancelChanges}
           type="button"
@@ -534,7 +534,7 @@ export function AvailabilitySelector({
           {t.event.availability.cancelChanges}
         </button>
         <button
-          className={`sl-button w-full px-5 py-3 shadow-[0_10px_30px_rgb(29_29_27_/_18%)] sm:shadow-none ${
+          className={`sl-button w-full whitespace-nowrap px-2 py-3 text-xs shadow-[0_10px_30px_rgb(29_29_27_/_18%)] sm:px-5 sm:text-sm sm:shadow-none ${
             isDirty ? "sl-button-primary" : "sl-button-secondary"
           }`}
           disabled={isPending || !isDirty}

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Confidentialité" updatedAt="30 July 2026">
+    <LegalPage title="Confidentialité" updatedAt="30 juillet 2026">
       <section>
         <h2>Responsable du traitement</h2>
         <p>
@@ -76,10 +76,27 @@ export default function PrivacyPage() {
         <h2>Conservation</h2>
         <p>
           Les sondages inactifs peuvent être supprimés automatiquement après la
-          date de fin du sondage et une période d’inactivité. Les données
-          techniques et statistiques peuvent être conservées pour des durées
-          différentes selon les contraintes de sécurité, d’hébergement et
-          d’analyse agrégée.
+          date de fin du sondage et au moins deux semaines sans activité. La
+          suppression d’un sondage entraîne la suppression des participants et
+          des disponibilités associées.
+        </p>
+        <p>
+          Les journaux techniques, de sécurité et de diagnostic peuvent être
+          conservés pour des durées différentes selon les règles des
+          prestataires d’hébergement et les besoins de prévention des abus.
+        </p>
+      </section>
+
+      <section>
+        <h2>Données stockées sur l’appareil</h2>
+        <p>
+          Slotly peut stocker localement la langue choisie et l’identifiant du
+          participant associé à un sondage. Cela permet de retrouver une
+          participation sur le même navigateur et d’éviter de redemander le nom
+          à chaque visite.
+        </p>
+        <p>
+          Slotly n’utilise pas ces informations pour de la publicité ciblée.
         </p>
       </section>
 
@@ -88,7 +105,7 @@ export default function PrivacyPage() {
         <p>
           Slotly utilise Vercel Analytics et Vercel Speed Insights pour mesurer
           l’audience et les performances du service de manière agrégée, sans
-          finalité publicitaire.
+          finalité publicitaire et sans cookie publicitaire tiers.
         </p>
         <p>
           PostHog peut être utilisé uniquement s’il est explicitement activé sur
@@ -96,6 +113,11 @@ export default function PrivacyPage() {
           des événements produit non sensibles : aucun nom de participant, titre
           d’événement ou contenu libre ne doit être envoyé dans les événements
           analytics.
+        </p>
+        <p>
+          Si une configuration future d’analytics nécessite un consentement
+          préalable, Slotly devra demander ce consentement avant toute collecte
+          concernée.
         </p>
       </section>
 
@@ -109,14 +131,19 @@ export default function PrivacyPage() {
             PostHog, uniquement si l’analytics produit optionnel est activé.
           </li>
         </ul>
+        <p>
+          Ces prestataires peuvent traiter des données hors de l’Union
+          européenne. Dans ce cas, les transferts doivent être encadrés par les
+          garanties appropriées proposées par les prestataires concernés.
+        </p>
       </section>
 
       <section>
         <h2>Vos droits</h2>
         <p>
           Vous pouvez demander l’accès, la rectification ou la suppression de
-          vos données, ainsi que vous opposer à certains traitements, en
-          écrivant à{" "}
+          vos données, ainsi que la limitation, la portabilité lorsque celle-ci
+          s’applique, ou vous opposer à certains traitements, en écrivant à{" "}
           <a href="mailto:creadiv.tech+slotly@gmail.com">
             creadiv.tech+slotly@gmail.com
           </a>

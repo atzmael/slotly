@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <LegalPage title="Conditions d’utilisation" updatedAt="30 July 2026">
+    <LegalPage title="Conditions d’utilisation" updatedAt="30 juillet 2026">
       <section>
         <h2>Objet</h2>
         <p>
@@ -50,12 +50,27 @@ export default function TermsPage() {
       </section>
 
       <section>
+        <h2>Responsabilité de l’utilisateur</h2>
+        <p>
+          L’utilisateur est responsable des informations qu’il saisit, des
+          disponibilités qu’il partage et des personnes auxquelles il transmet
+          un lien de sondage. Un lien partagé publiquement peut être consulté
+          par toute personne qui y a accès.
+        </p>
+      </section>
+
+      <section>
         <h2>Disponibilité du service</h2>
         <p>
           Slotly est fourni en l’état, dans le cadre d’un MVP public. Des
           interruptions, évolutions ou suppressions de fonctionnalités peuvent
           intervenir, notamment pour maintenance, sécurité ou limitation des
           abus.
+        </p>
+        <p>
+          Les résultats affichés dépendent des informations saisies par les
+          participants. Slotly n’apporte aucune garantie sur l’exactitude des
+          disponibilités déclarées par les utilisateurs.
         </p>
       </section>
 
@@ -74,6 +89,25 @@ export default function TermsPage() {
           Slotly ne propose actuellement aucun abonnement, commande ou paiement.
           Les présentes conditions ne constituent donc pas des conditions
           générales de vente.
+        </p>
+      </section>
+
+      <section>
+        <h2>Évolution des conditions</h2>
+        <p>
+          Les présentes conditions peuvent être mises à jour pour refléter
+          l’évolution du service, des contraintes techniques ou des obligations
+          légales. La version applicable est celle publiée sur le site au moment
+          de l’utilisation.
+        </p>
+      </section>
+
+      <section>
+        <h2>Droit applicable</h2>
+        <p>
+          Les présentes conditions sont soumises au droit français. En cas de
+          difficulté, l’utilisateur est invité à contacter Slotly afin de
+          rechercher une solution amiable.
         </p>
       </section>
 

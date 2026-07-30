@@ -43,6 +43,7 @@ const en = {
     terms: "Terms",
     privacy: "Privacy",
     feedback: "Feedback or bug",
+    creadivProject: "A Creadiv project",
   },
   home: {
     createPoll: "Create Poll",
@@ -273,6 +274,7 @@ const fr: Messages = {
     terms: "Conditions d’utilisation",
     privacy: "Confidentialité",
     feedback: "Feedback ou bug",
+    creadivProject: "Un projet Creadiv",
   },
   home: {
     createPoll: "Créer un sondage",

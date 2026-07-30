@@ -16,6 +16,8 @@ export interface AnalyticsBaseProperties {
   readonly device_type?: AnalyticsDeviceType;
 }
 
+type AvailabilityMode = "time_slots" | "full_day";
+
 export type AnalyticsEvent =
   | {
       readonly name:
@@ -56,6 +58,7 @@ export type AnalyticsEvent =
       readonly name: "availability.started";
       readonly properties: AnalyticsBaseProperties & {
         readonly days_count: number;
+        readonly mode?: AvailabilityMode;
         readonly slot_size_minutes: number;
       };
     }
@@ -78,6 +81,7 @@ export type AnalyticsEvent =
       readonly name: "availability.saved";
       readonly properties: AnalyticsBaseProperties & {
         readonly days_count: number;
+        readonly mode?: AvailabilityMode;
         readonly selected_slots_count: number;
         readonly slot_size_minutes: number;
       };

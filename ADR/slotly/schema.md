@@ -36,6 +36,8 @@ Champs cibles :
 - `end_time`: heure locale de fin de la fenetre quotidienne ;
 - `duration_minutes`: 30, 60, 120, 180 ou 240 ;
 - `slot_size_minutes`: 30 ou 60 ;
+- `is_full_day`: si `true`, les participants choisissent des dates entieres
+  sans grille horaire ;
 - `created_at`.
 
 Regles :
@@ -45,6 +47,9 @@ Regles :
 - La page resultats est `/e/{eventId}/results`.
 - La fenetre horaire quotidienne est configurable a la creation et remplace
   toute plage horaire hardcodee cote UI.
+- Un poll `is_full_day` conserve les dates dans le meme modele
+  `availability_windows`, avec des fenetres UTC minuit -> minuit par date
+  selectionnee.
 - Un poll sans activite pendant 14 jours apres sa date de fin peut etre supprime
   automatiquement pour proteger le quota de la base gratuite.
 
@@ -100,6 +105,10 @@ Le domaine transforme les fenetres de disponibilite en creneaux valides selon :
 - `duration_minutes` ;
 - `slot_size_minutes` ;
 - disponibilites participants normalisees.
+
+Pour un poll `is_full_day`, le domaine genere un candidat par date incluse dans
+`start_date` -> `end_date` et classe ces dates selon le nombre de participants
+disponibles sur toute la journee.
 
 Pour chaque creneau candidat :
 

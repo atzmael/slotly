@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useActionState, useRef, useState } from "react";
 import type { FocusEvent, FormEvent } from "react";
 import { trackEvent } from "@/analytics/client";
 import { getDeviceType, resolveRoutePattern } from "@/analytics/events";
@@ -18,6 +18,7 @@ const initialCreateEventActionState = {
     endTime: "22:00",
     durationMinutes: 60,
     slotSizeMinutes: 60,
+    isFullDay: false,
   },
 };
 
@@ -31,6 +32,7 @@ export function NewPollForm({ locale }: NewPollFormProps) {
     createEventAction,
     initialCreateEventActionState,
   );
+  const [isFullDay, setIsFullDay] = useState(state.values.isFullDay);
   const t = messages[locale];
   const durationOptions = [
     { label: t.create.durations.minutes30, value: 30 },
@@ -141,7 +143,25 @@ export function NewPollForm({ locale }: NewPollFormProps) {
         </label>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <label className="flex items-start gap-3 rounded-[var(--radius-panel)] border border-[var(--line)] bg-[var(--surface-subtle)] p-3">
+        <input
+          checked={isFullDay}
+          className="mt-1 size-4 accent-[var(--primary)]"
+          name="isFullDay"
+          onChange={(event) => setIsFullDay(event.target.checked)}
+          type="checkbox"
+        />
+        <span>
+          <span className="block text-sm font-medium">
+            {t.create.fields.fullDay}
+          </span>
+          <span className="mt-1 block text-xs leading-5 text-[var(--muted)]">
+            {t.create.fields.fullDayHelp}
+          </span>
+        </span>
+      </label>
+
+      <div className={isFullDay ? "hidden" : "grid gap-4 sm:grid-cols-2"}>
         <label className="block">
           <span className="text-sm font-medium">
             {t.create.fields.startTime}
@@ -172,7 +192,7 @@ export function NewPollForm({ locale }: NewPollFormProps) {
         </label>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className={isFullDay ? "hidden" : "grid gap-4 sm:grid-cols-2"}>
         <label className="block">
           <span className="text-sm font-medium">
             {t.create.fields.duration}

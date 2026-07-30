@@ -3,6 +3,7 @@ import {
   isValidTimeZone,
   normalizeParticipantName,
   rankAvailabilitySlots,
+  rankFullDayAvailabilitySlots,
   validateEventDraft,
   type Participant,
 } from "./availability";
@@ -35,6 +36,34 @@ describe("validateEventDraft", () => {
         endTime: "22:00",
         durationMinutes: 120,
         slotSizeMinutes: 60,
+        isFullDay: false,
+      },
+    });
+  });
+
+  it("accepts full-day events without requiring usable time options", () => {
+    expect(
+      validateEventDraft({
+        title: " Weekend with friends ",
+        startDate: "2026-06-19",
+        endDate: "2026-06-21",
+        startTime: "",
+        endTime: "",
+        durationMinutes: Number.NaN,
+        slotSizeMinutes: Number.NaN,
+        isFullDay: true,
+      }),
+    ).toEqual({
+      valid: true,
+      value: {
+        title: "Weekend with friends",
+        startDate: "2026-06-19",
+        endDate: "2026-06-21",
+        startTime: "00:00",
+        endTime: "23:59",
+        durationMinutes: 60,
+        slotSizeMinutes: 60,
+        isFullDay: true,
       },
     });
   });
@@ -77,6 +106,52 @@ describe("validateEventDraft", () => {
       valid: false,
       errors: ["duration_exceeds_time_range"],
     });
+  });
+});
+
+describe("rankFullDayAvailabilitySlots", () => {
+  it("ranks whole dates by attendance", () => {
+    const ranked = rankFullDayAvailabilitySlots({
+      participants,
+      startDate: "2026-06-19",
+      endDate: "2026-06-21",
+      availability: [
+        {
+          participantId: "p1",
+          start: "2026-06-19T00:00:00.000Z",
+          end: "2026-06-21T00:00:00.000Z",
+        },
+        {
+          participantId: "p2",
+          start: "2026-06-20T00:00:00.000Z",
+          end: "2026-06-22T00:00:00.000Z",
+        },
+      ],
+    });
+
+    expect(
+      ranked.map((slot) => ({
+        start: slot.start,
+        end: slot.end,
+        availableCount: slot.availableCount,
+      })),
+    ).toEqual([
+      {
+        start: "2026-06-20T00:00:00.000Z",
+        end: "2026-06-21T00:00:00.000Z",
+        availableCount: 2,
+      },
+      {
+        start: "2026-06-19T00:00:00.000Z",
+        end: "2026-06-20T00:00:00.000Z",
+        availableCount: 1,
+      },
+      {
+        start: "2026-06-21T00:00:00.000Z",
+        end: "2026-06-22T00:00:00.000Z",
+        availableCount: 1,
+      },
+    ]);
   });
 });
 

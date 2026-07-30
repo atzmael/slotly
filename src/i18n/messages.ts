@@ -47,6 +47,8 @@ const en = {
       startTimeHelp: "Earliest time shown each day.",
       endTime: "End time",
       endTimeHelp: "Latest time shown each day.",
+      fullDay: "Full day",
+      fullDayHelp: "Participants pick dates only, without hourly slots.",
       duration: "Event duration",
       durationHelp: "Length of the meeting you want to schedule.",
       slotSize: "Slot size",
@@ -115,6 +117,7 @@ const en = {
     availability: {
       title: "Pick availability",
       help: "Tap or drag across every slot that works for you.",
+      fullDayHelp: "Tap every date that works for you.",
       selected: (count: number, dirty: boolean) =>
         `${count} selected${dirty ? " - unsaved" : ""}`,
       errors: {
@@ -142,6 +145,7 @@ const en = {
   },
   results: {
     title: (eventTitle: string) => `Best times for ${eventTitle}`,
+    fullDayTitle: (eventTitle: string) => `Best dates for ${eventTitle}`,
     emptyNoParticipantsTitle: "No one has joined yet",
     emptyNoParticipantsDescription:
       "Share the event link so people can add their name and slots.",
@@ -209,6 +213,9 @@ const fr: Messages = {
       startTimeHelp: "Première heure affichée chaque jour.",
       endTime: "Heure de fin",
       endTimeHelp: "Dernière heure affichée chaque jour.",
+      fullDay: "Journée complète",
+      fullDayHelp:
+        "Les participants choisissent uniquement des dates, sans créneaux horaires.",
       duration: "Durée de l’événement",
       durationHelp: "Durée du rendez-vous à planifier.",
       slotSize: "Taille des créneaux",
@@ -278,6 +285,7 @@ const fr: Messages = {
     availability: {
       title: "Choisir mes disponibilités",
       help: "Touchez ou glissez sur tous les créneaux qui vous conviennent.",
+      fullDayHelp: "Touchez toutes les dates qui vous conviennent.",
       selected: (count: number, dirty: boolean) =>
         `${count} sélectionné${count > 1 ? "s" : ""}${dirty ? " - non enregistré" : ""}`,
       errors: {
@@ -308,6 +316,7 @@ const fr: Messages = {
   },
   results: {
     title: (eventTitle: string) => `Meilleurs créneaux pour ${eventTitle}`,
+    fullDayTitle: (eventTitle: string) => `Meilleures dates pour ${eventTitle}`,
     emptyNoParticipantsTitle: "Personne n’a encore rejoint",
     emptyNoParticipantsDescription:
       "Partagez le lien pour que les participants ajoutent leur nom et leurs créneaux.",

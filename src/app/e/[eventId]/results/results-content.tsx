@@ -5,12 +5,14 @@ import type { RankedSlot } from "@/domain/availability";
 import { messages, type Locale } from "@/i18n/messages";
 
 interface ResultsContentProps {
+  readonly isFullDay: boolean;
   readonly locale: Locale;
   readonly participantCount: number;
   readonly rankedSlots: readonly RankedSlot[];
 }
 
 export function ResultsContent({
+  isFullDay,
   locale,
   participantCount,
   rankedSlots,
@@ -68,7 +70,7 @@ export function ResultsContent({
                     #{index + 1}
                   </span>
                   <p className="mt-1 font-medium">
-                    {formatSlot(slot, timezone, locale)}
+                    {formatSlot(slot, timezone, locale, isFullDay)}
                   </p>
                 </div>
                 <span className="shrink-0 text-sm text-[var(--muted)]">
@@ -95,14 +97,16 @@ export function ResultsContent({
               {t.selectedRecommendation}
             </p>
             <h2 className="mt-2 text-lg font-semibold">
-              {formatSlot(selectedSlot, timezone, locale)}
+              {formatSlot(selectedSlot, timezone, locale, isFullDay)}
             </h2>
             <p className="mt-2 text-sm text-[var(--muted)]">
               {t.attendance(selectedSlot.availableCount, participantCount)}
             </p>
-            <p className="mt-1 text-xs text-[var(--muted)]">
-              {t.displayedIn(timezone)}
-            </p>
+            {!isFullDay ? (
+              <p className="mt-1 text-xs text-[var(--muted)]">
+                {t.displayedIn(timezone)}
+              </p>
+            ) : null}
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <ParticipantList
                 names={selectedSlot.availableParticipants.map(
@@ -182,8 +186,19 @@ function formatSlot(
   slot: RankedSlot,
   timezone: string,
   locale: Locale,
+  isFullDay: boolean,
 ): string {
   const start = new Date(slot.start);
+
+  if (isFullDay) {
+    return new Intl.DateTimeFormat(locale, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      timeZone: "UTC",
+    }).format(start);
+  }
+
   const end = new Date(slot.end);
   const day = new Intl.DateTimeFormat(locale, {
     weekday: "short",

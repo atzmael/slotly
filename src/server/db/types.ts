@@ -19,6 +19,7 @@ export interface Database {
           end_time: string;
           duration_minutes: number;
           slot_size_minutes: number;
+          is_full_day: boolean;
           created_at: string;
         };
         Insert: {
@@ -30,6 +31,7 @@ export interface Database {
           end_time: string;
           duration_minutes: number;
           slot_size_minutes: number;
+          is_full_day?: boolean;
           created_at?: string;
         };
         Update: {
@@ -41,6 +43,7 @@ export interface Database {
           end_time?: string;
           duration_minutes?: number;
           slot_size_minutes?: number;
+          is_full_day?: boolean;
           created_at?: string;
         };
         Relationships: [];

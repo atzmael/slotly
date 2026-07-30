@@ -47,6 +47,7 @@ export default async function EventPage({ params }: EventPageProps) {
                 event.endDate,
                 event.startTime,
                 event.endTime,
+                event.isFullDay,
                 locale,
               )}
             </p>
@@ -78,6 +79,7 @@ export default async function EventPage({ params }: EventPageProps) {
             endDate={event.endDate}
             endTime={event.endTime}
             eventId={event.id}
+            isFullDay={event.isFullDay}
             locale={locale}
             participants={participants}
             slotSizeMinutes={event.slotSizeMinutes}
@@ -95,8 +97,13 @@ function formatEventWindow(
   endDate: string,
   startTime: string,
   endTime: string,
+  isFullDay: boolean,
   locale: Locale,
 ): string {
+  if (isFullDay) {
+    return `${formatDate(startDate, locale)} -> ${formatDate(endDate, locale)}`;
+  }
+
   return `${formatDate(startDate, locale)} -> ${formatDate(endDate, locale)}, ${startTime} -> ${endTime}`;
 }
 

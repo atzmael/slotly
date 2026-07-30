@@ -18,6 +18,7 @@ import { messages, type Locale } from "@/i18n/messages";
 import { joinEventAction } from "./actions";
 import { AvailabilitySelector } from "./availability-selector";
 import { broadcastEventChange } from "./event-realtime";
+import { FullDayAvailabilitySelector } from "./full-day-availability-selector";
 import { TemporaryStatusMessage } from "./temporary-status-message";
 
 const initialJoinEventState = {
@@ -28,6 +29,7 @@ const initialJoinEventState = {
 export function JoinEventForm({
   availabilityWindows,
   eventId,
+  isFullDay,
   participants,
   startDate,
   startTime,
@@ -38,6 +40,7 @@ export function JoinEventForm({
 }: {
   readonly availabilityWindows: readonly EventAvailabilityWindow[];
   readonly eventId: string;
+  readonly isFullDay: boolean;
   readonly participants: readonly EventParticipant[];
   readonly startDate: string;
   readonly startTime: string;
@@ -146,7 +149,19 @@ export function JoinEventForm({
         </TemporaryStatusMessage>
       ) : null}
 
-      {activeParticipantId ? (
+      {activeParticipantId && isFullDay ? (
+        <FullDayAvailabilitySelector
+          endDate={endDate}
+          eventId={eventId}
+          initialWindows={activeAvailabilityWindows}
+          key={activeParticipantId}
+          locale={locale}
+          participantId={activeParticipantId}
+          startDate={startDate}
+        />
+      ) : null}
+
+      {activeParticipantId && !isFullDay ? (
         <AvailabilitySelector
           endDate={endDate}
           endTime={endTime}

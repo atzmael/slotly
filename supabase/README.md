@@ -13,6 +13,7 @@ Initial schema:
 - `availability_windows`
 - `get_event_snapshot(event_id)` public RPC for narrow link-based reads
 - `delete_stale_events(retention_days)` service-only RPC for scheduled cleanup
+- `events.is_full_day` for date-only availability polls
 
 The MVP is accountless. Next server services should use `SUPABASE_SECRET_KEY` for writes. Direct anonymous table access is intentionally closed by RLS; public reads should go through RPCs that accept a non-enumerable event id.
 
@@ -69,6 +70,7 @@ Production runs `/api/cron/cleanup-stale-events` daily through Vercel Cron.
 
 - Confirm the initial migration is applied once to the production Supabase project.
 - Confirm the stale event cleanup migration is applied.
+- Confirm the full-day polls migration is applied before testing date-only polls.
 - Confirm RLS is enabled on `events`, `participants`, and `availability_windows`.
 - Confirm anonymous direct table reads remain closed.
 - Confirm `get_event_snapshot(uuid)` is executable by `anon`.

@@ -15,6 +15,7 @@ export interface EventDraft {
   readonly endTime: string;
   readonly durationMinutes: number;
   readonly slotSizeMinutes: number;
+  readonly isFullDay?: boolean;
 }
 
 export interface ValidEventDraft {
@@ -25,6 +26,7 @@ export interface ValidEventDraft {
   readonly endTime: string;
   readonly durationMinutes: DurationMinutes;
   readonly slotSizeMinutes: SlotSizeMinutes;
+  readonly isFullDay: boolean;
 }
 
 export interface Participant {
@@ -54,6 +56,13 @@ export interface RankAvailabilityInput {
   readonly slotSizeMinutes: number;
 }
 
+export interface RankFullDayAvailabilityInput {
+  readonly participants: readonly Participant[];
+  readonly availability: readonly AvailabilityWindow[];
+  readonly startDate: string;
+  readonly endDate: string;
+}
+
 type MillisecondWindow = {
   readonly participantId: string;
   readonly startMs: number;
@@ -67,6 +76,7 @@ export function validateEventDraft(
   | { readonly valid: false; readonly errors: readonly string[] } {
   const errors: string[] = [];
   const title = draft.title.trim();
+  const isFullDay = draft.isFullDay === true;
 
   if (title.length === 0) {
     errors.push("title_required");
@@ -84,11 +94,11 @@ export function validateEventDraft(
     errors.push("end_date_invalid");
   }
 
-  if (!isTimeOnly(draft.startTime)) {
+  if (!isFullDay && !isTimeOnly(draft.startTime)) {
     errors.push("start_time_invalid");
   }
 
-  if (!isTimeOnly(draft.endTime)) {
+  if (!isFullDay && !isTimeOnly(draft.endTime)) {
     errors.push("end_time_invalid");
   }
 
@@ -108,15 +118,16 @@ export function validateEventDraft(
     errors.push("date_range_too_long");
   }
 
-  if (!isAllowedDuration(draft.durationMinutes)) {
+  if (!isFullDay && !isAllowedDuration(draft.durationMinutes)) {
     errors.push("duration_invalid");
   }
 
-  if (!isAllowedSlotSize(draft.slotSizeMinutes)) {
+  if (!isFullDay && !isAllowedSlotSize(draft.slotSizeMinutes)) {
     errors.push("slot_size_invalid");
   }
 
   if (
+    !isFullDay &&
     isTimeOnly(draft.startTime) &&
     isTimeOnly(draft.endTime) &&
     timeToMinutes(draft.startTime) >= timeToMinutes(draft.endTime)
@@ -125,6 +136,7 @@ export function validateEventDraft(
   }
 
   if (
+    !isFullDay &&
     isTimeOnly(draft.startTime) &&
     isTimeOnly(draft.endTime) &&
     isAllowedDuration(draft.durationMinutes) &&
@@ -144,10 +156,15 @@ export function validateEventDraft(
       title,
       startDate: draft.startDate,
       endDate: draft.endDate,
-      startTime: draft.startTime,
-      endTime: draft.endTime,
-      durationMinutes: draft.durationMinutes as DurationMinutes,
-      slotSizeMinutes: draft.slotSizeMinutes as SlotSizeMinutes,
+      startTime: isFullDay ? "00:00" : draft.startTime,
+      endTime: isFullDay ? "23:59" : draft.endTime,
+      durationMinutes: isFullDay
+        ? 60
+        : (draft.durationMinutes as DurationMinutes),
+      slotSizeMinutes: isFullDay
+        ? 60
+        : (draft.slotSizeMinutes as SlotSizeMinutes),
+      isFullDay,
     },
   };
 }
@@ -219,6 +236,54 @@ export function rankAvailabilitySlots(
         right.availableCount - left.availableCount ||
         Date.parse(left.start) - Date.parse(right.start) ||
         Date.parse(left.end) - Date.parse(right.end),
+    );
+}
+
+export function rankFullDayAvailabilitySlots(
+  input: RankFullDayAvailabilityInput,
+): RankedSlot[] {
+  if (!isDateOnly(input.startDate) || !isDateOnly(input.endDate)) {
+    throw new Error("Invalid full-day date range");
+  }
+
+  const participantById = new Map(
+    input.participants.map((participant) => [participant.id, participant]),
+  );
+  const windows = mergeWindows(
+    normalizeWindows(input.availability, participantById),
+  );
+  const windowsByParticipant = groupWindowsByParticipant(windows);
+  const candidateDays = getCandidateDays(input.startDate, input.endDate);
+
+  return candidateDays
+    .map(({ startMs, endMs }) => {
+      const availableParticipants = input.participants.filter((participant) =>
+        isParticipantAvailable(
+          windowsByParticipant.get(participant.id) ?? [],
+          startMs,
+          endMs,
+        ),
+      );
+      const availableIds = new Set(
+        availableParticipants.map((participant) => participant.id),
+      );
+      const missingParticipants = input.participants.filter(
+        (participant) => !availableIds.has(participant.id),
+      );
+
+      return {
+        start: new Date(startMs).toISOString(),
+        end: new Date(endMs).toISOString(),
+        availableCount: availableParticipants.length,
+        availableParticipants,
+        missingParticipants,
+      };
+    })
+    .filter((slot) => slot.availableCount > 0)
+    .sort(
+      (left, right) =>
+        right.availableCount - left.availableCount ||
+        Date.parse(left.start) - Date.parse(right.start),
     );
 }
 
@@ -320,6 +385,21 @@ function getCandidateSlots(
   return Array.from(slotsByKey.values()).sort(
     (left, right) => left.startMs - right.startMs || left.endMs - right.endMs,
   );
+}
+
+function getCandidateDays(
+  startDate: string,
+  endDate: string,
+): Array<{ readonly startMs: number; readonly endMs: number }> {
+  const startMs = toDateOnlyMs(startDate);
+  const endMs = toDateOnlyMs(endDate);
+  const days: Array<{ readonly startMs: number; readonly endMs: number }> = [];
+
+  for (let dayStartMs = startMs; dayStartMs <= endMs; dayStartMs += dayMs) {
+    days.push({ startMs: dayStartMs, endMs: dayStartMs + dayMs });
+  }
+
+  return days;
 }
 
 function isParticipantAvailable(

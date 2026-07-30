@@ -15,6 +15,7 @@ export interface EventInsert {
   readonly end_time: string;
   readonly duration_minutes: number;
   readonly slot_size_minutes: number;
+  readonly is_full_day: boolean;
 }
 
 export interface CreateEventRepository {
@@ -71,6 +72,7 @@ export interface SlotlyEvent {
   readonly endTime: string;
   readonly durationMinutes: number;
   readonly slotSizeMinutes: number;
+  readonly isFullDay: boolean;
   readonly createdAt: string;
 }
 
@@ -169,6 +171,7 @@ export async function createEvent(
       end_time: validation.value.endTime,
       duration_minutes: validation.value.durationMinutes,
       slot_size_minutes: validation.value.slotSizeMinutes,
+      is_full_day: validation.value.isFullDay,
     });
 
     return {
@@ -549,6 +552,7 @@ function parseEventSnapshot(payload: Json): EventSnapshot {
       endTime: asTimeString(event.end_time ?? "22:00"),
       durationMinutes: asNumber(event.duration_minutes),
       slotSizeMinutes: asNumber(event.slot_size_minutes),
+      isFullDay: asBoolean(event.is_full_day ?? false),
       createdAt: asString(event.created_at),
     },
     participants: participants.map((participant) => {
@@ -595,7 +599,9 @@ function isEventSchemaMigrationError(error: unknown): boolean {
   return (
     (code === "PGRST204" || code === "42703") &&
     typeof message === "string" &&
-    (message.includes("start_time") || message.includes("end_time"))
+    (message.includes("start_time") ||
+      message.includes("end_time") ||
+      message.includes("is_full_day"))
   );
 }
 
@@ -652,6 +658,14 @@ function asTimeString(value: Json | undefined): string {
 function asNumber(value: Json | undefined): number {
   if (typeof value !== "number") {
     throw new Error("Expected number");
+  }
+
+  return value;
+}
+
+function asBoolean(value: Json | undefined): boolean {
+  if (typeof value !== "boolean") {
+    throw new Error("Expected boolean");
   }
 
   return value;

@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { rankAvailabilitySlots } from "@/domain/availability";
+import {
+  rankAvailabilitySlots,
+  rankFullDayAvailabilitySlots,
+} from "@/domain/availability";
 import { getRequestLocale } from "@/i18n/locale";
 import { LanguageSwitcher } from "@/i18n/language-switcher";
 import { messages, type Locale } from "@/i18n/messages";
@@ -26,7 +29,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
   }
 
   const { event, participants, availabilityWindows } = result.snapshot;
-  const rankedSlots = rankAvailabilitySlots({
+  const rankInput = {
     participants: participants.map((participant) => ({
       id: participant.id,
       name: participant.name,
@@ -37,9 +40,18 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
       start: window.start,
       end: window.end,
     })),
-    durationMinutes: event.durationMinutes,
-    slotSizeMinutes: event.slotSizeMinutes,
-  });
+  };
+  const rankedSlots = event.isFullDay
+    ? rankFullDayAvailabilitySlots({
+        ...rankInput,
+        startDate: event.startDate,
+        endDate: event.endDate,
+      })
+    : rankAvailabilitySlots({
+        ...rankInput,
+        durationMinutes: event.durationMinutes,
+        slotSizeMinutes: event.slotSizeMinutes,
+      });
 
   return (
     <main className="min-h-screen px-5 py-6 sm:px-8">
@@ -62,11 +74,14 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
                 event.endDate,
                 event.startTime,
                 event.endTime,
+                event.isFullDay,
                 locale,
               )}
             </p>
             <h1 className="mt-2 text-3xl font-semibold tracking-normal sm:text-4xl">
-              {t.results.title(event.title)}
+              {event.isFullDay
+                ? t.results.fullDayTitle(event.title)
+                : t.results.title(event.title)}
             </h1>
             <p className="mt-3 text-sm text-[var(--muted)]">
               {t.event.participantCount(participants.length)}
@@ -89,6 +104,7 @@ export default async function ResultsPage({ params }: ResultsPageProps) {
 
         <ResultsContent
           locale={locale}
+          isFullDay={event.isFullDay}
           participantCount={participants.length}
           rankedSlots={rankedSlots}
         />
@@ -102,8 +118,13 @@ function formatEventWindow(
   endDate: string,
   startTime: string,
   endTime: string,
+  isFullDay: boolean,
   locale: Locale,
 ): string {
+  if (isFullDay) {
+    return `${formatDate(startDate, locale)} -> ${formatDate(endDate, locale)}`;
+  }
+
   return `${formatDate(startDate, locale)} -> ${formatDate(endDate, locale)}, ${startTime} -> ${endTime}`;
 }
 

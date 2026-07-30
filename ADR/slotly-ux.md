@@ -44,6 +44,7 @@ Champs :
 
 - Event name.
 - Date range.
+- Full day checkbox for date-only polls.
 - Daily time range.
 - Event duration : 30 min, 1 hour, 2 hours, 3 hours, 4 hours.
 - Slot size : 30 min ou 1 hour.
@@ -60,6 +61,8 @@ UX :
 - erreurs inline ;
 - la grille de participation utilise la plage horaire choisie, sans plage
   hardcodee ;
+- si "Full day" est coche, les champs horaires et tailles de creneaux sont
+  caches ou neutralises car les participants choisiront uniquement des dates ;
 - aucune option avancee en MVP.
 
 ### Join Poll
@@ -81,6 +84,8 @@ Interaction disponibilite :
 - selection continue ;
 - drag rectangulaire : depuis une case de depart, glisser horizontalement puis
   verticalement selectionne tout le rectangle de cases entre depart et arrivee ;
+- pour un poll full-day, afficher un calendrier date-only avec les dates hors
+  plage grisees et non selectionnables ;
 - cibles tactiles confortables ;
 - pas de micro-cellules difficiles a toucher.
 
@@ -110,6 +115,8 @@ Contenu attendu :
 - liste Present ;
 - liste Absent ;
 - heatmap visible avec intensite basee sur `availableCount`.
+- pour un poll full-day, le ranking affiche des dates completes plutot que des
+  creneaux horaires.
 
 Exemple de ranking :
 

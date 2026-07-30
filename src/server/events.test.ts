@@ -91,6 +91,44 @@ describe("createEvent", () => {
         end_time: "22:00",
         duration_minutes: 60,
         slot_size_minutes: 30,
+        is_full_day: false,
+      },
+    ]);
+  });
+
+  it("validates and persists a full-day event", async () => {
+    const inserted: EventInsert[] = [];
+    const result = await createEvent(
+      {
+        title: " Friends Weekend ",
+        startDate: "2026-06-19",
+        endDate: "2026-06-21",
+        startTime: "",
+        endTime: "",
+        durationMinutes: Number.NaN,
+        slotSizeMinutes: Number.NaN,
+        isFullDay: true,
+      },
+      createFakeRepository(async (event) => {
+        inserted.push(event);
+        return { id: "9dcb8596-4785-4c57-9edc-f9bc0478fc39" };
+      }),
+    );
+
+    expect(result).toEqual({
+      ok: true,
+      eventId: "9dcb8596-4785-4c57-9edc-f9bc0478fc39",
+    });
+    expect(inserted).toEqual([
+      {
+        title: "Friends Weekend",
+        start_date: "2026-06-19",
+        end_date: "2026-06-21",
+        start_time: "00:00",
+        end_time: "23:59",
+        duration_minutes: 60,
+        slot_size_minutes: 60,
+        is_full_day: true,
       },
     ]);
   });
@@ -191,6 +229,7 @@ describe("getEventSnapshot", () => {
               end_time: "22:00",
               duration_minutes: 120,
               slot_size_minutes: 60,
+              is_full_day: false,
               created_at: "2026-06-01T00:00:00.000Z",
             },
             participants: [
@@ -221,6 +260,7 @@ describe("getEventSnapshot", () => {
           endTime: "22:00",
           durationMinutes: 120,
           slotSizeMinutes: 60,
+          isFullDay: false,
           createdAt: "2026-06-01T00:00:00.000Z",
         },
         participants: [

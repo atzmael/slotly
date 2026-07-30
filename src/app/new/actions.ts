@@ -18,6 +18,7 @@ interface CreateEventActionValues {
   readonly endTime: string;
   readonly durationMinutes: number;
   readonly slotSizeMinutes: number;
+  readonly isFullDay: boolean;
 }
 
 export async function createEventAction(
@@ -68,5 +69,6 @@ function getCreateEventActionValues(
     endTime: getString(formData, "endTime"),
     durationMinutes: getNumber(formData, "durationMinutes"),
     slotSizeMinutes: getNumber(formData, "slotSizeMinutes"),
+    isFullDay: formData.get("isFullDay") === "on",
   };
 }

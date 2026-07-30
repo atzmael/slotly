@@ -18,16 +18,16 @@ const en = {
   },
   home: {
     createPoll: "Create Poll",
-    eyebrow: "Fast planning, built for phones",
-    title: "Find the best time without the spreadsheet feeling.",
+    eyebrow: "For friends, clubs, volunteer teams, and small crews",
+    title: "Find the right time, together.",
     subtitle:
-      "Create a link, collect availability, and instantly know the best time to meet.",
+      "Plan dinners, weekends, association meetings, or lightweight team sessions with one simple availability link.",
     bestSlots: "Best slots",
     live: "Live",
     valueProps: [
       "No accounts",
-      "Mobile-first availability",
-      "Automatic best-slot ranking",
+      "Made for group chats",
+      "Useful for small teams too",
     ],
     demoSlots: [
       ["Tue 20:00", "12 available", "w-full"],
@@ -50,6 +50,8 @@ const en = {
       startTimeHelp: "Earliest time shown each day.",
       endTime: "End time",
       endTimeHelp: "Latest time shown each day.",
+      fullDay: "Full day",
+      fullDayHelp: "Participants pick dates only, without hourly slots.",
       duration: "Event duration",
       durationHelp: "Length of the meeting you want to schedule.",
       slotSize: "Slot size",
@@ -118,6 +120,7 @@ const en = {
     availability: {
       title: "Pick availability",
       help: "Tap or drag across every slot that works for you.",
+      fullDayHelp: "Tap every date that works for you.",
       selected: (count: number, dirty: boolean) =>
         `${count} selected${dirty ? " - unsaved" : ""}`,
       errors: {
@@ -138,13 +141,17 @@ const en = {
       applyWeekdays: "Apply to weekdays",
       clearAll: "Deselect all",
       cancelChanges: "Cancel changes",
+      cancelChangesShort: "Cancel",
       timeHeader: "Time",
       saving: "Saving...",
+      savingShort: "Saving...",
       save: "Save availability",
+      saveShort: "Save",
     },
   },
   results: {
     title: (eventTitle: string) => `Best times for ${eventTitle}`,
+    fullDayTitle: (eventTitle: string) => `Best dates for ${eventTitle}`,
     emptyNoParticipantsTitle: "No one has joined yet",
     emptyNoParticipantsDescription:
       "Share the event link so people can add their name and slots.",
@@ -181,16 +188,16 @@ const fr: Messages = {
   },
   home: {
     createPoll: "Créer un sondage",
-    eyebrow: "Planification rapide, pensée pour mobile",
-    title: "Trouvez le meilleur créneau sans tableur.",
+    eyebrow: "Pour amis, assos, clubs et petites équipes",
+    title: "Trouvez le bon moment, ensemble.",
     subtitle:
-      "Créez un lien, collectez les disponibilités, et voyez tout de suite le meilleur moment.",
+      "Organisez un dîner, un week-end, une réunion d’asso ou un point d’équipe avec un simple lien de disponibilités.",
     bestSlots: "Meilleurs créneaux",
     live: "Live",
     valueProps: [
       "Aucun compte",
-      "Disponibilités mobile-first",
-      "Classement automatique",
+      "Pensé pour les groupes",
+      "Utile aussi en petite équipe",
     ],
     demoSlots: [
       ["Mar 20:00", "12 disponibles", "w-full"],
@@ -215,6 +222,9 @@ const fr: Messages = {
       startTimeHelp: "Première heure affichée chaque jour.",
       endTime: "Heure de fin",
       endTimeHelp: "Dernière heure affichée chaque jour.",
+      fullDay: "Journée complète",
+      fullDayHelp:
+        "Les participants choisissent uniquement des dates, sans créneaux horaires.",
       duration: "Durée de l’événement",
       durationHelp: "Durée du rendez-vous à planifier.",
       slotSize: "Taille des créneaux",
@@ -284,6 +294,7 @@ const fr: Messages = {
     availability: {
       title: "Choisir mes disponibilités",
       help: "Touchez ou glissez sur tous les créneaux qui vous conviennent.",
+      fullDayHelp: "Touchez toutes les dates qui vous conviennent.",
       selected: (count: number, dirty: boolean) =>
         `${count} sélectionné${count > 1 ? "s" : ""}${dirty ? " - non enregistré" : ""}`,
       errors: {
@@ -307,13 +318,17 @@ const fr: Messages = {
       applyWeekdays: "Jours ouvrés",
       clearAll: "Tout désélectionner",
       cancelChanges: "Annuler les modifications",
+      cancelChangesShort: "Annuler",
       timeHeader: "Heure",
       saving: "Enregistrement...",
+      savingShort: "Enregistrement...",
       save: "Enregistrer mes disponibilités",
+      saveShort: "Enregistrer",
     },
   },
   results: {
     title: (eventTitle: string) => `Meilleurs créneaux pour ${eventTitle}`,
+    fullDayTitle: (eventTitle: string) => `Meilleures dates pour ${eventTitle}`,
     emptyNoParticipantsTitle: "Personne n’a encore rejoint",
     emptyNoParticipantsDescription:
       "Partagez le lien pour que les participants ajoutent leur nom et leurs créneaux.",

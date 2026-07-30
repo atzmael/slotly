@@ -1,116 +1,93 @@
 # Slotly
 
-Slotly is a mobile-first, accountless availability poll app: create a link, collect availability, instantly know the best time to meet.
+**Find the best time or date to meet, without accounts or spreadsheets.**
 
-The MVP is intentionally small:
+Slotly is a lightweight availability poll built for quick plans: meetings,
+dinners, weekends with friends, family events, and any moment where asking
+"when are you free?" should not become project management.
 
-- no accounts;
-- no onboarding;
-- shareable event links;
-- automatic timezone handling;
-- mobile-first availability grid;
-- automatic best-slot ranking.
+[Try Slotly](https://slotly-meetings.vercel.app)
 
-## Source Of Truth
+## What It Does
 
-Canonical decisions live in `ADR/`:
+Slotly lets anyone create a poll, share a link, and collect availability from
+participants in a few seconds.
 
-- `ADR/slotly.md`
-- `ADR/slotly-ux.md`
-- `ADR/slotly/`
+- **No accounts**: organizers and participants can use it immediately.
+- **One link**: create a poll and share it anywhere.
+- **Mobile-first selection**: tap or drag across the slots that work.
+- **Time-slot polls**: find the best meeting time across several days.
+- **Full-day polls**: pick whole dates for weekends, trips, and date-only plans.
+- **Instant results**: Slotly ranks the best options automatically.
+- **Timezone-aware**: time-slot polls stay readable across locations.
+- **Bilingual interface**: English and French, detected from the browser.
 
-The implementation plan lives in `IMPLEMENTATION_PLAN.md`.
+## Why It Exists
 
-## Source Layout
+Most scheduling products are either too formal, too account-heavy, or awkward on
+phones. Slotly is intentionally small: no onboarding, no team setup, no calendar
+integration required before you can get an answer.
 
-Current layout:
+The goal is simple:
 
-- `src/app` - Next.js routes and route handlers.
-- `src/domain` - pure product rules, deterministic and DB-free.
-- `src/server` - server-only services, validation, and persistence.
-- `src/client` - browser-only service clients.
-- `supabase/migrations` - database schema migrations.
-- `tests/e2e` - Playwright happy-path coverage.
+> Create a poll. Share the link. See the best option.
 
-## Minimal UI System
+## Product Principles
 
-Shared UI primitives live in `src/app/globals.css` and use the `sl-*` prefix:
+- **Fast over complete**: the first useful answer matters more than a huge
+  feature set.
+- **Accountless by default**: joining a poll should feel as easy as replying to
+  a message.
+- **Mobile-first**: the participant flow is the product.
+- **Privacy-conscious**: collect only what the poll needs.
+- **Readable results**: the best option should be obvious in a few seconds.
 
-- `sl-button`, `sl-button-primary`, `sl-button-secondary`
-- `sl-field`
-- `sl-panel`
-- `sl-alert`, `sl-alert-error`, `sl-alert-success`
+## Current Scope
 
-Keep new route UI on these primitives before adding new styling patterns.
-Interactive elements should preserve hover, focus, active, disabled, and cursor
-states.
+Slotly currently supports:
 
-## Environment
+- public availability polls;
+- participant name-based reconnect;
+- automatic best-slot ranking;
+- realtime refresh when availability changes;
+- stale poll cleanup;
+- optional privacy-first product analytics.
 
-Local development and Vercel need these variables:
+Slotly does not currently include:
 
-```bash
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
-SUPABASE_SECRET_KEY=
-```
+- accounts;
+- calendars integrations;
+- email notifications;
+- recurring polls;
+- team workspaces.
 
-`SUPABASE_SECRET_KEY` is server-only. Do not expose it to browser code.
+Those may come later, but the core free flow should stay fast and accountless.
 
-Optional local mode flag:
+## Privacy And Safety
 
-```bash
-APP_ACCESS_MODE=public
-```
+Slotly polls are public to anyone with the link. The link acts as the share
+token.
 
-## Local Development
+Current safeguards include:
 
-Use the conservative webpack dev server by default:
+- non-enumerable poll ids;
+- server-side validation and rate limiting on public actions;
+- restricted direct database access;
+- no raw event titles or participant names in analytics payloads;
+- automatic cleanup for stale polls.
 
-```bash
-pnpm dev
-```
+## Roadmap Ideas
 
-If you want to test Turbopack explicitly:
+- Better result sharing.
+- Calendar export.
+- Optional organizer controls.
+- Stronger abuse protection if traffic grows.
+- More polished full-day planning flows.
 
-```bash
-pnpm dev:turbo
-```
+## Status
 
-If local dev becomes unstable, stop the server and prefer `pnpm dev` before
-retrying Turbopack.
+Slotly is a public MVP. It is actively evolving based on real usage and
+feedback.
 
-## Supabase
-
-Apply the migrations in `supabase/migrations` to the target Supabase project before deploying the app.
-
-The MVP keeps direct anonymous table access closed with RLS. Public reads go through the `get_event_snapshot` RPC, and server writes use `SUPABASE_SECRET_KEY`.
-
-Realtime uses Supabase Broadcast topics named `event:{eventId}`. No Postgres table publication is required for the current realtime refresh behavior.
-
-## Deploy Checklist
-
-- Supabase project created.
-- Migration `202605310001_initial_mvp.sql` applied.
-- `NEXT_PUBLIC_SUPABASE_URL` configured in Vercel.
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` configured in Vercel.
-- `SUPABASE_SECRET_KEY` configured in Vercel as a server-only secret.
-- `CRON_SECRET` configured in Vercel for scheduled cleanup.
-- `pnpm build` passes locally.
-- `pnpm audit --prod` has no high or moderate production findings.
-- `pnpm e2e` passes locally against the target environment variables.
-- Vercel preview opens `/new`.
-- Preview happy path works: create poll, join, save availability, view results.
-- Vercel Firewall or another edge protection is ready if public traffic spikes.
-
-## Quality Checks
-
-Expected commands:
-
-```bash
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm e2e
-pnpm build
-```
+Feedback and bug reports are welcome:
+[creadiv.tech+slotlysupport@gmail.com](mailto:creadiv.tech+slotlysupport@gmail.com)

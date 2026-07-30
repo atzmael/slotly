@@ -4,6 +4,7 @@ import { getRequestLocale } from "@/i18n/locale";
 import { LanguageSwitcher } from "@/i18n/language-switcher";
 import { messages, type Locale } from "@/i18n/messages";
 import { getEventSnapshot } from "@/server/events";
+import { BrandMark } from "../../brand-mark";
 import { EventRealtimeRefresh } from "./event-realtime";
 import { JoinEventForm } from "./join-event-form";
 import { ShareLinkButton } from "./share-link-button";
@@ -35,7 +36,7 @@ export default async function EventPage({ params }: EventPageProps) {
             className="text-sm font-semibold text-[var(--primary)]"
             href="/"
           >
-            {t.common.brand}
+            <BrandMark size="sm" />
           </Link>
           <LanguageSwitcher locale={locale} />
         </div>

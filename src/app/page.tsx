@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getRequestLocale } from "@/i18n/locale";
 import { LanguageSwitcher } from "@/i18n/language-switcher";
 import { messages } from "@/i18n/messages";
+import { BrandMark } from "./brand-mark";
 
 export default async function HomePage() {
   const locale = await getRequestLocale();
@@ -11,7 +12,7 @@ export default async function HomePage() {
     <main className="min-h-screen px-5 py-6 sm:px-8">
       <section className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-5xl flex-col justify-between">
         <header className="flex items-center justify-between gap-3">
-          <span className="text-lg font-semibold tracking-normal">Slotly</span>
+          <BrandMark />
           <div className="flex items-center gap-2">
             <LanguageSwitcher locale={locale} />
             <Link className="sl-button sl-button-secondary" href="/new">
@@ -75,7 +76,6 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-
       </section>
     </main>
   );

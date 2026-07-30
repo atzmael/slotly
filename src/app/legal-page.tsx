@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getRequestLocale } from "@/i18n/locale";
 import { LanguageSwitcher } from "@/i18n/language-switcher";
-import { messages } from "@/i18n/messages";
+import { BrandMark } from "./brand-mark";
 
 interface LegalPageProps {
   readonly title: string;
@@ -15,7 +15,6 @@ export async function LegalPage({
   updatedAt,
 }: LegalPageProps) {
   const locale = await getRequestLocale();
-  const t = messages[locale].common;
 
   return (
     <main className="min-h-screen px-5 py-6 sm:px-8">
@@ -25,7 +24,7 @@ export async function LegalPage({
             className="text-sm font-semibold text-[var(--primary)]"
             href="/"
           >
-            {t.brand}
+            <BrandMark size="sm" />
           </Link>
           <LanguageSwitcher locale={locale} />
         </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getRequestLocale } from "@/i18n/locale";
 import { LanguageSwitcher } from "@/i18n/language-switcher";
 import { messages } from "@/i18n/messages";
+import { BrandMark } from "../brand-mark";
 import { NewPollForm } from "./new-poll-form";
 
 export default async function NewPollPage() {
@@ -16,7 +17,7 @@ export default async function NewPollPage() {
             className="text-sm font-semibold text-[var(--primary)]"
             href="/"
           >
-            {t.backlink}
+            <BrandMark size="sm" />
           </Link>
           <LanguageSwitcher locale={locale} />
         </div>

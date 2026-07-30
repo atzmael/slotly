@@ -462,19 +462,19 @@ export function AvailabilitySelector({
           </div>
         </details>
 
-        <div className="mt-2 max-h-[calc(100svh-16rem)] overflow-auto rounded-t-none rounded-b-[8px] border border-[var(--line)] bg-[var(--surface)] sm:mt-0 sm:max-h-[calc(100vh-17rem)] sm:rounded-t-[8px]">
+        <div className="mt-2 max-h-[calc(100svh-16rem)] overflow-auto rounded-t-none rounded-b-[10px] border border-[var(--line)] bg-[var(--surface)] shadow-[var(--shadow-panel)] sm:mt-0 sm:max-h-[calc(100vh-17rem)] sm:rounded-t-[10px]">
           <div
             className="grid min-w-max select-none [--day-col-min:5.75rem] [--time-col-width:3.25rem] sm:[--day-col-min:7rem] sm:[--time-col-width:4.5rem]"
             style={{
               gridTemplateColumns: `var(--time-col-width) repeat(${days.length}, minmax(var(--day-col-min), 1fr))`,
             }}
           >
-            <div className="sticky top-0 left-0 z-20 flex min-h-12 items-center border-r border-b border-l border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-sm font-medium text-[var(--muted)] sm:min-h-11 sm:px-2 sm:py-3 sm:text-xs">
+            <div className="sticky top-0 left-0 z-20 flex min-h-12 items-center border-r border-b border-l border-[var(--line)] bg-[var(--surface-subtle)] px-2 py-3 text-sm font-medium text-[var(--muted)] sm:min-h-11 sm:px-2 sm:py-3 sm:text-xs">
               {t.event.availability.timeHeader}
             </div>
             {days.map((day) => (
               <div
-                className="sticky top-0 z-10 flex min-h-12 items-center justify-center border-r border-b border-l border-[var(--line)] bg-[#f5f5ef] px-2 py-3 text-center text-sm font-semibold sm:min-h-11 sm:px-2 sm:py-3 sm:text-xs"
+                className="sticky top-0 z-10 flex min-h-12 items-center justify-center border-r border-b border-l border-[var(--line)] bg-[var(--surface-subtle)] px-2 py-3 text-center text-sm font-semibold sm:min-h-11 sm:px-2 sm:py-3 sm:text-xs"
                 key={day.id}
               >
                 {day.label}
@@ -496,7 +496,7 @@ export function AvailabilitySelector({
                       aria-pressed={selected}
                       className={`sl-availability-cell min-h-12 touch-none border-r border-b border-l border-[var(--line)] px-1.5 py-2.5 text-left text-xs active:scale-[0.99] sm:min-h-14 sm:px-2 sm:py-3 ${
                         selected
-                          ? "bg-[#dff4ed] text-[var(--foreground)]"
+                          ? "bg-[var(--primary-soft)] text-[var(--foreground)]"
                           : "bg-[var(--surface)] text-[var(--muted)]"
                       }`}
                       data-availability-cell-id={cell.id}
@@ -526,7 +526,7 @@ export function AvailabilitySelector({
         }`}
       >
         <button
-          className="sl-button sl-button-secondary w-full whitespace-nowrap px-2 py-3 text-xs shadow-[0_10px_30px_rgb(29_29_27_/_18%)] sm:px-5 sm:text-sm sm:shadow-none"
+          className="sl-button sl-button-secondary w-full whitespace-nowrap px-2 py-3 text-xs shadow-[var(--shadow-floating)] sm:px-5 sm:text-sm sm:shadow-none"
           disabled={isPending || !isDirty}
           onClick={cancelChanges}
           type="button"
@@ -534,7 +534,7 @@ export function AvailabilitySelector({
           {t.event.availability.cancelChanges}
         </button>
         <button
-          className={`sl-button w-full whitespace-nowrap px-2 py-3 text-xs shadow-[0_10px_30px_rgb(29_29_27_/_18%)] sm:px-5 sm:text-sm sm:shadow-none ${
+          className={`sl-button w-full whitespace-nowrap px-2 py-3 text-xs shadow-[var(--shadow-floating)] sm:px-5 sm:text-sm sm:shadow-none ${
             isDirty ? "sl-button-primary" : "sl-button-secondary"
           }`}
           disabled={isPending || !isDirty}

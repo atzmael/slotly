@@ -56,7 +56,7 @@ export function ResultsContent({
           return (
             <button
               aria-pressed={selected}
-              className="sl-panel w-full p-4 text-left hover:border-[var(--primary)] active:scale-[0.99] data-[selected=true]:border-[var(--primary)] data-[selected=true]:shadow-sm"
+              className="sl-panel w-full p-4 text-left active:scale-[0.99]"
               data-selected={selected}
               key={`${slot.start}-${slot.end}`}
               onClick={() => setSelectedIndex(index)}
@@ -75,7 +75,7 @@ export function ResultsContent({
                   {t.availableCount(slot.availableCount)}
                 </span>
               </div>
-              <div className="mt-4 h-2 rounded-full bg-[var(--line)]">
+              <div className="mt-4 h-2 rounded-full bg-[var(--line-soft)]">
                 <div
                   className="h-2 rounded-full bg-[var(--primary)]"
                   style={{

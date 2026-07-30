@@ -43,7 +43,7 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="sl-panel p-4 shadow-sm">
+          <div className="sl-panel p-4">
             <div className="mb-4 flex items-center justify-between">
               <span className="text-sm font-semibold">{t.home.bestSlots}</span>
               <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold">
@@ -57,7 +57,7 @@ export default async function HomePage() {
                     <span className="font-medium">{time}</span>
                     <span className="text-sm text-[var(--muted)]">{count}</span>
                   </div>
-                  <div className="h-2 rounded-full bg-[#ecece4]">
+                  <div className="h-2 rounded-full bg-[var(--line-soft)]">
                     <div
                       className={`${width} h-2 rounded-full bg-[var(--primary)]`}
                     />

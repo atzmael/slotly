@@ -1,23 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fbfbf8;
-  --foreground: #1d1d1b;
-  --muted: #696964;
-  --line: #deded7;
+  --background: #f7f8fa;
+  --foreground: #111827;
+  --muted: #667085;
+  --line: #e5e7eb;
+  --line-soft: #eef1f4;
+  --line-strong: #cbd5e1;
   --surface: #ffffff;
-  --primary: #146c5c;
+  --surface-raised: #ffffff;
+  --surface-subtle: #f8fafc;
+  --primary: #0f766e;
+  --primary-hover: #115e59;
+  --primary-soft: #ccfbf1;
+  --primary-soft-hover: #99f6e4;
   --primary-foreground: #ffffff;
-  --accent: #f1c84b;
-  --danger-line: #e6b8a8;
-  --danger-surface: #fff5ef;
-  --danger-text: #8a351e;
-  --success-line: #a8d8cc;
-  --success-surface: #effaf6;
-  --success-text: #146c5c;
+  --accent: #f5c542;
+  --danger-line: #fecaca;
+  --danger-surface: #fff1f2;
+  --danger-text: #9f1239;
+  --success-line: #99f6e4;
+  --success-surface: #ecfdf5;
+  --success-text: #0f766e;
   --radius-control: 999px;
-  --radius-panel: 8px;
-  --transition-fast: 150ms ease;
+  --radius-panel: 10px;
+  --shadow-panel: 0 1px 2px rgb(15 23 42 / 4%),
+    0 12px 32px rgb(15 23 42 / 7%);
+  --shadow-panel-hover: 0 2px 4px rgb(15 23 42 / 5%),
+    0 16px 40px rgb(15 23 42 / 10%);
+  --shadow-floating: 0 12px 32px rgb(15 23 42 / 18%);
+  --focus-ring: 0 0 0 3px rgb(15 118 110 / 14%);
+  --transition-fast: 160ms ease;
 }
 
 * {
@@ -31,7 +44,9 @@ html {
 body {
   min-height: 100%;
   margin: 0;
-  background: var(--background);
+  background:
+    linear-gradient(180deg, #ffffff 0, var(--background) 15rem),
+    var(--background);
   color: var(--foreground);
   font-family:
     Inter,
@@ -88,41 +103,77 @@ a[href]:active {
     min-height: 2.5rem;
     align-items: center;
     justify-content: center;
+    border: 1px solid transparent;
     border-radius: var(--radius-control);
     padding: 0.5rem 1rem;
     text-align: center;
     font-size: 0.875rem;
     font-weight: 500;
+    box-shadow: none;
   }
 
   .sl-button-primary {
+    border-color: var(--primary);
     background: var(--primary);
     color: var(--primary-foreground);
     font-weight: 600;
+    box-shadow: 0 8px 18px rgb(15 118 110 / 18%);
   }
 
   .sl-button-primary:hover {
-    background: #0f5d50;
+    border-color: var(--primary-hover);
+    background: var(--primary-hover);
+    box-shadow: 0 10px 22px rgb(15 118 110 / 22%);
   }
 
   .sl-button-secondary {
     border: 1px solid var(--line);
-    background: var(--surface);
+    background: rgb(255 255 255 / 88%);
+    color: var(--foreground);
   }
 
   .sl-button-secondary:hover {
-    border-color: var(--primary);
+    border-color: var(--line-strong);
+    background: var(--surface);
     color: var(--primary);
+    box-shadow: 0 6px 18px rgb(15 23 42 / 6%);
   }
 
   .sl-button:disabled {
-    opacity: 0.65;
+    box-shadow: none;
+    opacity: 0.5;
   }
 
   .sl-panel {
-    border: 1px solid var(--line);
+    border: 1px solid rgb(203 213 225 / 70%);
     border-radius: var(--radius-panel);
-    background: var(--surface);
+    background: var(--surface-raised);
+    box-shadow: var(--shadow-panel);
+  }
+
+  button.sl-panel,
+  a.sl-panel {
+    transition:
+      background-color var(--transition-fast),
+      border-color var(--transition-fast),
+      box-shadow var(--transition-fast),
+      color var(--transition-fast),
+      transform var(--transition-fast);
+  }
+
+  button.sl-panel:hover,
+  a.sl-panel:hover {
+    border-color: var(--line-strong);
+    box-shadow: var(--shadow-panel-hover);
+  }
+
+  button.sl-panel[data-selected="true"],
+  a.sl-panel[data-selected="true"] {
+    border-color: rgb(15 118 110 / 55%);
+    background: linear-gradient(180deg, #ffffff 0%, #f0fdfa 100%);
+    box-shadow:
+      inset 0 0 0 1px rgb(15 118 110 / 10%),
+      var(--shadow-panel);
   }
 
   .sl-accordion summary {
@@ -179,12 +230,12 @@ a[href]:active {
   }
 
   .sl-field:hover {
-    border-color: #bfc3bb;
+    border-color: var(--line-strong);
   }
 
   .sl-field:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgb(20 108 92 / 12%);
+    box-shadow: var(--focus-ring);
   }
 
   .sl-alert {
@@ -192,6 +243,7 @@ a[href]:active {
     border: 1px solid;
     padding: 0.75rem;
     font-size: 0.875rem;
+    box-shadow: 0 8px 24px rgb(15 23 42 / 5%);
   }
 
   .sl-alert-error {

@@ -101,7 +101,7 @@ const en = {
       welcomeBack: (name: string) =>
         `Welcome back, ${name}. Update your availability below.`,
       nameLabel: "Your name",
-      namePlaceholder: "Mael",
+      namePlaceholder: "John Doe",
       timezoneNotice: (timezone: string) =>
         `Times are shown in ${timezone}. Availability selection comes next.`,
       joining: "Joining...",
@@ -264,7 +264,7 @@ const fr: Messages = {
       welcomeBack: (name: string) =>
         `Bon retour, ${name}. Modifiez vos disponibilités ci-dessous.`,
       nameLabel: "Votre nom",
-      namePlaceholder: "Mael",
+      namePlaceholder: "John Doe",
       timezoneNotice: (timezone: string) =>
         `Les horaires sont affichés en ${timezone}. La sélection vient ensuite.`,
       joining: "Inscription...",

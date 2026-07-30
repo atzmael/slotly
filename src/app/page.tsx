@@ -10,7 +10,7 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen px-5 py-6 sm:px-8">
-      <section className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-5xl flex-col justify-between">
+      <section className="mx-auto flex w-full max-w-5xl flex-col gap-10 lg:min-h-[min(760px,calc(100vh-3rem))] lg:gap-12">
         <header className="flex items-center justify-between gap-3">
           <BrandMark />
           <div className="flex items-center gap-2">
@@ -21,7 +21,7 @@ export default async function HomePage() {
           </div>
         </header>
 
-        <div className="grid gap-10 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
+        <div className="grid gap-10 py-10 sm:py-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-16">
           <div className="max-w-2xl">
             <p className="mb-4 text-sm font-semibold uppercase text-[var(--primary)]">
               {t.home.eyebrow}

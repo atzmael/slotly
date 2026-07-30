@@ -43,6 +43,7 @@ const en = {
     terms: "Terms",
     privacy: "Privacy",
     feedback: "Feedback or bug",
+    creadivProject: "A Creadiv project",
   },
   home: {
     createPoll: "Create Poll",
@@ -127,6 +128,8 @@ const en = {
         participant_name_taken:
           "This name is already used in this poll. Add an initial or another detail.",
         timezone_invalid: "Your timezone could not be detected.",
+        event_finalized:
+          "This poll is closed. The final date has already been chosen.",
         rate_limited: "Too many attempts. Wait a few minutes, then try again.",
         join_event_failed: "Could not join this poll. Try again.",
       },
@@ -157,6 +160,8 @@ const en = {
         availability_required: "Select at least one slot.",
         availability_too_large: "Too many slots selected.",
         availability_window_invalid: "One selected slot is invalid.",
+        event_finalized:
+          "This poll is closed. Availability can no longer be changed.",
         rate_limited: "Too many attempts. Wait a few minutes, then try again.",
         save_availability_failed: "Could not save availability. Try again.",
       },
@@ -191,6 +196,34 @@ const en = {
       "Results are calculated as soon as at least one participant saves availability.",
     availableCount: (count: number) => `${count} available`,
     selectedRecommendation: "Selected recommendation",
+    creatorActionsTitle: "Creator action",
+    finalizeSelected: "Select this final date",
+    finalizeConfirm:
+      "Close this poll and choose this date as the final option?",
+    finalizing: "Selecting...",
+    cancelFinalDate: "Cancel final date",
+    cancelFinalDateConfirm: "Reopen voting for this poll?",
+    cancelingFinalDate: "Canceling...",
+    finalizedTitle: "Final date selected",
+    finalizedDescription:
+      "Voting is closed. Add the final date to your calendar.",
+    addToGoogleCalendar: "Add to Google Calendar",
+    addToIcloudCalendar: "Add to iCloud Calendar",
+    finalizationSaved: "Final date selected.",
+    finalizationCanceled: "Final date canceled. Voting is open again.",
+    creatorOnlyNotice:
+      "Only the poll creator can select or cancel the final date.",
+    finalizationErrors: {
+      event_id_invalid: "This poll link is invalid.",
+      creator_token_invalid: "Only the poll creator can do this.",
+      event_finalized:
+        "This poll already has a final date. Cancel it before choosing another one.",
+      final_window_invalid: "Choose a valid ranked option.",
+      rate_limited: "Too many attempts. Wait a few minutes, then try again.",
+      finalize_event_failed: "The final date could not be selected. Try again.",
+      cancel_finalization_failed:
+        "The final date could not be canceled. Try again.",
+    },
     attendance: (available: number, total: number) =>
       `${available} of ${total} participant${total === 1 ? "" : "s"} can attend.`,
     displayedIn: (timezone: string) => `Displayed in ${timezone}`,
@@ -241,6 +274,7 @@ const fr: Messages = {
     terms: "Conditions d’utilisation",
     privacy: "Confidentialité",
     feedback: "Feedback ou bug",
+    creadivProject: "Un projet Creadiv",
   },
   home: {
     createPoll: "Créer un sondage",
@@ -328,6 +362,8 @@ const fr: Messages = {
         participant_name_taken:
           "Ce nom est déjà utilisé dans ce sondage. Ajoutez une initiale ou un détail.",
         timezone_invalid: "Votre fuseau horaire n’a pas pu être détecté.",
+        event_finalized:
+          "Ce sondage est fermé. La date définitive a déjà été choisie.",
         rate_limited:
           "Trop de tentatives. Attendez quelques minutes, puis réessayez.",
         join_event_failed: "Impossible de rejoindre ce sondage. Réessayez.",
@@ -359,6 +395,8 @@ const fr: Messages = {
         availability_required: "Sélectionnez au moins un créneau.",
         availability_too_large: "Trop de créneaux sélectionnés.",
         availability_window_invalid: "Un créneau sélectionné est invalide.",
+        event_finalized:
+          "Ce sondage est fermé. Les disponibilités ne peuvent plus être modifiées.",
         rate_limited:
           "Trop de tentatives. Attendez quelques minutes, puis réessayez.",
         save_availability_failed:
@@ -397,6 +435,36 @@ const fr: Messages = {
     availableCount: (count: number) =>
       `${count} disponible${count > 1 ? "s" : ""}`,
     selectedRecommendation: "Recommandation sélectionnée",
+    creatorActionsTitle: "Action créateur",
+    finalizeSelected: "Sélectionner cette date définitive",
+    finalizeConfirm:
+      "Fermer ce sondage et choisir cette date comme option définitive ?",
+    finalizing: "Sélection...",
+    cancelFinalDate: "Annuler la date définitive",
+    cancelFinalDateConfirm: "Rouvrir les votes pour ce sondage ?",
+    cancelingFinalDate: "Annulation...",
+    finalizedTitle: "Date définitive sélectionnée",
+    finalizedDescription:
+      "Le vote est fermé. Ajoutez la date définitive à votre agenda.",
+    addToGoogleCalendar: "Ajouter à Google Calendar",
+    addToIcloudCalendar: "Ajouter à iCloud Agenda",
+    finalizationSaved: "Date définitive sélectionnée.",
+    finalizationCanceled: "Date définitive annulée. Le vote est rouvert.",
+    creatorOnlyNotice:
+      "Seul le créateur du sondage peut sélectionner ou annuler la date définitive.",
+    finalizationErrors: {
+      event_id_invalid: "Ce lien de sondage est invalide.",
+      creator_token_invalid: "Seul le créateur du sondage peut faire cela.",
+      event_finalized:
+        "Ce sondage a déjà une date définitive. Annulez-la avant d’en choisir une autre.",
+      final_window_invalid: "Choisissez une option classée valide.",
+      rate_limited:
+        "Trop de tentatives. Attendez quelques minutes, puis réessayez.",
+      finalize_event_failed:
+        "La date définitive n’a pas pu être sélectionnée. Réessayez.",
+      cancel_finalization_failed:
+        "La date définitive n’a pas pu être annulée. Réessayez.",
+    },
     attendance: (available: number, total: number) =>
       `${available} sur ${total} participant${total === 1 ? "" : "s"} peut${available > 1 ? "vent" : ""} venir.`,
     displayedIn: (timezone: string) => `Affiché en ${timezone}`,

@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { getRequestLocale } from "@/i18n/locale";
 import { LanguageSwitcher } from "@/i18n/language-switcher";
 import { messages, type Locale } from "@/i18n/messages";
-import { getEventSnapshot } from "@/server/events";
+import { getCreatorTokenHashFromCookie } from "@/server/creator-token";
+import { canManageEvent, getEventSnapshot } from "@/server/events";
+import { FinalEventCard } from "./final-event-card";
 import { BrandMark } from "../../brand-mark";
 import { createPageMetadata } from "../../site-metadata";
 import { EventRealtimeRefresh } from "./event-realtime";
@@ -48,6 +50,14 @@ export default async function EventPage({ params }: EventPageProps) {
   }
 
   const { event, participants, availabilityWindows } = result.snapshot;
+  const creatorTokenHash = await getCreatorTokenHashFromCookie(event.id);
+  const isCreator = await canManageEvent({
+    eventId: event.id,
+    creatorTokenHash,
+  });
+  const isFinalized = Boolean(
+    event.finalizedStart && event.finalizedEnd && event.finalizedAt,
+  );
 
   return (
     <main className="min-h-screen px-5 py-6 sm:px-8">
@@ -96,20 +106,32 @@ export default async function EventPage({ params }: EventPageProps) {
           </div>
         </div>
 
-        <div className="sl-panel mt-8 p-5">
-          <JoinEventForm
-            availabilityWindows={availabilityWindows}
-            endDate={event.endDate}
-            endTime={event.endTime}
+        {isFinalized && event.finalizedStart && event.finalizedEnd ? (
+          <FinalEventCard
             eventId={event.id}
+            eventTitle={event.title}
+            finalEnd={event.finalizedEnd}
+            finalStart={event.finalizedStart}
+            isCreator={isCreator}
             isFullDay={event.isFullDay}
             locale={locale}
-            participants={participants}
-            slotSizeMinutes={event.slotSizeMinutes}
-            startDate={event.startDate}
-            startTime={event.startTime}
           />
-        </div>
+        ) : (
+          <div className="sl-panel mt-8 p-5">
+            <JoinEventForm
+              availabilityWindows={availabilityWindows}
+              endDate={event.endDate}
+              endTime={event.endTime}
+              eventId={event.id}
+              isFullDay={event.isFullDay}
+              locale={locale}
+              participants={participants}
+              slotSizeMinutes={event.slotSizeMinutes}
+              startDate={event.startDate}
+              startTime={event.startTime}
+            />
+          </div>
+        )}
       </section>
     </main>
   );

@@ -114,6 +114,10 @@ Decision actuelle en draft :
 - Les meilleurs creneaux sont classes automatiquement par nombre de participants disponibles.
 - Le detail d'un creneau montre immediatement presents et absents.
 - La heatmap reste visible pour garder une lecture globale.
+- Le createur accountless peut choisir une date definitive depuis les resultats
+  et verrouiller le sondage ; ce choix peut etre annule.
+- Les exports calendrier du MVP sont limites au choix definitif via lien Google
+  Calendar et fichier `.ics`, sans compte ni integration connectee.
 - Les donnees personnelles libres sont minimales, masquees dans les logs, et jamais utilisees comme cles analytics.
 - La monetisation future ne doit pas bloquer la creation simple, la participation sans compte, le ranking, les timezones ou la lecture presents/absents.
 - Les regles metier doivent rester dans `src/domain` ou services applicatifs, pas dans les composants UI.

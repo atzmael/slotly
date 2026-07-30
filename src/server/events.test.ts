@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  cancelEventFinalization,
+  canManageEvent,
   cleanupStaleEvents,
   createEvent,
+  finalizeEvent,
   getEventSnapshot,
   joinEvent,
   saveAvailability,
@@ -9,10 +12,14 @@ import {
   type AvailabilityRepository,
   type CreateEventRepository,
   type EventInsert,
+  type EventFinalizationRepository,
   type ParticipantInsert,
   type ParticipantRepository,
   type StaleEventCleanupRepository,
 } from "./events";
+
+const creatorTokenHash =
+  "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 
 function createFakeRepository(
   onInsert: (event: EventInsert) => Promise<{ readonly id: string }>,
@@ -30,6 +37,9 @@ function createFakeAvailabilityRepository(
   ) => Promise<"replaced" | "participant_not_found">,
 ): AvailabilityRepository {
   return {
+    async getEventLockState() {
+      return { finalized_at: null };
+    },
     replaceAvailability: onReplace,
   };
 }
@@ -44,10 +54,83 @@ function createFakeParticipantRepository(
   } | null = null,
 ): ParticipantRepository {
   return {
+    async getEventLockState() {
+      return { finalized_at: null };
+    },
     async findParticipantByNormalizedName() {
       return existingParticipant;
     },
     insertParticipant: onInsert,
+  };
+}
+
+function createFakeFinalizationRepository(
+  state: Awaited<
+    ReturnType<EventFinalizationRepository["getEventFinalizationState"]>
+  >,
+  calls: {
+    readonly finalized?: Array<{
+      readonly eventId: string;
+      readonly finalStart: string;
+      readonly finalEnd: string;
+    }>;
+    readonly canceled?: string[];
+  } = {},
+): EventFinalizationRepository {
+  return {
+    async getEventSnapshot() {
+      return createFinalizationSnapshot(state?.creator_token_hash ?? null);
+    },
+    async getEventFinalizationState() {
+      return state;
+    },
+    async finalizeEvent(eventId, finalStart, finalEnd) {
+      calls.finalized?.push({ eventId, finalStart, finalEnd });
+    },
+    async cancelFinalization(eventId) {
+      calls.canceled?.push(eventId);
+    },
+  };
+}
+
+function createFinalizationSnapshot(tokenHash: string | null) {
+  return {
+    event: {
+      id: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
+      title: "Board Game Night",
+      start_date: "2026-06-15",
+      end_date: "2026-06-21",
+      start_time: "18:00",
+      end_time: "22:00",
+      duration_minutes: 60,
+      slot_size_minutes: 60,
+      is_full_day: false,
+      creator_token_hash: tokenHash,
+      finalized_start_at: null,
+      finalized_end_at: null,
+      finalized_at: null,
+      created_at: "2026-06-01T00:00:00.000Z",
+    },
+    participants: [
+      {
+        id: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
+        event_id: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
+        name: "Mael",
+        timezone: "Europe/Paris",
+        created_at: "2026-06-01T00:01:00.000Z",
+        updated_at: "2026-06-01T00:01:00.000Z",
+      },
+    ],
+    availabilityWindows: [
+      {
+        id: "0fe12880-bfd5-4d79-9048-116e76d162f5",
+        participant_id: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
+        start_at: "2026-06-15T17:00:00.000Z",
+        end_at: "2026-06-15T18:00:00.000Z",
+        created_at: "2026-06-01T00:02:00.000Z",
+        updated_at: "2026-06-01T00:02:00.000Z",
+      },
+    ],
   };
 }
 
@@ -71,6 +154,7 @@ describe("createEvent", () => {
         endTime: "22:00",
         durationMinutes: 60,
         slotSizeMinutes: 30,
+        creatorTokenHash,
       },
       createFakeRepository(async (event) => {
         inserted.push(event);
@@ -92,6 +176,7 @@ describe("createEvent", () => {
         duration_minutes: 60,
         slot_size_minutes: 30,
         is_full_day: false,
+        creator_token_hash: creatorTokenHash,
       },
     ]);
   });
@@ -108,6 +193,7 @@ describe("createEvent", () => {
         durationMinutes: Number.NaN,
         slotSizeMinutes: Number.NaN,
         isFullDay: true,
+        creatorTokenHash,
       },
       createFakeRepository(async (event) => {
         inserted.push(event);
@@ -129,6 +215,7 @@ describe("createEvent", () => {
         duration_minutes: 60,
         slot_size_minutes: 60,
         is_full_day: true,
+        creator_token_hash: creatorTokenHash,
       },
     ]);
   });
@@ -144,6 +231,7 @@ describe("createEvent", () => {
         endTime: "18:00",
         durationMinutes: 45,
         slotSizeMinutes: 15,
+        creatorTokenHash,
       },
       createFakeRepository(async () => {
         didInsert = true;
@@ -174,6 +262,7 @@ describe("createEvent", () => {
         endTime: "22:00",
         durationMinutes: 120,
         slotSizeMinutes: 60,
+        creatorTokenHash,
       },
       createFakeRepository(async () => {
         throw new Error("database unavailable");
@@ -196,6 +285,7 @@ describe("createEvent", () => {
         endTime: "22:00",
         durationMinutes: 120,
         slotSizeMinutes: 60,
+        creatorTokenHash,
       },
       createFakeRepository(async () => {
         throw {
@@ -230,6 +320,9 @@ describe("getEventSnapshot", () => {
               duration_minutes: 120,
               slot_size_minutes: 60,
               is_full_day: false,
+              finalized_start_at: "2026-06-15T17:00:00.000Z",
+              finalized_end_at: "2026-06-15T18:00:00.000Z",
+              finalized_at: "2026-06-10T00:00:00.000Z",
               created_at: "2026-06-01T00:00:00.000Z",
             },
             participants: [
@@ -261,6 +354,10 @@ describe("getEventSnapshot", () => {
           durationMinutes: 120,
           slotSizeMinutes: 60,
           isFullDay: false,
+          creatorTokenHash: null,
+          finalizedStart: "2026-06-15T17:00:00.000Z",
+          finalizedEnd: "2026-06-15T18:00:00.000Z",
+          finalizedAt: "2026-06-10T00:00:00.000Z",
           createdAt: "2026-06-01T00:00:00.000Z",
         },
         participants: [
@@ -386,6 +483,32 @@ describe("joinEvent", () => {
     expect(result).toEqual({
       ok: false,
       errors: ["event_id_invalid", "name_required", "timezone_invalid"],
+    });
+    expect(didInsert).toBe(false);
+  });
+
+  it("rejects joining a finalized event", async () => {
+    let didInsert = false;
+    const result = await joinEvent(
+      {
+        eventId: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
+        name: "Mael",
+        timezone: "Europe/Paris",
+      },
+      {
+        ...createFakeParticipantRepository(async () => {
+          didInsert = true;
+          return { id: "unused" };
+        }),
+        async getEventLockState() {
+          return { finalized_at: "2026-06-10T00:00:00.000Z" };
+        },
+      },
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      errors: ["event_finalized"],
     });
     expect(didInsert).toBe(false);
   });
@@ -523,6 +646,32 @@ describe("saveAvailability", () => {
     expect(didAttemptReplace).toBe(true);
   });
 
+  it("rejects availability changes on finalized events", async () => {
+    let didReplace = false;
+    const result = await saveAvailability(
+      {
+        eventId: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
+        participantId: "1c17ce6f-62d2-450a-b30b-ce2a5fc1b3f3",
+        windows: [],
+      },
+      {
+        ...createFakeAvailabilityRepository(async () => {
+          didReplace = true;
+          return "replaced";
+        }),
+        async getEventLockState() {
+          return { finalized_at: "2026-06-10T00:00:00.000Z" };
+        },
+      },
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      errors: ["event_finalized"],
+    });
+    expect(didReplace).toBe(false);
+  });
+
   it("maps persistence failures to a safe error", async () => {
     const result = await saveAvailability(
       {
@@ -544,6 +693,120 @@ describe("saveAvailability", () => {
       ok: false,
       errors: ["save_availability_failed"],
     });
+  });
+});
+
+describe("event finalization", () => {
+  it("recognizes the creator token hash without exposing it in the snapshot", async () => {
+    const result = await canManageEvent(
+      {
+        eventId: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
+        creatorTokenHash,
+      },
+      createFakeFinalizationRepository({
+        id: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
+        is_full_day: false,
+        creator_token_hash: creatorTokenHash,
+        finalized_at: null,
+      }),
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it("finalizes an event with the creator token hash", async () => {
+    const calls: {
+      finalized: Array<{
+        readonly eventId: string;
+        readonly finalStart: string;
+        readonly finalEnd: string;
+      }>;
+    } = { finalized: [] };
+
+    const result = await finalizeEvent(
+      {
+        eventId: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
+        creatorTokenHash,
+        finalStart: "2026-06-15T17:00:00.000Z",
+        finalEnd: "2026-06-15T18:00:00.000Z",
+      },
+      createFakeFinalizationRepository(
+        {
+          id: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
+          is_full_day: false,
+          creator_token_hash: creatorTokenHash,
+          finalized_at: null,
+        },
+        calls,
+      ),
+    );
+
+    expect(result).toEqual({ ok: true });
+    expect(calls.finalized).toEqual([
+      {
+        eventId: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
+        finalStart: "2026-06-15T17:00:00.000Z",
+        finalEnd: "2026-06-15T18:00:00.000Z",
+      },
+    ]);
+  });
+
+  it("rejects finalization from non-creators", async () => {
+    const calls: {
+      finalized: Array<{
+        readonly eventId: string;
+        readonly finalStart: string;
+        readonly finalEnd: string;
+      }>;
+    } = { finalized: [] };
+
+    const result = await finalizeEvent(
+      {
+        eventId: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
+        creatorTokenHash,
+        finalStart: "2026-06-15T17:00:00.000Z",
+        finalEnd: "2026-06-15T18:00:00.000Z",
+      },
+      createFakeFinalizationRepository(
+        {
+          id: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
+          is_full_day: false,
+          creator_token_hash:
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          finalized_at: null,
+        },
+        calls,
+      ),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      errors: ["creator_token_invalid"],
+    });
+    expect(calls.finalized).toEqual([]);
+  });
+
+  it("cancels finalization with the creator token hash", async () => {
+    const calls: { canceled: string[] } = { canceled: [] };
+
+    const result = await cancelEventFinalization(
+      {
+        eventId: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
+        creatorTokenHash,
+      },
+      createFakeFinalizationRepository(
+        {
+          id: "374eb478-4ff2-4b84-9107-7c90dfb714ff",
+          is_full_day: false,
+          creator_token_hash: creatorTokenHash,
+          finalized_at: "2026-06-10T00:00:00.000Z",
+        },
+        calls,
+      ),
+    );
+
+    expect(result).toEqual({ ok: true });
+    expect(calls.canceled).toEqual(["374eb478-4ff2-4b84-9107-7c90dfb714ff"]);
   });
 });
 

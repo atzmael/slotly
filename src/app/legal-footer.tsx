@@ -12,7 +12,17 @@ export async function LegalFooter() {
   return (
     <footer className="px-5 pb-6 sm:px-8">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 border-t border-[var(--line)] pt-5 text-sm text-[var(--muted)] sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <BrandMark size="sm" />
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <BrandMark size="sm" />
+          <a
+            className="hover:text-[var(--primary)]"
+            href="https://creadiv.fr"
+            rel="noreferrer"
+            target="_blank"
+          >
+            {t.creadivProject}
+          </a>
+        </div>
         <nav className="flex flex-wrap gap-x-4 gap-y-2">
           <Link className="hover:text-[var(--primary)]" href="/legal">
             {t.legalNotice}

@@ -20,6 +20,10 @@ export interface Database {
           duration_minutes: number;
           slot_size_minutes: number;
           is_full_day: boolean;
+          creator_token_hash: string | null;
+          finalized_start_at: string | null;
+          finalized_end_at: string | null;
+          finalized_at: string | null;
           created_at: string;
         };
         Insert: {
@@ -32,6 +36,10 @@ export interface Database {
           duration_minutes: number;
           slot_size_minutes: number;
           is_full_day?: boolean;
+          creator_token_hash?: string | null;
+          finalized_start_at?: string | null;
+          finalized_end_at?: string | null;
+          finalized_at?: string | null;
           created_at?: string;
         };
         Update: {
@@ -44,6 +52,10 @@ export interface Database {
           duration_minutes?: number;
           slot_size_minutes?: number;
           is_full_day?: boolean;
+          creator_token_hash?: string | null;
+          finalized_start_at?: string | null;
+          finalized_end_at?: string | null;
+          finalized_at?: string | null;
           created_at?: string;
         };
         Relationships: [];

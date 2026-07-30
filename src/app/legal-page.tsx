@@ -29,7 +29,9 @@ export async function LegalPage({
           <LanguageSwitcher locale={locale} />
         </div>
         <article className="sl-panel mt-10 p-5 sm:p-7">
-          <p className="text-sm text-[var(--muted)]">Updated {updatedAt}</p>
+          <p className="text-sm text-[var(--muted)]">
+            Mis à jour le {updatedAt}
+          </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-normal">
             {title}
           </h1>

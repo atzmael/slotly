@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function LegalNoticePage() {
   return (
-    <LegalPage title="Mentions légales" updatedAt="30 July 2026">
+    <LegalPage title="Mentions légales" updatedAt="30 juillet 2026">
       <section>
         <h2>Éditeur du site</h2>
         <p>
@@ -16,8 +16,8 @@ export default function LegalNoticePage() {
           Noisy-le-Grand, France.
         </p>
         <p>
-          L’entreprise est inscrite au R.C.S. de Bobigny sous le numéro Bobigny
-          A 953 748 159.
+          L’entreprise individuelle est inscrite au R.C.S. de Bobigny sous le
+          numéro Bobigny A 953 748 159.
         </p>
         <p>
           Contact :{" "}
@@ -43,10 +43,15 @@ export default function LegalNoticePage() {
       <section>
         <h2>Propriété intellectuelle</h2>
         <p>
-          Sauf mention contraire, les contenus textuels publics de Slotly sont
-          mis à disposition sous licence Creative Commons. Les marques, logos,
-          noms de domaine, éléments d’interface et éléments techniques restent
-          protégés par les droits applicables.
+          Les contenus éditoriaux publics de Slotly peuvent être réutilisés sous
+          licence Creative Commons lorsque cette licence est explicitement
+          indiquée sur le support concerné. À défaut d’indication, toute
+          réutilisation non autorisée reste interdite.
+        </p>
+        <p>
+          Le nom Slotly, le logo, les éléments d’interface, le code source, les
+          éléments techniques et les signes distinctifs restent protégés par les
+          droits applicables.
         </p>
       </section>
 

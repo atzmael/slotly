@@ -1,6 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { cleanupStaleEvents } from "@/server/events";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
   const authorization = request.headers.get("authorization");

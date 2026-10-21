@@ -49,7 +49,8 @@ begin
 end;
 $$;
 
-revoke all on function public.delete_stale_events(integer) from public;
+-- Supabase can grant execute directly to API roles through default privileges.
+revoke all on function public.delete_stale_events(integer) from public, anon, authenticated;
 grant execute on function public.delete_stale_events(integer) to service_role;
 
 comment on function public.delete_stale_events(integer) is
